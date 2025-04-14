@@ -2,6 +2,7 @@ package dk.patientassist.persistence;
 
 import java.util.Properties;
 
+import dk.patientassist.config.Mode;
 import dk.patientassist.utilities.Utils;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -21,17 +22,21 @@ public class HibernateConfig
 {
     private static Logger logger = LoggerFactory.getLogger(HibernateConfig.class);
     private static EntityManagerFactory emf;
-    public static EntityManagerFactory getEntityManagerFactory() {
+
+    public static EntityManagerFactory getEntityManagerFactory()
+    {
         if (emf == null)
             throw new RuntimeException("No EntityManagerFactory Instance");
         return emf;
     }
 
-    private static void getAnnotationConfiguration(Configuration configuration) {
+    private static void getAnnotationConfiguration(Configuration configuration)
+    {
         // add our db entities here
     }
 
-    public static void Init(Mode mode) {
+    public static void Init(Mode mode)
+    {
         try {
             Configuration configuration = new Configuration();
             Properties props = new Properties();
@@ -46,8 +51,6 @@ public class HibernateConfig
 
             configuration.setProperties(props);
             getAnnotationConfiguration(configuration);
-
-            logger.info("hibernate props: " + props);
 
             ServiceRegistry serviceRegistry =
                     new StandardServiceRegistryBuilder().
@@ -71,20 +74,10 @@ public class HibernateConfig
     }
 
     private static Properties setDevProperties(Properties props){
-        System.out.printf("%s, %s, %s, %s%n",
-                Utils.getPropertyValue("DB_CONN_STR", "config.properties"),
-                Utils.getPropertyValue("DB_NAME", "config.properties"),
-                Utils.getPropertyValue("DB_USER", "config.properties"),
-                Utils.getPropertyValue("DB_PW", "config.properties")
-                );
         props.put("hibernate.hikari_leakDetectionThreshold", "10000"); // leak detection
-        props.setProperty("hibernate.connection.url",
-                Utils.getPropertyValue("DB_CONN_STR", "config.properties")
-                        + Utils.getPropertyValue("DB_NAME", "config.properties"));
-        props.setProperty("hibernate.connection.username",
-                Utils.getPropertyValue("DB_USER", "config.properties"));
-        props.setProperty("hibernate.connection.password",
-                Utils.getPropertyValue("DB_PW", "config.properties"));
+        props.setProperty("hibernate.connection.url", Utils.getPropertyValue("DB_CONN_STR") + Utils.getPropertyValue("DB_NAME"));
+        props.setProperty("hibernate.connection.username", Utils.getPropertyValue("DB_USER"));
+        props.setProperty("hibernate.connection.password", Utils.getPropertyValue("DB_PW"));
         return props;
     }
 
@@ -106,9 +99,14 @@ public class HibernateConfig
         return props;
     }
 
-    public enum Mode {
-        DEV, TEST, DEPLOY
+    private void logProps()
+    {
+        logger.info(String.format("DB_CONN_STR: %s, DB_NAME: %s, DB_USER: %s, DB_PW: %s%n",
+                    Utils.getPropertyValue("DB_CONN_STR"),
+                    Utils.getPropertyValue("DB_NAME"),
+                    Utils.getPropertyValue("DB_USER"),
+                    Utils.getPropertyValue("DB_PW")
+                    ));
     }
-
 }
 

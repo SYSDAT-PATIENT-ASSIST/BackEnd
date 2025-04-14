@@ -1,5 +1,10 @@
-package dk.patientassist.control;
+package dk.patientassist.exceptions;
 
+/**
+ *
+ * Patient Assist
+ *
+ */
 public class ApiException extends RuntimeException
 {
     private int code;

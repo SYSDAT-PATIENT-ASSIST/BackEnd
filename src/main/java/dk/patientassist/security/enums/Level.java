@@ -1,4 +1,10 @@
 package dk.patientassist.security.enums;
 
-public enum Level {
+/**
+ *
+ * Patient Assist
+ *
+ */
+public enum Level
+{
 }

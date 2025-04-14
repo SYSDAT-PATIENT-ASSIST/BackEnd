@@ -17,30 +17,43 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import dk.patientassist.control.ApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dk.patientassist.exceptions.ApiException;
 import io.javalin.http.Context;
 
+/**
+ *
+ * Patient Assist
+ *
+ */
 public class Utils
 {
+    static Logger logger = LoggerFactory.getLogger(Utils.class);
+    static Properties config_properties;
+    static DateTimeFormatter dateTimeFormatter;
     static ObjectMapper objectMapperDef = new ObjectMapper();
     static ObjectMapper objectMapper;
 
-    public static String getPropertyValue(String propName, String resourceName)
+    public static String getPropertyValue(String key)
     {
-        try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(resourceName)) {
-            Properties prop = new Properties();
-            prop.load(is);
-
-            String value = prop.getProperty(propName);
-            if (value != null) {
-                return value.trim();  // Trim whitespace
-            } else {
-                throw new ApiException(500, String.format("Property %s not found in %s", propName, resourceName));
+        if (config_properties == null) {
+            try {
+                loadConfig("config.properties");
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                System.exit(1);
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            throw new ApiException(500, String.format("Could not read property %s. Did you remember to build the project with MAVEN?", propName));
         }
+
+        String value = (String) config_properties.get(key);
+
+        if (value == null) {
+            logger.warn(String.format("Property %s not found in %s", key, "config_properties"));
+        }
+
+        return value;
     }
 
     public static ObjectMapper getObjectMapper()
@@ -48,36 +61,34 @@ public class Utils
         if (objectMapper == null) {
             objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // Ignore unknown properties in JSON
-            objectMapper.registerModule(new JavaTimeModule()); // Serialize and deserialize java.time objects
+            objectMapper.registerModule(new JavaTimeModule());
             objectMapper.writer(new DefaultPrettyPrinter());
         }
         return objectMapper;
     }
 
-    public static String convertToJsonMessage(Context ctx, String property, String message)
+    public static String JSONStatusMessage(Context ctx)
     {
         Map<String, String> msgMap = new HashMap<>();
-        //msgMap.put(property, message);  // Put the message in the map
-        msgMap.put(property, ctx.status().toString());
-        msgMap.put("status", String.valueOf(ctx.statusCode()));  // Put the status in the map
-        msgMap.put("timestamp", new DateTimeFormatterBuilder()
-                .appendPattern("yyyy-MM-dd HH:mm:ss")
-                .appendFraction(ChronoField.MILLI_OF_SECOND, 2, 3, true)
-                .toFormatter()
-                .format(LocalDateTime.now()));
+        msgMap.put("message", ctx.status().toString());
+        msgMap.put("status", String.valueOf(ctx.statusCode()));
+        msgMap.put("timestamp", dateTimeFormat(LocalDateTime.now()));
         try {
-            return objectMapperDef.writeValueAsString(msgMap);  // Convert the map to JSON
+            return objectMapperDef.writeValueAsString(msgMap);
         } catch (Exception e) {
-            return "{\"error\": \"Could not convert  message to JSON\"}";
+            return "{\"error\": \"Could not convert message to JSON\"}";
         }
     }
 
-    public static DateTimeFormatter dateTimeFormatter()
+    public static String dateTimeFormat(LocalDateTime ldt)
     {
-        return new DateTimeFormatterBuilder()
+        if (dateTimeFormatter == null) {
+            dateTimeFormatter = new DateTimeFormatterBuilder()
                 .appendPattern("yyyy-MM-dd HH:mm:ss")
                 .appendFraction(ChronoField.MILLI_OF_SECOND, 2, 3, true)
                 .toFormatter();
+        }
+        return dateTimeFormatter.format(ldt);
     }
 
     public static double roundFloat(double num, int places)
@@ -85,5 +96,15 @@ public class Utils
         BigDecimal val = BigDecimal.valueOf(num);
         val = val.setScale(places, RoundingMode.HALF_UP);
         return val.doubleValue();
+    }
+
+    private static void loadConfig(String name) throws IOException
+    {
+        config_properties = new Properties();
+        try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(name)) {
+            config_properties.load(is);
+        } catch (IOException ex) {
+            throw new IOException(String.format("Could not read property file %s: %s", name, ex.getMessage()));
+        }
     }
 }

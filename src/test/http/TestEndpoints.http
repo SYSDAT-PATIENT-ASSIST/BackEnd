@@ -1,0 +1,175 @@
+### 
+### -----------------------
+### Patient Assist.........
+### Systemudvikling........
+### Cph. Business School...
+### -----------------------
+###
+ 
+@url=http://localhost:9999
+
+###
+# @name LOGIN
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin"
+}
+
+> {%
+    client.global.set("JWT", response.body.token);
+%}
+
+###
+# @name TEST ADMIN PRIVS
+
+GET {{url}}/protected/admin_demo
+Authorization: Bearer {{JWT}}
+
+> {%
+    client.test("admin authorization", function() {
+        client.assert(response.status === 200, "response status is not 200");
+    });
+%}
+
+
+###
+# @name GET ALL
+
+GET {{url}}/api/doctors
+
+> {%
+    client.test("get all", function() {
+        client.assert(response.status === 200, "response status is not 200 " + response.status);
+    });
+%}
+
+###
+# @name POST DOCTOR NO AUTHORIZATION
+
+POST {{url}}/api/doctor
+Content-Type: application/json
+
+< ./../resources/json/doctor1.json
+
+> {%
+    client.test("post doctor", function() {
+        client.assert(response.status === 401, "response status is not 401 " + response.status);
+    });
+%}
+
+###
+# @name POST DOCTOR
+
+POST {{url}}/api/doctor
+Content-Type: application/json
+Authorization: Bearer {{JWT}}
+
+< ./../resources/json/doctor1.json
+
+> {%
+    client.global.set("posted_doctor_id", response.body.id);
+    client.test("post doctor", function() {
+        client.assert(response.status === 201, "response status is not 201 " + response.status);
+    });
+%}
+
+###
+# @name PUT DOCTOR
+
+PUT {{url}}/api/doctor/{{posted_doctor_id}}
+Content-Type: application/json
+Authorization: Bearer {{JWT}}
+
+< ./../resources/json/doctor_update.json
+
+> {%
+    client.test("put doctor " + response.body.id, function() {
+        client.assert(response.status === 200, "response status is not 200 " + response.status);
+    });
+%}
+
+###
+# @name DELETE DOCTOR
+
+DELETE {{url}}/api/doctor/{{posted_doctor_id}}
+Content-Type: application/json
+Authorization: Bearer {{JWT}}
+
+> {%
+    client.test("delete doctor " + response.body.id, function() {
+        client.assert(response.status === 200, "response status is not 200 " + response.status);
+    });
+%}
+
+###
+# @name CHECK DELETED DOCTOR
+
+GET {{url}}/api/doctor/{{posted_doctor_id}}
+Content-Type: application/json
+Authorization: Bearer {{JWT}}
+
+> {%
+    client.test("check deleted doctor " + response.body.id, function() {
+        client.assert(response.status === 404, "response status is not 404 " + response.status);
+    });
+%}
+
+###
+# @name GET BY SPEC OK
+
+GET {{url}}/api/doctor/speciality/pediatrics
+
+> {%
+    client.test("get by spec", function() {
+        client.assert(response.status === 200, "response status is not 200 " + response.status);
+    });
+%}
+
+###
+# @name GET BY SPEC OK
+
+GET {{url}}/api/doctor/speciality/FAMILY_MEDICINE
+
+> {%
+    client.test("get by spec", function() {
+        client.assert(response.status === 200, "response status is not 200 " + response.status);
+    });
+%}
+
+###
+# @name GET BY SPEC FAIL
+
+GET {{url}}/api/doctor/speciality/pediatric
+
+> {%
+    client.test("get by spec", function() {
+        client.assert(response.status === 404, "response status is not 404 " + response.status);
+    });
+%}
+
+### 
+# @name GET BY BIRTHDATE OK
+
+GET {{url}}/api/doctor/birthdate/range?from=1980-01-01&to=1980-06-01
+
+> {%
+    client.test("get by birthdate", function() {
+        client.assert(response.status === 200, "response status is not 200 " + response.status);
+    });
+%}
+
+### 
+# @name GET BY BIRTHDATE FAIL
+
+GET {{url}}/api/doctor/birthdate/range?from=1980-06-01&to=2024-10-10
+
+> {%
+    client.test("get by birthdate", function() {
+        client.assert(response.headers.valueOf("Content-Length") === "2", "response length is not 2" + response.headers.valueOf("Content-Length"));
+    });
+%}
+
