@@ -20,51 +20,53 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.patientassist.exceptions.ApiException;
 import io.javalin.http.Context;
 
 /**
- *
  * Patient Assist
- *
  */
 public class Utils
 {
-    static Logger logger = LoggerFactory.getLogger(Utils.class);
-    static Properties config_properties;
-    static DateTimeFormatter dateTimeFormatter;
-    static ObjectMapper objectMapperDef = new ObjectMapper();
-    static ObjectMapper objectMapper;
+    static final Logger logger = LoggerFactory.getLogger(Utils.class);
+    static Properties config_properties = new Properties();
+    static DateTimeFormatter DTFormatterDefault;
+    static ObjectMapper objectMapperCompact = new ObjectMapper();
+    static ObjectMapper objectMapperPretty;
 
-    public static String getPropertyValue(String key)
+    public static String getConfigProperty(String key)
     {
-        if (config_properties == null) {
+        if (config_properties.isEmpty()) {
             try {
-                loadConfig("config.properties");
-            } catch (Exception e) {
+                loadConfig();
+            } catch (IOException e) {
                 logger.error(e.getMessage());
-                System.exit(1);
+                return null;
             }
         }
 
         String value = (String) config_properties.get(key);
 
         if (value == null) {
-            logger.warn(String.format("Property %s not found in %s", key, "config_properties"));
+            logger.warn("property {} not found in project configuration", key);
         }
 
         return value;
     }
 
-    public static ObjectMapper getObjectMapper()
+    public static ObjectMapper getObjectMapperPretty()
     {
-        if (objectMapper == null) {
-            objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // Ignore unknown properties in JSON
-            objectMapper.registerModule(new JavaTimeModule());
-            objectMapper.writer(new DefaultPrettyPrinter());
+        if (objectMapperPretty == null) {
+            objectMapperPretty = new ObjectMapper();
+            objectMapperPretty.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // Ignore unknown properties in JSON
+            objectMapperPretty.registerModule(new JavaTimeModule());
+            objectMapperPretty.writer(new DefaultPrettyPrinter());
         }
-        return objectMapper;
+        return objectMapperPretty;
+    }
+
+    public static ObjectMapper getObjectMapperCompact()
+    {
+        return objectMapperCompact;
     }
 
     public static String JSONStatusMessage(Context ctx)
@@ -74,7 +76,7 @@ public class Utils
         msgMap.put("status", String.valueOf(ctx.statusCode()));
         msgMap.put("timestamp", dateTimeFormat(LocalDateTime.now()));
         try {
-            return objectMapperDef.writeValueAsString(msgMap);
+            return objectMapperCompact.writeValueAsString(msgMap);
         } catch (Exception e) {
             return "{\"error\": \"Could not convert message to JSON\"}";
         }
@@ -82,13 +84,13 @@ public class Utils
 
     public static String dateTimeFormat(LocalDateTime ldt)
     {
-        if (dateTimeFormatter == null) {
-            dateTimeFormatter = new DateTimeFormatterBuilder()
-                .appendPattern("yyyy-MM-dd HH:mm:ss")
-                .appendFraction(ChronoField.MILLI_OF_SECOND, 2, 3, true)
-                .toFormatter();
+        if (DTFormatterDefault == null) {
+            DTFormatterDefault = new DateTimeFormatterBuilder()
+                    .appendPattern("yyyy-MM-dd HH:mm:ss")
+                    .appendFraction(ChronoField.MILLI_OF_SECOND, 2, 3, true)
+                    .toFormatter();
         }
-        return dateTimeFormatter.format(ldt);
+        return DTFormatterDefault.format(ldt);
     }
 
     public static double roundFloat(double num, int places)
@@ -98,13 +100,15 @@ public class Utils
         return val.doubleValue();
     }
 
-    private static void loadConfig(String name) throws IOException
+    private static void loadConfig() throws IOException
     {
-        config_properties = new Properties();
-        try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(name)) {
-            config_properties.load(is);
-        } catch (IOException ex) {
-            throw new IOException(String.format("Could not read property file %s: %s", name, ex.getMessage()));
+        try (InputStream istream = Utils.class.getClassLoader().getResourceAsStream("config.properties")) {
+            config_properties.load(istream);
+            config_properties.forEach((key, value) -> { // environment variables trump project's config props
+                if (System.getenv((String) key) != null) {
+                    config_properties.put(key, System.getenv((String) key));
+                }
+            });
         }
     }
 }

@@ -1,9 +1,7 @@
 package dk.patientassist.config;
 
 /**
- *
  * Patient Assist
- *
  */
 public enum Mode
 {

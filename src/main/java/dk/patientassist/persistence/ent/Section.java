@@ -1,0 +1,26 @@
+package dk.patientassist.persistence.ent;
+
+import java.util.Set;
+
+import jakarta.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+/**
+ * Patient Assist
+ */
+@Entity
+public class Section
+{
+    @Id
+    public Long id;
+    public String name;
+    @ManyToMany
+    @JsonIgnore
+    @JoinTable(name = "employee_section", joinColumns = @JoinColumn(name = "employee_id"), inverseJoinColumns = @JoinColumn(name = "section_id"))
+    public Set<Employee> employees;
+    @OneToMany
+    @JsonIgnore
+    public Set<Bed> beds;
+}
+

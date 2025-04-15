@@ -1,11 +1,11 @@
 package dk.patientassist.persistence.enums;
 
+import io.javalin.security.RouteRole;
+
 /**
- *
  * Patient Assist
- *
  */
-public enum Role
+public enum Role implements RouteRole
 {
-    DOCTOR, NURSE, CHEF, HEADCHEF
+    GUEST, DOCTOR, NURSE, CHEF, HEADCHEF, ADMIN;
 }

@@ -12,7 +12,7 @@
 
 
   <properties>
-    <MAINCLASS_NAME>App</MAINCLASS_NAME>
+    <mainClass>App</mainClass>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,25 +24,19 @@
     <hamcrest.version>3.0</hamcrest.version>
     <testcontainers.version>1.20.6</testcontainers.version>
     <hikari.version>6.0.0</hikari.version>
-    <javalin.version>6.3.0</javalin.version>
+    <javalin.version>6.6.0</javalin.version>
     <jbcrypt.version>0.4</jbcrypt.version>
     <token.security.version>1.0.1</token.security.version>
     <cucumber.version>7.20.1</cucumber.version>
+    <javajwt.version>4.5.0</javajwt.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-    </repository>
-  </repositories>
 
   <dependencies>
 
     <dependency>
-      <groupId>com.github.Hartmannsolution</groupId>
-      <artifactId>TokenSecurity</artifactId>
-      <version>${token.security.version}</version>
+      <groupId>com.auth0</groupId>
+      <artifactId>java-jwt</artifactId>
+      <version>${javajwt.version}</version>
     </dependency>
 
     <dependency>
@@ -230,7 +224,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>${project.groupId}.${MAINCLASS_NAME}</mainClass>
+                  <mainClass>${project.groupId}.${mainClass}</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -250,7 +244,7 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>${project.groupId}.${MAINCLASS_NAME}</mainClass>
+          <mainClass>${project.groupId}.${mainClass}</mainClass>
         </configuration>
       </plugin>
 

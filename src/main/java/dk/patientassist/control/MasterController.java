@@ -14,18 +14,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import io.javalin.http.HttpResponseException;
-import io.javalin.http.UnauthorizedResponse;
 import io.javalin.json.JavalinJackson;
 
 /**
- *
  * Patient Assist
- *
  */
 public class MasterController
 {
-    private static Logger logger = LoggerFactory.getLogger(MasterController.class);
+    private static final Logger logger = LoggerFactory.getLogger(MasterController.class);
 
     public static Javalin start(int port)
     {
@@ -36,7 +32,8 @@ public class MasterController
 
     private static Javalin setup()
     {
-        Javalin jav = Javalin.create(config -> {
+        @SuppressWarnings("deprecation")
+		Javalin jav = Javalin.create(config -> {
             config.jsonMapper(new JavalinJackson().updateMapper(mapper -> {
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 mapper.registerModule(new JavaTimeModule());
@@ -47,16 +44,13 @@ public class MasterController
             config.showJavalinBanner = false;
             config.router.contextPath = "/api";
             config.bundledPlugins.enableRouteOverview("/routes");
-            /* SECURITY */
-            // config.router.apiBuilder(SecurityRoutes.getSecuredRoutes());
-            // config.router.apiBuilder(SecurityRoutes.getSecurityRoutes());
             config.requestLogger.http((ctx, ms) -> debugLog(ctx, ms));
             /* API */
+            config.router.apiBuilder(AuthController.getEndpoints());
             // config.router.apiBuilder(PokemonController.getPokemonRoutes());
         });
         /* SECURITY */
-        // AccessController accessController = new AccessController();
-        // jav.beforeMatched(accessController::accessHandler);
+        jav.beforeMatched(AccessController::check);
         /* CORS */
         jav.before(MasterController::corsHeaders);
         jav.options("/*", MasterController::corsHeadersOptions);
@@ -79,14 +73,16 @@ public class MasterController
         logger.info(logEntry);
     }
 
-    private static void corsHeaders(Context ctx) {
+    private static void corsHeaders(Context ctx)
+    {
         ctx.header("Access-Control-Allow-Origin", "*");
         ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
         ctx.header("Access-Control-Allow-Credentials", "true");
     }
 
-    private static void corsHeadersOptions(Context ctx) {
+    private static void corsHeadersOptions(Context ctx)
+    {
         ctx.header("Access-Control-Allow-Origin", "*");
         ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");

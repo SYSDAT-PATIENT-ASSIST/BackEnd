@@ -1,27 +1,26 @@
 package dk.patientassist;
 
-import dk.patientassist.persistence.HibernateConfig;
-import jakarta.persistence.EntityManagerFactory;
+import static dk.patientassist.config.Mode.DEV;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.patientassist.persistence.HibernateConfig;
+import jakarta.persistence.EntityManagerFactory;
+
 /**
- *
  * Patient Assist
- *
  */
 public class App
 {
-    private static Logger logger = LoggerFactory.getLogger(App.class);
-    private static EntityManagerFactory EMF;
+	@SuppressWarnings("unused")
+	private static final Logger logger = LoggerFactory.getLogger(App.class);
+	@SuppressWarnings("unused")
+	private static EntityManagerFactory EMF;
 
     public static void main(String[] args)
     {
-        logger.debug("lol");
-        logger.info("lol");
-        logger.warn("lol");
-        logger.error("lol");
-        // HibernateConfig.Init(HibernateConfig.Mode.DEV);
-        // EMF = HibernateConfig.getEntityManagerFactory();
+        HibernateConfig.Init(DEV);
+        EMF = HibernateConfig.getEntityManagerFactory();
     }
 }

@@ -14,13 +14,11 @@ import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityManagerFactory;
 
 /**
- *
  * Patient Assist
- *
  */
 public class HibernateConfig
 {
-    private static Logger logger = LoggerFactory.getLogger(HibernateConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(HibernateConfig.class);
     private static EntityManagerFactory emf;
 
     public static EntityManagerFactory getEntityManagerFactory()
@@ -40,14 +38,14 @@ public class HibernateConfig
         try {
             Configuration configuration = new Configuration();
             Properties props = new Properties();
-            props = setBaseProperties(props);
+            setBaseProperties(props);
 
             if (System.getenv("DEPLOYED") != null)
-                props = setDeployedProperties(props);
+                setDeployedProperties(props);
             else if (mode == Mode.DEV)
-                props = setDevProperties(props);
+                setDevProperties(props);
             else if (mode == Mode.TEST)
-                props = setTestProperties(props);
+                setTestProperties(props);
 
             configuration.setProperties(props);
             getAnnotationConfiguration(configuration);
@@ -63,32 +61,33 @@ public class HibernateConfig
         }
     }
 
-    private static Properties setBaseProperties(Properties props){
+    private static void setBaseProperties(Properties props)
+    {
         props.put("hibernate.connection.driver_class", "org.postgresql.Driver");
         props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.current_session_context_class", "thread");
         props.put("hibernate.show_sql", "false");
         props.put("hibernate.format_sql", "false");
         props.put("hibernate.use_sql_comments", "false");
-        return props;
     }
 
-    private static Properties setDevProperties(Properties props){
+    private static void setDevProperties(Properties props)
+    {
         props.put("hibernate.hikari_leakDetectionThreshold", "10000"); // leak detection
-        props.setProperty("hibernate.connection.url", Utils.getPropertyValue("DB_CONN_STR") + Utils.getPropertyValue("DB_NAME"));
-        props.setProperty("hibernate.connection.username", Utils.getPropertyValue("DB_USER"));
-        props.setProperty("hibernate.connection.password", Utils.getPropertyValue("DB_PW"));
-        return props;
+        props.setProperty("hibernate.connection.url", Utils.getConfigProperty("DB_CONN_STR") + Utils.getConfigProperty("DB_NAME"));
+        props.setProperty("hibernate.connection.username", Utils.getConfigProperty("DB_USER"));
+        props.setProperty("hibernate.connection.password", Utils.getConfigProperty("DB_PW"));
     }
 
-    private static Properties setDeployedProperties(Properties props){
+    private static void setDeployedProperties(Properties props)
+    {
         props.setProperty("hibernate.connection.url", System.getenv("DB_CONN_STR") + System.getenv("DB_NAME_GARDEN"));
         props.setProperty("hibernate.connection.username", System.getenv("DB_USER"));
         props.setProperty("hibernate.connection.password", System.getenv("DB_PW"));
-        return props;
     }
 
-    private static Properties setTestProperties(Properties props) {
+    private static void setTestProperties(Properties props)
+    {
         props.put("hibernate.connection.driver_class", "org.testcontainers.jdbc.ContainerDatabaseDriver");
         props.put("hibernate.connection.url", "jdbc:tc:postgresql:15.3-alpine3.18:///test_db");
         props.put("hibernate.connection.username", "postgres");
@@ -96,17 +95,11 @@ public class HibernateConfig
         props.put("hibernate.archive.autodetect", "class");
         props.put("hibernate.show_sql", "false");
         props.put("hibernate.hbm2ddl.auto", "create-drop");
-        return props;
     }
 
-    private void logProps()
+    @SuppressWarnings("unused")
+	private void logProps()
     {
-        logger.info(String.format("DB_CONN_STR: %s, DB_NAME: %s, DB_USER: %s, DB_PW: %s%n",
-                    Utils.getPropertyValue("DB_CONN_STR"),
-                    Utils.getPropertyValue("DB_NAME"),
-                    Utils.getPropertyValue("DB_USER"),
-                    Utils.getPropertyValue("DB_PW")
-                    ));
+        logger.info("DB_CONN_STR: {}, DB_NAME: {}, DB_USER: {}, DB_PW: {}%n", Utils.getConfigProperty("DB_CONN_STR"), Utils.getConfigProperty("DB_NAME"), Utils.getConfigProperty("DB_USER"), Utils.getConfigProperty("DB_PW"));
     }
 }
-
