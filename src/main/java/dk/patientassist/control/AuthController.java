@@ -86,6 +86,7 @@ public class AuthController {
                     .put("email", emp.email)
                     .put("name", emp.getFullName())
                     .set("roles", emp.getRolesAsJSONArray());
+
             ctx.json(jsonResponse);
             ctx.status(201);
         } catch (ConstraintViolationException e) {

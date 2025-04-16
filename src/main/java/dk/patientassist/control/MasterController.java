@@ -21,8 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MasterController {
 
-    private static final Logger logger = LoggerFactory.getLogger(
-            MasterController.class);
+    private static final Logger logger = LoggerFactory.getLogger(MasterController.class);
 
     public static Javalin start(int port) {
         Javalin jav = setup();
@@ -42,18 +41,13 @@ public class MasterController {
         @SuppressWarnings("deprecation")
         Javalin jav = Javalin.create(config -> {
             config.jsonMapper(
-                    new JavalinJackson()
-                            .updateMapper(mapper -> {
-                                mapper.configure(
-                                        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                                        false);
-                                mapper.registerModule(new JavaTimeModule());
-                                mapper.writer(new DefaultPrettyPrinter());
-                                mapper.disable(
-                                        SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                                mapper.enable(
-                                        MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
-                            }));
+                    new JavalinJackson().updateMapper(mapper -> {
+                        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                        mapper.registerModule(new JavaTimeModule());
+                        mapper.writer(new DefaultPrettyPrinter());
+                        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                        mapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
+                    }));
             config.showJavalinBanner = false;
             config.router.contextPath = "/api";
             config.bundledPlugins.enableRouteOverview("/routes");
@@ -67,16 +61,12 @@ public class MasterController {
         jav.before(MasterController::corsHeaders);
         jav.options("/*", MasterController::corsHeadersOptions);
         /* EXCEPTIONS */
-        jav.exception(
-                HttpResponseException.class,
-                MasterController::jsonErrorResponse);
+        jav.exception(HttpResponseException.class, MasterController::jsonErrorResponse);
 
         return jav;
     }
 
-    private static void jsonErrorResponse(
-            HttpResponseException e,
-            Context ctx) {
+    private static void jsonErrorResponse(HttpResponseException e, Context ctx) {
         ctx.status(e.getStatus());
         Map<String, String> msgMap = new HashMap<>();
         msgMap.put("message", e.getMessage());
@@ -103,22 +93,18 @@ public class MasterController {
 
     private static void corsHeaders(Context ctx) {
         ctx.header("Access-Control-Allow-Origin", "*");
-        ctx.header(
-                "Access-Control-Allow-Methods",
+        ctx.header("Access-Control-Allow-Methods",
                 "GET, POST, PUT, DELETE, OPTIONS");
-        ctx.header(
-                "Access-Control-Allow-Headers",
+        ctx.header("Access-Control-Allow-Headers",
                 "Content-Type, Authorization");
         ctx.header("Access-Control-Allow-Credentials", "true");
     }
 
     private static void corsHeadersOptions(Context ctx) {
         ctx.header("Access-Control-Allow-Origin", "*");
-        ctx.header(
-                "Access-Control-Allow-Methods",
+        ctx.header("Access-Control-Allow-Methods",
                 "GET, POST, PUT, DELETE, OPTIONS");
-        ctx.header(
-                "Access-Control-Allow-Headers",
+        ctx.header("Access-Control-Allow-Headers",
                 "Content-Type, Authorization");
         ctx.header("Access-Control-Allow-Credentials", "true");
         ctx.status(204);

@@ -33,8 +33,7 @@ public class AccessController {
         jwtKey = Utils.getConfigProperty("JWT_SECRET_KEY");
         jwtIss = Utils.getConfigProperty("JWT_ISSUER");
         jwtExp = Long.parseLong(Utils.getConfigProperty("JWT_EXPIRE_TIME"));
-        jwtHdr = Utils.getObjectMapperCompact()
-                .writeValueAsString(Map.of("typ", "JWT", "alg", "HS256"));
+        jwtHdr = Utils.getObjectMapperCompact().writeValueAsString(Map.of("typ", "JWT", "alg", "HS256"));
     }
 
     public static void check(@NotNull Context ctx) {
@@ -55,8 +54,7 @@ public class AccessController {
 
             Claim claimRoles = jwt.getClaim("roles");
             if (claimRoles == null) {
-                throw new ForbiddenResponse(
-                        "Forbidden: roles do not match endpoint rules");
+                throw new ForbiddenResponse("Forbidden: roles do not match endpoint rules");
             }
 
             Role[] roles = claimRoles.asArray(Role.class);
@@ -69,8 +67,7 @@ public class AccessController {
             }
 
             if (!Role.find(ctx.routeRoles(), roles)) {
-                throw new ForbiddenResponse(
-                        "Forbidden: roles do not match endpoint rules");
+                throw new ForbiddenResponse("Forbidden: roles do not match endpoint rules");
             }
 
             logger.info(
