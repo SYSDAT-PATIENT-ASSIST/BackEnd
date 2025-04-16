@@ -33,15 +33,9 @@ public class MasterController {
     private static Javalin setup() {
         try {
             AuthController.init();
-        } catch (Exception e) {
-            logger.error("Failed to initialize AuthController: {}", e.getMessage());
-            System.exit(1);
-        }
-
-        try {
             AccessController.init();
         } catch (Exception e) {
-            logger.error("Failed to initialize AccessController: {}", e.getMessage());
+            logger.error("Failed to initialize one or more controllers: {}", e.getMessage());
             System.exit(1);
         }
 
