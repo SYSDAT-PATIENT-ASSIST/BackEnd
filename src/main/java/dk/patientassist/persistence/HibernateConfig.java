@@ -90,7 +90,7 @@ public class HibernateConfig {
         props.put("hibernate.connection.driver_class", "org.testcontainers.jdbc.ContainerDatabaseDriver");
         props.put("hibernate.connection.url", "jdbc:tc:postgresql:15.3-alpine3.18:///test_db");
         props.put("hibernate.connection.username", "postgres");
-        props.put("hibernate.connection.password", "admin");
+        props.put("hibernate.connection.password", "postgres");
         props.put("hibernate.archive.autodetect", "class");
         props.put("hibernate.show_sql", "false");
         props.put("hibernate.hbm2ddl.auto", "create-drop");

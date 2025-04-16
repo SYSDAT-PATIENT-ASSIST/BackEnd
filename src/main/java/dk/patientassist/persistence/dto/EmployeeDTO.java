@@ -6,11 +6,10 @@ import dk.patientassist.persistence.enums.Role;
 import lombok.EqualsAndHashCode;
 
 /**
-* Patient Assist
-*/
+ * Patient Assist
+ */
 @EqualsAndHashCode
-public class EmployeeDTO
-{
+public class EmployeeDTO {
     public String email;
     public String firstName;
     public String middleName;
