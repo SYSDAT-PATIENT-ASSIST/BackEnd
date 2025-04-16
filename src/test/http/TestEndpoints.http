@@ -21,5 +21,16 @@ Content-Type: application/json
     "middle_name": "Doe",
     "last_name": "Smith",
     "roles": ["admin"],
-    "sections": [1, 2]
+    "sections": [1, 2, 5]
+}
+
+###
+# @name LOGIN
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@example.com",
+    "password": "admin"
 }

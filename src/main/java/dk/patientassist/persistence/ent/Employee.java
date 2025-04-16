@@ -5,10 +5,13 @@ import dk.patientassist.persistence.enums.Role;
 import dk.patientassist.utilities.Utils;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.Array;
+import org.mindrot.jbcrypt.BCrypt;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -17,11 +20,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * Patient Assist
  */
 @Entity
+@Table(name = "employee", uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
 public class Employee
 {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
-    @Column(nullable = false)
+    @Column(name = "email", unique = true, nullable = false)
     public String email;
     @Column(name = "first_name", nullable = false)
     public String firstName;
@@ -48,6 +53,12 @@ public class Employee
         return String.join(", ", roles.stream().map(Role::name).toList());
     }
 
+    public List<String> getRolesAsStringList() {
+        if (roles == null || roles.isEmpty())
+            return new ArrayList<>();
+        return roles.stream().map(Role::name).toList();
+    }
+
     public ArrayNode getRolesAsJSONArray() {
         ArrayNode arrayNode = Utils.getObjectMapperCompact().createArrayNode();
         if (roles == null || roles.isEmpty())
@@ -62,7 +73,7 @@ public class Employee
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             Employee emp = new Employee();
             emp.email = json.get("email").asText();
-            emp.password = json.get("password").asText();
+            emp.password = BCrypt.hashpw(json.get("password").asText(), BCrypt.gensalt());
             emp.firstName = json.get("first_name").asText();
             emp.middleName = json.get("middle_name").asText();
             emp.lastName = json.get("last_name").asText();

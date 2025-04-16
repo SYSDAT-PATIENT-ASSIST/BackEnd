@@ -1,6 +1,8 @@
 package dk.patientassist.persistence.ent;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 /**
@@ -9,7 +11,9 @@ import jakarta.persistence.Id;
 @Entity
 public class Event
 {
-    @Id public Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Integer id;
     public String name;
     // public Integer base_experience; // base xp from defeating this pokemon
     // public Double height; // unit: 0.1m

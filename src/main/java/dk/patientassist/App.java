@@ -17,7 +17,7 @@ public class App
 
     public static void main(String[] args)
     {
-        HibernateConfig.Init(DEV);
+        HibernateConfig.init(DEV);
 
         try {
 
