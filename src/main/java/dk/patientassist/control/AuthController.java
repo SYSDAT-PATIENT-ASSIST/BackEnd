@@ -78,7 +78,7 @@ public class AuthController {
                     .withSubject("Patient Assist Login Credentials")
                     .withClaim("name", emp.getFullName())
                     .withClaim("email", emp.email)
-                    .withClaim("roles", emp.getRolesAsString())
+                    .withClaim("roles", emp.getRolesAsStringList())
                     .sign(Algorithm.HMAC256(jwtKey));
 
             JsonNode jsonResponse = Utils.getObjectMapperCompact().createObjectNode()
