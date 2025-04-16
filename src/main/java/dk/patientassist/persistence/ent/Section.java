@@ -19,8 +19,7 @@ public class Section
     @JsonIgnore
     @JoinTable(name = "employee_section", joinColumns = @JoinColumn(name = "employee_id"), inverseJoinColumns = @JoinColumn(name = "section_id"))
     public Set<Employee> employees;
-    @OneToMany
+    @OneToMany(mappedBy = "section")
     @JsonIgnore
     public Set<Bed> beds;
 }
-

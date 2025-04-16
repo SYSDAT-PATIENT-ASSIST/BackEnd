@@ -1,7 +1,8 @@
 package dk.patientassist.control;
 
-import dk.patientassist.utilities.*;
-import dk.patientassist.exceptions.*;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,10 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import dk.patientassist.utilities.Utils;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import io.javalin.http.HttpResponseException;
 import io.javalin.json.JavalinJackson;
 
 /**
@@ -32,6 +35,13 @@ public class MasterController
 
     private static Javalin setup()
     {
+        try {
+			AuthController.init();
+		} catch (Exception e) {
+			logger.error("Failed to initialize AuthController", e.getMessage());
+			System.exit(1);
+		}
+
         @SuppressWarnings("deprecation")
 		Javalin jav = Javalin.create(config -> {
             config.jsonMapper(new JavalinJackson().updateMapper(mapper -> {
@@ -55,15 +65,24 @@ public class MasterController
         jav.before(MasterController::corsHeaders);
         jav.options("/*", MasterController::corsHeadersOptions);
         /* EXCEPTIONS*/
-        jav.exception(ApiException.class, MasterController::apiError);
+        jav.exception(HttpResponseException.class, MasterController::jsonErrorResponse);
 
         return jav;
     }
 
-    private static void apiError(ApiException e, Context ctx)
+    private static void jsonErrorResponse(HttpResponseException e, Context ctx)
     {
-        ctx.status(e.getCode());
-        ctx.json(Utils.JSONStatusMessage(ctx));
+        ctx.status(e.getStatus());
+        Map<String, String> msgMap = new HashMap<>();
+        msgMap.put("message", ctx.status().toString());
+        msgMap.put("status", String.valueOf(ctx.statusCode()));
+        msgMap.put("timestamp", Utils.dateTimeFormat(LocalDateTime.now()));
+        try {
+            ctx.json(msgMap);
+        } catch (Exception exc) {
+            logger.error("Error occurred while sending JSON response");
+            ctx.json("");
+        }
     }
 
     private static void debugLog(Context ctx, float ms)

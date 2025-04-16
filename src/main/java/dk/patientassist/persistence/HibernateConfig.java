@@ -3,6 +3,10 @@ package dk.patientassist.persistence;
 import java.util.Properties;
 
 import dk.patientassist.config.Mode;
+import dk.patientassist.persistence.ent.Bed;
+import dk.patientassist.persistence.ent.Employee;
+import dk.patientassist.persistence.ent.Section;
+import dk.patientassist.persistence.enums.Role;
 import dk.patientassist.utilities.Utils;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -30,7 +34,10 @@ public class HibernateConfig
 
     private static void getAnnotationConfiguration(Configuration configuration)
     {
-        // add our db entities here
+        configuration.addAnnotatedClass(Employee.class);
+        configuration.addAnnotatedClass(Section.class);
+        configuration.addAnnotatedClass(Role.class);
+        configuration.addAnnotatedClass(Bed.class);
     }
 
     public static void Init(Mode mode)

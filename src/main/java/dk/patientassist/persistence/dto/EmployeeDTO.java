@@ -1,16 +1,20 @@
 package dk.patientassist.persistence.dto;
 
+import java.util.Set;
+
 import dk.patientassist.persistence.enums.Role;
+import lombok.EqualsAndHashCode;
 
 /**
- * Patient Assist
- */
+* Patient Assist
+*/
+@EqualsAndHashCode
 public class EmployeeDTO
 {
-	public Long id;
-	public String middleName;
-	public String lastName;
-	public String email;
+    public String email;
     public String firstName;
-    public Role role;
+    public String middleName;
+    public String lastName;
+    public Set<Role> roles;
+    public Set<Integer> section_ids;
 }
