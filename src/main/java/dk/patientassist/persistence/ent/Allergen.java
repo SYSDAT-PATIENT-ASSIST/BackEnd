@@ -11,8 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Entity
 @EqualsAndHashCode
-public class Allergen
-{
+public class Allergen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;

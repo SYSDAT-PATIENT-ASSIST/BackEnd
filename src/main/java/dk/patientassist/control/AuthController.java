@@ -43,7 +43,10 @@ public class AuthController {
                 post("/login", AuthController::login, Role.GUEST);
                 post("/register", AuthController::register, Role.GUEST);
                 /* TEST PATHS */
-                get("/admin_only", ctx -> { ctx.json(""); ctx.status(200); }, Role.ADMIN);
+                get("/admin_only", ctx -> {
+                    ctx.json("");
+                    ctx.status(200);
+                }, Role.ADMIN);
             });
         };
     }

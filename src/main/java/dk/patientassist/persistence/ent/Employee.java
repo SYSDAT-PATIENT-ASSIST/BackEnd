@@ -20,9 +20,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * Patient Assist
  */
 @Entity
-@Table(name = "employee", uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
-public class Employee
-{
+@Table(name = "employee", uniqueConstraints = @UniqueConstraint(columnNames = { "email" }))
+public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;

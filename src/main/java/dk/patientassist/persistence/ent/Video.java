@@ -9,8 +9,7 @@ import jakarta.persistence.Id;
  * Patient Assist
  */
 @Entity
-public class Video
-{
+public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;

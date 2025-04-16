@@ -11,12 +11,10 @@ import dk.patientassist.persistence.HibernateConfig;
 /**
  * Patient Assist
  */
-public class App
-{
-	private static final Logger logger = LoggerFactory.getLogger(App.class);
+public class App {
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         HibernateConfig.init(DEV);
 
         try {
@@ -27,7 +25,7 @@ public class App
 
             HibernateConfig.getEntityManagerFactory().close();
             logger.error("Error initializing application: {}{}",
-                e.getMessage(), System.lineSeparator());
+                    e.getMessage(), System.lineSeparator());
             e.printStackTrace();
 
         }

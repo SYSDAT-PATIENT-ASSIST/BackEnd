@@ -48,8 +48,7 @@ public class TestAuth {
     }
 
     @BeforeEach
-    void setupBeforeEach()
-    {
+    void setupBeforeEach() {
         logout();
     }
 
@@ -58,16 +57,16 @@ public class TestAuth {
     @Test
     void testRegisterAdmin() {
         String json = """
-        {
-            "email": "admin@example.com",
-            "password": "admin",
-            "first_name": "John",
-            "middle_name": "Doe",
-            "last_name": "Smith",
-            "roles": ["admin"],
-            "sections": [1, 2, 5]
-        }
-        """;
+                {
+                    "email": "admin@example.com",
+                    "password": "admin",
+                    "first_name": "John",
+                    "middle_name": "Doe",
+                    "last_name": "Smith",
+                    "roles": ["admin"],
+                    "sections": [1, 2, 5]
+                }
+                """;
 
         RestAssured.given().port(port)
                 .body(json)
@@ -79,7 +78,6 @@ public class TestAuth {
                 .when().get("/api/auth/admin_only")
                 .then().assertThat().statusCode(200);
     }
-
 
     @Test
     void testLoginAdmin() {
@@ -102,17 +100,6 @@ public class TestAuth {
         jwtAdmin = RestAssured.given().port(port).contentType("application/json").body(json)
                 .when().post("/api/auth/login")
                 .then().extract().path("token");
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
-        System.err.println(jwtAdmin);
     }
 
     static void logout() {

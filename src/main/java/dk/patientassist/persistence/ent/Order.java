@@ -9,8 +9,7 @@ import jakarta.persistence.Id;
  * Patient Assist
  */
 @Entity
-public class Order
-{
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;

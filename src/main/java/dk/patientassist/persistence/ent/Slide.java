@@ -9,8 +9,7 @@ import jakarta.persistence.Id;
  * Patient Assist
  */
 @Entity
-public class Slide
-{
+public class Slide {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;

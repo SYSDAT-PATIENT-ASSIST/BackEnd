@@ -12,8 +12,7 @@ import jakarta.persistence.ManyToOne;
  * Patient Assist
  */
 @Entity
-public class Bed
-{
+public class Bed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;

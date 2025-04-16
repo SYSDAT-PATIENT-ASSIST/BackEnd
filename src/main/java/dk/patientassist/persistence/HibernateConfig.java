@@ -20,28 +20,24 @@ import jakarta.persistence.EntityManagerFactory;
 /**
  * Patient Assist
  */
-public class HibernateConfig
-{
+public class HibernateConfig {
     private static final Logger logger = LoggerFactory.getLogger(HibernateConfig.class);
     private static EntityManagerFactory emf;
 
-    public static EntityManagerFactory getEntityManagerFactory()
-    {
+    public static EntityManagerFactory getEntityManagerFactory() {
         if (emf == null)
             throw new RuntimeException("No EntityManagerFactory Instance");
         return emf;
     }
 
-    private static void getAnnotationConfiguration(Configuration configuration)
-    {
+    private static void getAnnotationConfiguration(Configuration configuration) {
         configuration.addAnnotatedClass(Employee.class);
         configuration.addAnnotatedClass(Section.class);
         configuration.addAnnotatedClass(Role.class);
         configuration.addAnnotatedClass(Bed.class);
     }
 
-    public static void init(Mode mode)
-    {
+    public static void init(Mode mode) {
         try {
             Configuration configuration = new Configuration();
             Properties props = new Properties();
@@ -57,9 +53,8 @@ public class HibernateConfig
             configuration.setProperties(props);
             getAnnotationConfiguration(configuration);
 
-            ServiceRegistry serviceRegistry =
-                    new StandardServiceRegistryBuilder().
-                            applySettings(configuration.getProperties()).build();
+            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                    .applySettings(configuration.getProperties()).build();
             SessionFactory sf = configuration.buildSessionFactory(serviceRegistry);
             emf = sf.unwrap(EntityManagerFactory.class);
         } catch (Throwable ex) {
@@ -68,8 +63,7 @@ public class HibernateConfig
         }
     }
 
-    private static void setBaseProperties(Properties props)
-    {
+    private static void setBaseProperties(Properties props) {
         props.put("hibernate.connection.driver_class", "org.postgresql.Driver");
         props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.current_session_context_class", "thread");
@@ -78,23 +72,21 @@ public class HibernateConfig
         props.put("hibernate.use_sql_comments", "false");
     }
 
-    private static void setDevProperties(Properties props)
-    {
+    private static void setDevProperties(Properties props) {
         props.put("hibernate.hikari_leakDetectionThreshold", "10000"); // leak detection
-        props.setProperty("hibernate.connection.url", Utils.getConfigProperty("DB_CONN_STR") + Utils.getConfigProperty("DB_NAME"));
+        props.setProperty("hibernate.connection.url",
+                Utils.getConfigProperty("DB_CONN_STR") + Utils.getConfigProperty("DB_NAME"));
         props.setProperty("hibernate.connection.username", Utils.getConfigProperty("DB_USER"));
         props.setProperty("hibernate.connection.password", Utils.getConfigProperty("DB_PW"));
     }
 
-    private static void setDeployedProperties(Properties props)
-    {
+    private static void setDeployedProperties(Properties props) {
         props.setProperty("hibernate.connection.url", System.getenv("DB_CONN_STR") + System.getenv("DB_NAME_GARDEN"));
         props.setProperty("hibernate.connection.username", System.getenv("DB_USER"));
         props.setProperty("hibernate.connection.password", System.getenv("DB_PW"));
     }
 
-    private static void setTestProperties(Properties props)
-    {
+    private static void setTestProperties(Properties props) {
         props.put("hibernate.connection.driver_class", "org.testcontainers.jdbc.ContainerDatabaseDriver");
         props.put("hibernate.connection.url", "jdbc:tc:postgresql:15.3-alpine3.18:///test_db");
         props.put("hibernate.connection.username", "postgres");
@@ -105,8 +97,9 @@ public class HibernateConfig
     }
 
     @SuppressWarnings("unused")
-	private void logProps()
-    {
-        logger.info("DB_CONN_STR: {}, DB_NAME: {}, DB_USER: {}, DB_PW: {}%n", Utils.getConfigProperty("DB_CONN_STR"), Utils.getConfigProperty("DB_NAME"), Utils.getConfigProperty("DB_USER"), Utils.getConfigProperty("DB_PW"));
+    private void logProps() {
+        logger.info("DB_CONN_STR: {}, DB_NAME: {}, DB_USER: {}, DB_PW: {}%n", Utils.getConfigProperty("DB_CONN_STR"),
+                Utils.getConfigProperty("DB_NAME"), Utils.getConfigProperty("DB_USER"),
+                Utils.getConfigProperty("DB_PW"));
     }
 }

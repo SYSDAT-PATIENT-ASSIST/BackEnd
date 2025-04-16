@@ -10,8 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Patient Assist
  */
 @Entity
-public class Section
-{
+public class Section {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
