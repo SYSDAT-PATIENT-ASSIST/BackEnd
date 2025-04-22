@@ -13,8 +13,8 @@
 
   <properties>
     <MAINCLASS_NAME>App</MAINCLASS_NAME>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>22</maven.compiler.source>
+    <maven.compiler.target>22</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jackson.version>2.16.0</jackson.version>
     <lombok.version>1.18.34</lombok.version>
@@ -60,8 +60,15 @@
 
     <dependency>
       <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <version>7.14.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.cucumber</groupId>
       <artifactId>cucumber-junit-platform-engine</artifactId>
-      <version>${cucumber.version}</version>
+      <version>7.14.0</version>
       <scope>test</scope>
     </dependency>
 
