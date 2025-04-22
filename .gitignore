@@ -154,6 +154,14 @@ replay_pid*
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/**/compiler.xml
+.idea/**/misc.xml
+
+# IntelliJ Data Sources (avoid sharing local DB creds)
+.idea/dataSources.xml
+.idea/dataSources.ids
+.idea/dataSources.local.xml
+.idea/sqlDataSources.xml
 
 # AWS User-specific
 .idea/**/aws.xml
