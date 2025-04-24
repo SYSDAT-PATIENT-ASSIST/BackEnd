@@ -87,7 +87,7 @@ public class menuStepDefinitions
     @And("the system will be updated.")
     public void theSystemWillBeUpdated()
     {
-        // @Then("the order will be cancelled")
+        // see @Then("the order will be cancelled")
     }
 
     @Given("a dish is sold out")
