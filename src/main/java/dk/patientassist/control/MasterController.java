@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -37,7 +36,6 @@ public class MasterController {
             System.exit(1);
         }
 
-        @SuppressWarnings("deprecation")
         Javalin jav = Javalin.create(config -> {
             config.jsonMapper(
                     new JavalinJackson().updateMapper(mapper -> {
@@ -45,7 +43,6 @@ public class MasterController {
                         mapper.registerModule(new JavaTimeModule());
                         mapper.writer(new DefaultPrettyPrinter());
                         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                        mapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
                     }));
             config.showJavalinBanner = false;
             config.router.contextPath = "/api";

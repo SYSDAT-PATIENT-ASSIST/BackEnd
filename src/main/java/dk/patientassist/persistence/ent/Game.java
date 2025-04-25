@@ -19,4 +19,8 @@ public class Game {
     @ManyToMany
     @JoinTable(name = "game_category", joinColumns = @JoinColumn(name = "category_id"), inverseJoinColumns = @JoinColumn(name = "game_id"))
     public Set<GameCategory> categories;
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(name = "game_score", joinColumns = @JoinColumn(name = "score_id"), inverseJoinColumns = @JoinColumn(name = "game_id"))
+    public Set<Score> scores;
 }
