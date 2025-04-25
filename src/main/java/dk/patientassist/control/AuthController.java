@@ -5,6 +5,7 @@ import static io.javalin.apibuilder.ApiBuilder.path;
 import static io.javalin.apibuilder.ApiBuilder.post;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,9 @@ public class AuthController {
                 post("/register", AuthController::register, Role.GUEST);
                 /* TEST PATHS */
                 get("/admin_only", ctx -> {
-                    ctx.json("");
+                    Map<String, String> m = new HashMap<>();
+                    m.put("message", "hello from admin_only");
+                    ctx.json(m);
                     ctx.status(200);
                 }, Role.ADMIN);
             });
@@ -98,9 +101,9 @@ public class AuthController {
             ctx.json(jsonResponse);
             ctx.status(201);
         } catch (EntityExistsException e) {
-            throw new UnauthorizedResponse("registration failed: user already exists with that email");
+            throw new UnauthorizedResponse("Registration failed: user already exists with that email");
         } catch (Exception e) {
-            throw new UnauthorizedResponse("registration failed");
+            throw new UnauthorizedResponse("Registration failed");
         } finally {
             if (em != null) {
                 em.close();

@@ -51,13 +51,7 @@ Content-Type: application/json
 ###
 # @name LOGIN SUCCESS PRIVILEGE
 
-POST {{url}}/auth/ladmin_onlyogin
-Content-Type: application/json
-
-{
-    "email": "admin@example.com",
-    "password": "fail"
-}
+GET {{url}}/auth/admin_only
 
 ###
 # @name LOGIN FAIL PASSWORD

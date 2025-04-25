@@ -82,10 +82,12 @@ public class AccessController {
                     ctx.ip(),
                     e.getMessage());
             throw new ForbiddenResponse("Forbidden: " + e.getMessage());
+        } catch (ForbiddenResponse e) {
+            logger.info("access denied to {} from {}", ctx.path(), ctx.ip());
+            throw new ForbiddenResponse(e.getMessage());
         } catch (Exception e) {
             logger.info("access denied to {} from {}", ctx.path(), ctx.ip());
-            throw new ForbiddenResponse(
-                    e.getMessage().length() < 1 ? "Forbidden" : e.getMessage());
+            throw new ForbiddenResponse("Forbidden");
         }
     }
 }

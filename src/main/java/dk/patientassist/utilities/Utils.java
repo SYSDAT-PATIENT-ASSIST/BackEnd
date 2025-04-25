@@ -71,9 +71,9 @@ public class Utils {
         return objectMapperCompact;
     }
 
-    public static ObjectNode JSONStatusObject(Context ctx) {
+    public static ObjectNode JSONStatusObject(Context ctx, Exception e) {
         ObjectNode msg = Utils.getObjectMapperCompact().createObjectNode();
-        msg.put("message", ctx.status().toString());
+        msg.put("message", e.getMessage());
         msg.put("status", String.valueOf(ctx.statusCode()));
         msg.put("timestamp", dateTimeFormat(LocalDateTime.now()));
         return msg;

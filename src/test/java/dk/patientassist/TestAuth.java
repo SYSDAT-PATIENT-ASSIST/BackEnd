@@ -39,7 +39,7 @@ public class TestAuth {
         emf = HibernateConfig.getEntityManagerFactory();
 
         port = 9999;
-        jav = MasterController.start(port);
+        jav = MasterController.start(Mode.TEST, port);
     }
 
     @AfterAll

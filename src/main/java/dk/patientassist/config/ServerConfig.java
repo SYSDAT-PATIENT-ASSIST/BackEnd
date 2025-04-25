@@ -59,7 +59,7 @@ public class ServerConfig {
 
     private static void jsonErrorResponse(HttpResponseException e, Context ctx) {
         ctx.status(e.getStatus());
-        ctx.json(Utils.JSONStatusObject(ctx));
+        ctx.json(Utils.JSONStatusObject(ctx, e));
     }
 
     private static void debugLog(Context ctx, float ms) {
