@@ -25,6 +25,17 @@ Content-Type: application/json
 }
 
 ###
+# @name LOGIN FAIL PRIVILEGE
+
+POST {{url}}/auth/admin_only
+Content-Type: application/json
+
+{
+    "email": "admin@example.com",
+    "password": "fail"
+}
+
+###
 # @name LOGIN
 
 POST {{url}}/auth/login
@@ -33,6 +44,19 @@ Content-Type: application/json
 {
     "email": "admin@example.com",
     "password": "admin"
+}
+
+# > {% client.global.set("auth_token", response.body.token); %}
+
+###
+# @name LOGIN SUCCESS PRIVILEGE
+
+POST {{url}}/auth/ladmin_onlyogin
+Content-Type: application/json
+
+{
+    "email": "admin@example.com",
+    "password": "fail"
 }
 
 ###

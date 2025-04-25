@@ -15,8 +15,10 @@ import dk.patientassist.utilities.Utils;
 import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.http.Context;
 import io.javalin.http.UnauthorizedResponse;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
@@ -66,6 +68,11 @@ public class AuthController {
 
             em = HibernateConfig.getEntityManagerFactory().createEntityManager();
             em.getTransaction().begin();
+            List<Employee> empsWithSameEmail = em.createQuery("FROM Employee WHERE email ilike :1", Employee.class)
+                    .setParameter(1, emp.email).getResultList();
+            if (empsWithSameEmail.size() > 0) {
+                throw new EntityExistsException("");
+            }
             em.persist(emp);
             em.getTransaction().commit();
             em.close();
@@ -89,7 +96,7 @@ public class AuthController {
 
             ctx.json(jsonResponse);
             ctx.status(201);
-        } catch (ConstraintViolationException e) {
+        } catch (EntityExistsException e) {
             throw new UnauthorizedResponse("registration failed: user already exists with that email");
         } catch (Exception e) {
             throw new UnauthorizedResponse("registration failed");
