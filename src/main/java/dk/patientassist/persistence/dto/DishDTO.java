@@ -14,9 +14,8 @@ public class DishDTO
     private LocalDate available_until;
     private DishStatus status;
 
-    public DishDTO(Integer id, String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status)
+    public DishDTO(String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status)
     {
-        this.id = id;
         this.name = name;
         this.description = description;
         this.available_from = available_from;
@@ -26,7 +25,6 @@ public class DishDTO
 
     public DishDTO(Dish dish)
     {
-        this.id = dish.getId();
         this.name = dish.getName();
         this.description = dish.getDescription();
         this.available_from = dish.getAvailable_from();

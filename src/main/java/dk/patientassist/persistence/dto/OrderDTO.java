@@ -17,9 +17,8 @@ public class OrderDTO
     private DishDTO dish;
     private OrderStatus status;
 
-    public OrderDTO(Integer id, Integer bed_id, LocalDateTime order_time, String note, DishDTO dish, OrderStatus status)
+    public OrderDTO(Integer bed_id, LocalDateTime order_time, String note, DishDTO dish, OrderStatus status)
     {
-        this.id = id;
         this.bed_id = bed_id;
         this.order_time = order_time;
         this.note = note;
@@ -29,7 +28,6 @@ public class OrderDTO
 
     public OrderDTO(Order order)
     {
-        this.id = order.getId();
         this.bed_id = order.getBed_id();
         this.order_time = order.getOrder_time();
         this.note = order.getNote();

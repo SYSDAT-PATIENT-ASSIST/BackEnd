@@ -1,6 +1,7 @@
 package dk.patientassist.stepdefinitions;
 import dk.patientassist.control.DishController;
 import dk.patientassist.control.OrderController;
+import dk.patientassist.persistence.dto.OrderDTO;
 import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.DishStatus;
@@ -19,8 +20,8 @@ public class menuStepDefinitions
 {
     private DishController dishController = new DishController();
     private OrderController orderController = new OrderController();
-    private Dish dish = new Dish(3, "Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025,24), LocalDate.now(), DishStatus.AVAILABLE); //id, name, description, available_from, available_until, status
-    private Order order = new Order(1, 201, LocalDateTime.now(), "Ingen allergier", dish, OrderStatus.PENDING); //id, bed_id, order_time, note, dish, status
+    private Dish dish = new Dish("Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025,24), LocalDate.now(), DishStatus.AVAILABLE); //id, name, description, available_from, available_until, status
+    private Order order = new Order(201, LocalDateTime.now(), "Ingen allergier", dish, OrderStatus.PENDING); //id, bed_id, order_time, note, dish, status
 
     @Given("the patient has an assigned bed number and an iPad")
     public void thePatientHasAnAssignedBedNumberAndAnIPad()
@@ -80,7 +81,7 @@ public class menuStepDefinitions
     @Then("the order will be cancelled")
     public void theOrderWillBeCancelled()
     {
-        Order order = orderController.getOrder(1);
+        OrderDTO order = orderController.getOrder(1);
         Assert.assertEquals(OrderStatus.CANCELLED, order.getStatus());
     }
 

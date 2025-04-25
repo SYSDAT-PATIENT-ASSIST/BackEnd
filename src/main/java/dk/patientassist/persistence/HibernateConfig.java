@@ -2,6 +2,8 @@ package dk.patientassist.persistence;
 
 import java.util.Properties;
 
+import dk.patientassist.persistence.ent.Dish;
+import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.utilities.Utils;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -29,6 +31,8 @@ public class HibernateConfig
 
     private static void getAnnotationConfiguration(Configuration configuration) {
         // add our db entities here
+        configuration.addAnnotatedClass(Dish.class);
+        configuration.addAnnotatedClass(Order.class);
     }
 
     public static void Init(Mode mode) {

@@ -1,38 +1,65 @@
 package dk.patientassist.persistence.dao;
 
+import dk.patientassist.persistence.dto.OrderDTO;
 import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.OrderStatus;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderDAO
-{
+public class OrderDAO{
 
-    List<Order> orders = new ArrayList<>();
+    private static OrderDAO instance;
+    private static EntityManagerFactory emf;
 
+    public OrderDAO(EntityManagerFactory _emf){
+        emf = _emf;
+    }
 
-    public void createOrder(Order order)
-    {
-        orders.add(order);
+    public static OrderDAO getInstance(EntityManagerFactory _emf){
+        if (instance == null){
+            emf = _emf;
+            instance = new OrderDAO(emf);
+        }
+        return instance;
     }
 
 
-    public void cancelOrder(Integer orderId)
-    {
-      Order order = getOrder(orderId);
-      order.setStatus(OrderStatus.CANCELLED);
+    //createOrder er kun til test
+    public OrderDTO createOrder(OrderDTO orderDTO){
+        try (EntityManager em = emf.createEntityManager())
+        {
+            em.getTransaction().begin();
+            Order order = new Order(orderDTO);
+            em.persist(order);
+            em.getTransaction().commit();
+            return new OrderDTO(order);
+        }
     }
 
-    public Order getOrder(Integer orderId)
-    {
-      for (Order order : orders){
-          if (order.getId().equals(orderId)){
-              return order;
-          }
+
+    public OrderDTO getOrder(Integer orderId){
+        try (EntityManager em = emf.createEntityManager())
+        {
+            Order order = em.find(Order.class, orderId);
+            return new OrderDTO(order);
+        }
+    }
+
+    public OrderDTO cancelOrder(Integer orderId){
+      try (EntityManager em = emf.createEntityManager())
+      {
+          em.getTransaction().begin();
+          Order order = em.find(Order.class, orderId);
+          order.setStatus(OrderStatus.CANCELLED);
+          em.merge(order);
+          em.getTransaction().commit();
+          return new OrderDTO(order);
       }
-      return null;
     }
+
 
 
 
