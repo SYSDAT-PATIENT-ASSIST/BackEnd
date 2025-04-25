@@ -4,10 +4,20 @@ import static io.javalin.apibuilder.ApiBuilder.get;
 import static io.javalin.apibuilder.ApiBuilder.path;
 import static io.javalin.apibuilder.ApiBuilder.post;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
+import org.jetbrains.annotations.NotNull;
+import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+
 import dk.patientassist.persistence.HibernateConfig;
 import dk.patientassist.persistence.ent.Employee;
 import dk.patientassist.persistence.enums.Role;
@@ -17,15 +27,6 @@ import io.javalin.http.Context;
 import io.javalin.http.UnauthorizedResponse;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-
-import org.hibernate.exception.ConstraintViolationException;
-import org.jetbrains.annotations.NotNull;
-import org.mindrot.jbcrypt.BCrypt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Patient Assist
