@@ -10,8 +10,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.patientassist.config.Mode;
-import dk.patientassist.persistence.ent.*;
-import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.persistence.ent.Allergen;
+import dk.patientassist.persistence.ent.Bed;
+import dk.patientassist.persistence.ent.Dish;
+import dk.patientassist.persistence.ent.Employee;
+import dk.patientassist.persistence.ent.Event;
+import dk.patientassist.persistence.ent.Game;
+import dk.patientassist.persistence.ent.GameCategory;
+import dk.patientassist.persistence.ent.Order;
+import dk.patientassist.persistence.ent.Score;
+import dk.patientassist.persistence.ent.Section;
+import dk.patientassist.persistence.ent.Slide;
+import dk.patientassist.persistence.ent.TrainingProgram;
+import dk.patientassist.persistence.ent.Video;
 import dk.patientassist.utilities.Utils;
 import jakarta.persistence.EntityManagerFactory;
 
