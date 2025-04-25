@@ -14,5 +14,6 @@ public class Score {
     public Integer id;
     public Integer value;
     public String name;
-    public LocalDateTime time;
+    @Column(name = "time_of")
+    public LocalDateTime timeOf;
 }
