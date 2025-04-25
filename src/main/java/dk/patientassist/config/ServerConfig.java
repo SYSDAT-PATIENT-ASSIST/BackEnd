@@ -20,7 +20,7 @@ public class ServerConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerConfig.class);
 
-    public static Javalin setup() {
+    public static Javalin setup(Mode mode) {
         try {
             AuthController.init();
             AccessController.init();
@@ -40,7 +40,9 @@ public class ServerConfig {
             config.showJavalinBanner = false;
             config.router.contextPath = "/api";
             config.bundledPlugins.enableRouteOverview("/routes");
-            config.requestLogger.http((ctx, ms) -> debugLog(ctx, ms));
+            if (mode == Mode.DEV || mode == Mode.TEST) {
+                config.requestLogger.http((ctx, ms) -> debugLog(ctx, ms));
+            }
             /* API */
             config.router.apiBuilder(AuthController.getEndpoints());
         });

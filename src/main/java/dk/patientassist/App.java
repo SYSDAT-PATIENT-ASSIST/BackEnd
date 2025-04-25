@@ -5,6 +5,7 @@ import static dk.patientassist.config.Mode.DEV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.patientassist.config.Mode;
 import dk.patientassist.control.MasterController;
 import dk.patientassist.persistence.HibernateConfig;
 
@@ -19,7 +20,7 @@ public class App {
 
         try {
 
-            MasterController.start(9999);
+            MasterController.start(Mode.DEV, 9999);
 
         } catch (Exception e) {
 
