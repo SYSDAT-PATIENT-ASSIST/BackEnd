@@ -2,7 +2,9 @@ package dk.patientassist.utilities;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
@@ -68,6 +70,14 @@ public class Utils {
             objectMapperCompact.registerModule(new JavaTimeModule());
         }
         return objectMapperCompact;
+    }
+
+    public static ObjectNode JSONStatusObject(Context ctx) {
+        ObjectNode msg = Utils.getObjectMapperCompact().createObjectNode();
+        msg.put("message", ctx.status().toString());
+        msg.put("status", String.valueOf(ctx.statusCode()));
+        msg.put("timestamp", dateTimeFormat(LocalDateTime.now()));
+        return msg;
     }
 
     public static String JSONStatusMessage(Context ctx) {

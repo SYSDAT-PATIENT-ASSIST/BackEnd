@@ -68,16 +68,7 @@ public class MasterController {
 
     private static void jsonErrorResponse(HttpResponseException e, Context ctx) {
         ctx.status(e.getStatus());
-        Map<String, String> msgMap = new HashMap<>();
-        msgMap.put("message", e.getMessage());
-        msgMap.put("status", String.valueOf(ctx.statusCode()));
-        msgMap.put("timestamp", Utils.dateTimeFormat(LocalDateTime.now()));
-        try {
-            ctx.json(msgMap);
-        } catch (Exception exc) {
-            logger.error("Error occurred while sending JSON response");
-            ctx.json("");
-        }
+        ctx.json(Utils.JSONStatusObject(ctx));
     }
 
     private static void debugLog(Context ctx, float ms) {
