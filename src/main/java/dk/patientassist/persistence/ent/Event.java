@@ -1,9 +1,9 @@
 package dk.patientassist.persistence.ent;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
 
 /**
  * Patient Assist
@@ -14,4 +14,8 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
     public String name;
+    @Column(name = "start_time")
+    public LocalDateTime startTime;
+    @Column(name = "end_time")
+    public LocalDateTime endTime;
 }

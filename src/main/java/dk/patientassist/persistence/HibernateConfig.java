@@ -2,12 +2,6 @@ package dk.patientassist.persistence;
 
 import java.util.Properties;
 
-import dk.patientassist.config.Mode;
-import dk.patientassist.persistence.ent.Bed;
-import dk.patientassist.persistence.ent.Employee;
-import dk.patientassist.persistence.ent.Section;
-import dk.patientassist.persistence.enums.Role;
-import dk.patientassist.utilities.Utils;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -15,6 +9,13 @@ import org.hibernate.service.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.patientassist.config.Mode;
+import dk.patientassist.persistence.ent.Bed;
+import dk.patientassist.persistence.ent.Employee;
+import dk.patientassist.persistence.ent.Event;
+import dk.patientassist.persistence.ent.Section;
+import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.utilities.Utils;
 import jakarta.persistence.EntityManagerFactory;
 
 /**
@@ -35,6 +36,7 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(Section.class);
         configuration.addAnnotatedClass(Role.class);
         configuration.addAnnotatedClass(Bed.class);
+        configuration.addAnnotatedClass(Event.class);
     }
 
     public static void init(Mode mode) {

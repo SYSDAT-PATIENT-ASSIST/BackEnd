@@ -1,9 +1,7 @@
 package dk.patientassist.persistence.ent;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import dk.patientassist.persistence.enums.AgeGroup;
+import jakarta.persistence.*;
 
 /**
  * Patient Assist
@@ -14,4 +12,6 @@ public class GameCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
     public String name;
+    @Enumerated(EnumType.STRING)
+    public AgeGroup ageGroup;
 }

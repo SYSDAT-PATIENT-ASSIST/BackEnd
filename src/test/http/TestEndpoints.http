@@ -34,3 +34,25 @@ Content-Type: application/json
     "email": "admin@example.com",
     "password": "admin"
 }
+
+###
+# @name LOGIN FAIL PASSWORD
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@example.com",
+    "password": "fail"
+}
+
+###
+# @name LOGIN FAIL EMAIL
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "fail@example.com",
+    "password": "admin"
+}
