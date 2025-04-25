@@ -1,5 +1,7 @@
 package dk.patientassist.persistence.ent;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
 /**
@@ -10,5 +12,7 @@ public class Score {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
+    public Integer value;
     public String name;
+    public LocalDateTime time;
 }

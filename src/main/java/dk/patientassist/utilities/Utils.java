@@ -62,6 +62,11 @@ public class Utils {
     }
 
     public static ObjectMapper getObjectMapperCompact() {
+        if (objectMapperCompact == null) {
+            objectMapperCompact = new ObjectMapper();
+            objectMapperCompact.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapperCompact.registerModule(new JavaTimeModule());
+        }
         return objectMapperCompact;
     }
 

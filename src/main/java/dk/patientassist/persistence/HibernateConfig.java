@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.patientassist.config.Mode;
-import dk.patientassist.persistence.ent.Bed;
-import dk.patientassist.persistence.ent.Employee;
-import dk.patientassist.persistence.ent.Event;
-import dk.patientassist.persistence.ent.Section;
+import dk.patientassist.persistence.ent.*;
 import dk.patientassist.persistence.enums.Role;
 import dk.patientassist.utilities.Utils;
 import jakarta.persistence.EntityManagerFactory;
@@ -32,11 +29,19 @@ public class HibernateConfig {
     }
 
     private static void getAnnotationConfiguration(Configuration configuration) {
-        configuration.addAnnotatedClass(Employee.class);
-        configuration.addAnnotatedClass(Section.class);
-        configuration.addAnnotatedClass(Role.class);
+        configuration.addAnnotatedClass(Allergen.class);
         configuration.addAnnotatedClass(Bed.class);
+        configuration.addAnnotatedClass(Dish.class);
+        configuration.addAnnotatedClass(Employee.class);
         configuration.addAnnotatedClass(Event.class);
+        configuration.addAnnotatedClass(Game.class);
+        configuration.addAnnotatedClass(GameCategory.class);
+        configuration.addAnnotatedClass(Order.class);
+        configuration.addAnnotatedClass(Score.class);
+        configuration.addAnnotatedClass(Section.class);
+        configuration.addAnnotatedClass(Slide.class);
+        configuration.addAnnotatedClass(TrainingProgram.class);
+        configuration.addAnnotatedClass(Video.class);
     }
 
     public static void init(Mode mode) {

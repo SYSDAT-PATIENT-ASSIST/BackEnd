@@ -13,6 +13,7 @@ import java.util.Set;
 import org.hibernate.annotations.Array;
 import org.mindrot.jbcrypt.BCrypt;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -38,6 +39,7 @@ public class Employee {
     @Array(length = 16)
     @Enumerated(EnumType.STRING)
     public Set<Role> roles;
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "employee_section", joinColumns = @JoinColumn(name = "section_id"), inverseJoinColumns = @JoinColumn(name = "employee_id"))
     public Set<Section> sections;
