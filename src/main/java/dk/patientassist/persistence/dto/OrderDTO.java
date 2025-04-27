@@ -28,6 +28,7 @@ public class OrderDTO
 
     public OrderDTO(Order order)
     {
+        this.id = order.getId();
         this.bed_id = order.getBed_id();
         this.order_time = order.getOrder_time();
         this.note = order.getNote();

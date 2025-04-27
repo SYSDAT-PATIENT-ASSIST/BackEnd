@@ -25,6 +25,7 @@ public class DishDTO
 
     public DishDTO(Dish dish)
     {
+        this.id = dish.getId();
         this.name = dish.getName();
         this.description = dish.getDescription();
         this.available_from = dish.getAvailable_from();

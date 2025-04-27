@@ -45,7 +45,9 @@ public class Order{
         this.bed_id = orderDTO.getBed_id();
         this.order_time = orderDTO.getOrder_time();
         this.note = orderDTO.getNote();
-        this.dish = new Dish(orderDTO.getDish());
+        //this.dish = new Dish(orderDTO.getDish());
+        this.dish = new Dish(); //empty dish object
+        this.dish.setId(orderDTO.getDish().getId()); //only set id
         this.status = orderDTO.getStatus();
     }
 

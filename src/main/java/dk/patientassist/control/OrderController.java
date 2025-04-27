@@ -18,12 +18,6 @@ public class OrderController{
     }
 
 
-    //kun til test
-    public void createOrder(OrderDTO order){
-        dao.createOrder(order);
-    }
-
-
     public void getOrder(Context ctx){
         // request
         int orderId = ctx.pathParamAsClass("id", Integer.class).get();

@@ -1,6 +1,7 @@
 package dk.patientassist.persistence.dao;
 
 import dk.patientassist.persistence.dto.OrderDTO;
+import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.EntityManager;
@@ -33,6 +34,11 @@ public class OrderDAO{
         {
             em.getTransaction().begin();
             Order order = new Order(orderDTO);
+
+            if(orderDTO.getDish() != null && orderDTO.getDish().getId() != null) {
+                Dish dish = em.find(Dish.class, orderDTO.getDish().getId());
+                order.setDish(dish);
+            }
             em.persist(order);
             em.getTransaction().commit();
             return new OrderDTO(order);

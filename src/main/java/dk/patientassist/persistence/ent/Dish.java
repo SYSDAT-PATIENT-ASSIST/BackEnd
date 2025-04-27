@@ -4,12 +4,14 @@ import dk.patientassist.persistence.enums.DishStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @NoArgsConstructor
 @Getter
+@Setter
 @Entity
 @Table(name = "dish")
 public class Dish

@@ -44,9 +44,9 @@ class OrderDAOTest{
         DishDTO dish = new DishDTO("Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025,24), LocalDate.now(), DishStatus.AVAILABLE);
         DishDTO savedDish = dishDAO.createDish(dish);
         OrderDTO order = new OrderDTO(201, LocalDateTime.now(), "Ingen allergier", savedDish, OrderStatus.PENDING); //id, bed_id, order_time, note, dish, status
-        orderDAO.createOrder(order);
+        OrderDTO savedOrder = orderDAO.createOrder(order);
 
-        Integer id = order.getId();
+        Integer id = savedOrder.getId();
 
         orderDAO.cancelOrder(id);
 
