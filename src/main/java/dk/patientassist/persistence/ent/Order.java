@@ -19,10 +19,13 @@ public class Order{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
-
+    @Column(name = "bed_id")
     private Integer bed_id;
+    @Column(name = "order_timer")
     private LocalDateTime order_time;
+    @Column(name = "note")
     private String note;
+    @Column(name = "orderStatus")
     private OrderStatus status;
 
 

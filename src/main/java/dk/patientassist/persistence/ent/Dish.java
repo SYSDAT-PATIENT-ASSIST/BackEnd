@@ -1,5 +1,6 @@
 package dk.patientassist.persistence.ent;
 import dk.patientassist.persistence.dto.DishDTO;
+import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,14 +21,41 @@ public class Dish{
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "description")
     private String description;
+
+    @Column(name = "available_from")
     private LocalDate available_from;
+
+    @Column(name = "available_until")
     private LocalDate available_until;
+
+    @Column(name = "DishStatus") //Dish status is an Enum
     private DishStatus status;
+
+    @Column(name = "kcal")
+    private double kcal;
+
+    @Column(name = "protein")
+    private double protein;
+
+    @Column(name = "carbohydrates")
+    private double carbohydrates;
+
+    @Column(name = "fat")
+    private double fat;
+
+    @Column(name = "allergens")
+    private Allergens allergens;
 
     @OneToMany(mappedBy = "dish")
     private List<Order> orders;
+
+    @OneToOne(mappedBy = "dish")
+    private Recipe recipe;
 
     public Dish(String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status){
         this.name = name;

@@ -2,8 +2,7 @@ package dk.patientassist.persistence;
 
 import java.util.Properties;
 
-import dk.patientassist.persistence.ent.Dish;
-import dk.patientassist.persistence.ent.Order;
+import dk.patientassist.persistence.ent.*;
 import dk.patientassist.utilities.Utils;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -33,6 +32,9 @@ public class HibernateConfig
         // add our db entities here
         configuration.addAnnotatedClass(Dish.class);
         configuration.addAnnotatedClass(Order.class);
+        configuration.addAnnotatedClass(Recipe.class);
+        configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Ingredients.class);
     }
 
     public static void Init(Mode mode) {
@@ -65,6 +67,7 @@ public class HibernateConfig
     }
 
     private static Properties setBaseProperties(Properties props){
+        props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         props.put("hibernate.connection.driver_class", "org.postgresql.Driver");
         props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.current_session_context_class", "thread");
@@ -93,7 +96,7 @@ public class HibernateConfig
     }
 
     private static Properties setDeployedProperties(Properties props){
-        props.setProperty("hibernate.connection.url", System.getenv("DB_CONN_STR") + System.getenv("DB_NAME_GARDEN"));
+        props.setProperty("hibernate.connection.url", System.getenv("DB_CONN_STR") + System.getenv("DB_NAME"));
         props.setProperty("hibernate.connection.username", System.getenv("DB_USER"));
         props.setProperty("hibernate.connection.password", System.getenv("DB_PW"));
         return props;
