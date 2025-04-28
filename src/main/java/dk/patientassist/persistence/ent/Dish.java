@@ -14,8 +14,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "dish")
-public class Dish
-{
+public class Dish{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -30,8 +29,7 @@ public class Dish
     @OneToMany(mappedBy = "dish")
     private List<Order> orders;
 
-    public Dish(String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status)
-    {
+    public Dish(String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status){
         this.name = name;
         this.description = description;
         this.available_from = available_from;
@@ -39,8 +37,7 @@ public class Dish
         this.status = status;
     }
 
-    public Dish(DishDTO dishDTO)
-    {
+    public Dish(DishDTO dishDTO){
         this.name = dishDTO.getName();
         this.description = dishDTO.getDescription();
         this.available_from = dishDTO.getAvailable_from();

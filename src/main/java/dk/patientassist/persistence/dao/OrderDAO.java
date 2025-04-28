@@ -28,14 +28,13 @@ public class OrderDAO{
     }
 
 
-    //createOrder er kun til test
+    //createOrder only for test
     public OrderDTO createOrder(OrderDTO orderDTO){
-        try (EntityManager em = emf.createEntityManager())
-        {
+        try (EntityManager em = emf.createEntityManager()){
             em.getTransaction().begin();
             Order order = new Order(orderDTO);
 
-            if(orderDTO.getDish() != null && orderDTO.getDish().getId() != null) {
+            if(orderDTO.getDish() != null && orderDTO.getDish().getId() != null){
                 Dish dish = em.find(Dish.class, orderDTO.getDish().getId());
                 order.setDish(dish);
             }
@@ -47,16 +46,14 @@ public class OrderDAO{
 
 
     public OrderDTO getOrder(Integer orderId){
-        try (EntityManager em = emf.createEntityManager())
-        {
+        try (EntityManager em = emf.createEntityManager()){
             Order order = em.find(Order.class, orderId);
             return new OrderDTO(order);
         }
     }
 
     public OrderDTO cancelOrder(Integer orderId){
-      try (EntityManager em = emf.createEntityManager())
-      {
+      try (EntityManager em = emf.createEntityManager()){
           em.getTransaction().begin();
           Order order = em.find(Order.class, orderId);
           order.setStatus(OrderStatus.CANCELLED);
@@ -65,8 +62,6 @@ public class OrderDAO{
           return new OrderDTO(order);
       }
     }
-
-
 
 
 }

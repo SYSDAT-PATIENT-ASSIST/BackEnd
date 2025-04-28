@@ -12,16 +12,14 @@ public class DishController
 {
     private final DishDAO dao;
 
-    public DishController() {
+    public DishController(){
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
         this.dao = DishDAO.getInstance(emf);
     }
 
     public void getAllAvailable(Context ctx){
         try {
-            // List of DTOS
             List<DishDTO> dishDTOS = dao.getAllAvailable();
-            // response
             ctx.res().setStatus(200);
             ctx.json(dishDTOS, DishDTO.class);
         } catch (Exception e) {

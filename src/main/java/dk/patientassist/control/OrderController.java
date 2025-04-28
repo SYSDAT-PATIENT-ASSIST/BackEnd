@@ -17,14 +17,10 @@ public class OrderController{
         this.dao = OrderDAO.getInstance(emf);
     }
 
-
     public void getOrder(Context ctx){
-        // request
         int orderId = ctx.pathParamAsClass("id", Integer.class).get();
         try {
-            // DTO
             OrderDTO orderDTO = dao.getOrder(orderId);
-            // response
             ctx.res().setStatus(200);
             ctx.json(orderDTO, OrderDTO.class);
         } catch (Exception e) {
@@ -32,12 +28,10 @@ public class OrderController{
         }
     }
 
-
     //used for cucumber / menuStepDefinitions
     public OrderDTO getOrder(Integer orderId){
         return dao.getOrder(orderId);
     }
-
 
     public void cancelOrder(Context ctx){
         int orderId = ctx.pathParamAsClass("id", Integer.class).get();
@@ -49,7 +43,6 @@ public class OrderController{
             throw new NotFoundResponse("No content found for this request");
         }
     }
-
 
     //used for cucumber / menuStepDefinitions
     public OrderDTO cancelOrder(Integer orderId){

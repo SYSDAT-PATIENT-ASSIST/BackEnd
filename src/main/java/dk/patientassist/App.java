@@ -8,12 +8,10 @@ import jakarta.persistence.EntityManagerFactory;
  * Patient Assist
  *
  */
-public class App
-{
+public class App{
     private static EntityManagerFactory EMF;
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args){
         HibernateConfig.Init(HibernateConfig.Mode.DEV);
         EMF = HibernateConfig.getEntityManagerFactory();
     }

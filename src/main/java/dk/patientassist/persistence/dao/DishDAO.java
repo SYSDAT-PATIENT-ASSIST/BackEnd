@@ -27,10 +27,9 @@ public class DishDAO{
     }
 
 
-    //createDish er kun til test
+    //createDish only for test
     public DishDTO createDish(DishDTO dishDTO){
-        try (EntityManager em = emf.createEntityManager())
-        {
+        try (EntityManager em = emf.createEntityManager()){
             em.getTransaction().begin();
             Dish dish = new Dish(dishDTO);
             em.persist(dish);
@@ -40,15 +39,13 @@ public class DishDAO{
         }
     }
 
-    //getDish er kun til test
+    //getDish only for test
     public DishDTO getDish(Integer dishId){
-        try (EntityManager em = emf.createEntityManager())
-        {
+        try (EntityManager em = emf.createEntityManager()){
             Dish dish = em.find(Dish.class, dishId);
             return new DishDTO(dish);
         }
     }
-
 
     public List<DishDTO> getAllAvailable(){
         try (EntityManager em = emf.createEntityManager()){
