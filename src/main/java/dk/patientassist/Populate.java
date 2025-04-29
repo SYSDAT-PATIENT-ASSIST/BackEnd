@@ -13,6 +13,11 @@ import java.util.Set;
 
 public class Populate {
 
+    static {
+        HibernateConfig.Init(HibernateConfig.Mode.DEV);
+    }
+
+
     private static EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
     public static void main(String[] args) {

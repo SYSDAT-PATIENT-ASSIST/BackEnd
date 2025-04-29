@@ -19,8 +19,7 @@ public class Ingredients {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "recipe")
+    @ManyToOne
     private Recipe recipe;
 
     public Ingredients(Integer id, Recipe recipe) {

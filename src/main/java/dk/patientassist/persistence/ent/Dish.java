@@ -33,7 +33,7 @@ public class Dish{
     @Column(name = "available_until")
     private LocalDate available_until;
 
-    @Column(name = "DishStatus") //Dish status is an Enum
+    @Enumerated(EnumType.STRING)
     private DishStatus status;
 
     @Column(name = "kcal")
@@ -48,13 +48,14 @@ public class Dish{
     @Column(name = "fat")
     private double fat;
 
-    @Column(name = "allergens")
+    @Enumerated(EnumType.STRING)
     private Allergens allergens;
 
     @OneToMany(mappedBy = "dish")
     private List<Order> orders;
 
-    @OneToOne(mappedBy = "dish")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
     public Dish(String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status){

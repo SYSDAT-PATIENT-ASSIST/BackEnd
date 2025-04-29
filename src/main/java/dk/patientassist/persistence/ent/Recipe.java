@@ -23,10 +23,9 @@ public class Recipe {
     private String title;
 
     @OneToMany(mappedBy = "recipe")
-    @Column(name = "ingredients")
     private Set<Ingredients> ingredients;
 
-    @OneToOne(mappedBy = "recipe")
+    @OneToOne(mappedBy = "recipe", optional = true)
     private Dish dish;
 
     @Column(name = "instructions")
