@@ -3,6 +3,7 @@ package dk.patientassist.persistence;
 import java.util.Properties;
 
 import dk.patientassist.persistence.ent.*;
+import dk.patientassist.security.entities.Role;
 import dk.patientassist.utilities.Utils;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -10,6 +11,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import dk.patientassist.security.entities.User;
 
 import jakarta.persistence.EntityManagerFactory;
 
@@ -35,6 +37,8 @@ public class HibernateConfig
         configuration.addAnnotatedClass(Recipe.class);
         configuration.addAnnotatedClass(User.class);
         configuration.addAnnotatedClass(Ingredients.class);
+        configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Role.class);
     }
 
     public static void Init(Mode mode) {
