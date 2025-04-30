@@ -2,6 +2,8 @@ package dk.patientassist.persistence;
 
 import java.util.Properties;
 
+import dk.patientassist.persistence.ent.*;
+import dk.patientassist.security.entities.Role;
 import dk.patientassist.utilities.Utils;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -9,6 +11,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import dk.patientassist.security.entities.User;
 
 import jakarta.persistence.EntityManagerFactory;
 
@@ -28,7 +31,8 @@ public class HibernateConfig
     }
 
     private static void getAnnotationConfiguration(Configuration configuration) {
-        // add our db entities here
+        configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Role.class);
     }
 
     public static void Init(Mode mode) {
@@ -61,6 +65,7 @@ public class HibernateConfig
     }
 
     private static Properties setBaseProperties(Properties props){
+        //props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         props.put("hibernate.connection.driver_class", "org.postgresql.Driver");
         props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.current_session_context_class", "thread");
@@ -76,7 +81,7 @@ public class HibernateConfig
                 Utils.getPropertyValue("DB_NAME", "config.properties"),
                 Utils.getPropertyValue("DB_USER", "config.properties"),
                 Utils.getPropertyValue("DB_PW", "config.properties")
-                );
+        );
         props.put("hibernate.hikari_leakDetectionThreshold", "10000"); // leak detection
         props.setProperty("hibernate.connection.url",
                 Utils.getPropertyValue("DB_CONN_STR", "config.properties")
@@ -89,7 +94,7 @@ public class HibernateConfig
     }
 
     private static Properties setDeployedProperties(Properties props){
-        props.setProperty("hibernate.connection.url", System.getenv("DB_CONN_STR") + System.getenv("DB_NAME_GARDEN"));
+        props.setProperty("hibernate.connection.url", System.getenv("DB_CONN_STR") + System.getenv("DB_NAME"));
         props.setProperty("hibernate.connection.username", System.getenv("DB_USER"));
         props.setProperty("hibernate.connection.password", System.getenv("DB_PW"));
         return props;
@@ -111,4 +116,3 @@ public class HibernateConfig
     }
 
 }
-
