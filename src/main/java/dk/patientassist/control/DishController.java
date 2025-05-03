@@ -27,6 +27,10 @@ public class DishController
         }
     }
 
+    public void getDishById(Context ctx){
+
+    }
+
     //used for cucumber / menuStepDefinitions
     public List<DishDTO> getAllAvailable(){
         return dao.getAllAvailable();
