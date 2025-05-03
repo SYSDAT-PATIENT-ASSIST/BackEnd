@@ -1,8 +1,6 @@
 package dk.patientassist.persistence.dao;
-import dk.patientassist.control.DishController;
 import dk.patientassist.persistence.HibernateConfig;
 import dk.patientassist.persistence.dto.DishDTO;
-import dk.patientassist.persistence.ent.Dish;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
@@ -11,8 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class DishDAOTest{
 
@@ -36,7 +32,7 @@ class DishDAOTest{
 
     @Test
     void getAllAvailable(){
-        List<DishDTO> dishes = dishDAO.getAllAvailable();
+        List<DishDTO> dishes = dishDAO.getAllAvailableDishes();
         Assert.assertEquals(0, dishes.size());
     }
 }

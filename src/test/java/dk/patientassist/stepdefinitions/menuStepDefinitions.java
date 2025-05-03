@@ -6,8 +6,6 @@ import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dao.OrderDAO;
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.dto.OrderDTO;
-import dk.patientassist.persistence.ent.Dish;
-import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.DishStatus;
 import dk.patientassist.persistence.enums.OrderStatus;
 import io.cucumber.java.en.Given;
@@ -48,7 +46,7 @@ public class menuStepDefinitions{
 
     @And("the patient has opened the Menu on the iPad")
     public void thePatientHasOpenedTheMenuOnTheIPad(){
-        dishController.getAllAvailable();
+        dishController.getAllAvailableDishes();
     }
 
     @When("the patient selects a dish from the Menu")

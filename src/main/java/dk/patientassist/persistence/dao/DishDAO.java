@@ -1,9 +1,6 @@
 package dk.patientassist.persistence.dao;
 import dk.patientassist.persistence.dto.DishDTO;
-import dk.patientassist.persistence.dto.OrderDTO;
 import dk.patientassist.persistence.ent.Dish;
-import dk.patientassist.persistence.ent.Order;
-import dk.patientassist.persistence.enums.DishStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
@@ -47,7 +44,7 @@ public class DishDAO{
         }
     }
 
-    public List<DishDTO> getAllAvailable(){
+    public List<DishDTO> getAllAvailableDishes(){
         try (EntityManager em = emf.createEntityManager()){
             TypedQuery<DishDTO> query = em.createQuery("SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM dk.patientassist.persistence.ent.Dish d WHERE d.status = dk.patientassist.persistence.enums.DishStatus.AVAILABLE OR d.status = dk.patientassist.persistence.enums.DishStatus.SOLD_OUT", DishDTO.class);
             return query.getResultList();
