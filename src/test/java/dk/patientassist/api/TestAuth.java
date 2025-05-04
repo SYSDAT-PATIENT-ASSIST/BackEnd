@@ -13,7 +13,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import dk.patientassist.api.testresources.EmployeeData;
+import dk.patientassist.api.resources.EmployeeData;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.control.MasterController;

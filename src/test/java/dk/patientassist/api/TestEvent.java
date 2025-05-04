@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
-import dk.patientassist.api.testresources.EmployeeData;
-import dk.patientassist.api.testresources.EventData;
+import dk.patientassist.api.resources.EmployeeData;
+import dk.patientassist.api.resources.EventData;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.control.MasterController;

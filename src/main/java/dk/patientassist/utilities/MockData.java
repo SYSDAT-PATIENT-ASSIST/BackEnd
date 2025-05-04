@@ -18,7 +18,7 @@ public class MockData {
 
     public static Event event() {
         Event event = new Event();
-        event.id = rng.nextInt();
+        event.id = null;
         event.name = faker.harryPotter().location();
         event.description = faker.harryPotter().quote();
         event.startTime = LocalDateTime.now().plusDays(rng.nextLong(-365, 365)).plusHours(rng.nextLong(-12, 12));
