@@ -53,17 +53,20 @@ public class menuStepDefinitions{
 
     @When("the patient selects a dish from the Menu")
     public void thePatientSelectsADishFromTheMenu(){
-        // This step will be implemented by another team member - belongs to Task 2.
+        // Task 2. This step is frontend only
     }
 
     @And("the patient clicks the {string} button")
     public void thePatientClicksTheButton(String button){
-        // This step will be implemented by another team member - belongs to Task 2.
+        DishDTO savedDish = dishDAO.createDish(dishDTO);
+        orderDTO.setDish(savedDish);
+        OrderDTO savedOrder = orderController.createOrder(orderDTO);
+        this.orderId = savedOrder.getId();
     }
 
     @Then("a confirmation message should be displayed on the screen.")
     public void aConfirmationMessageShouldBeDisplayedOnTheScreen(){
-        // Task 3. This is frontend only
+        // Task 3. This step is frontend only
     }
 
     @Given("the patient has placed an order")

@@ -30,6 +30,10 @@ public class OrderController{
         }
     }
 
+    //used for cucumber / menuStepDefinitions
+    public OrderDTO createOrder(OrderDTO dto) {
+        return dao.createOrder(dto);
+    }
 
     public void getOrder(Context ctx){
         int orderId = ctx.pathParamAsClass("id", Integer.class).get();
