@@ -53,15 +53,15 @@ class DishDAOTest {
                 "Updated description",
                 original.getAvailable_from(),
                 original.getAvailable_until(),
-                DishStatus.SOLD_OUT,
+                DishStatus.UDSOLGT,
                 500, 30, 40, 15,
-                Allergens.EGGS
+                Allergens.ÆG
         );
 
         DishDTO updated = dao.updateDish(original.getId(), updatedDTO);
 
         assertEquals("Smørrebrød", updated.getName());
-        assertEquals(DishStatus.SOLD_OUT, updated.getStatus());
+        assertEquals(DishStatus.UDSOLGT, updated.getStatus());
     }
 
     @Test
@@ -100,7 +100,7 @@ class DishDAOTest {
                 "Test description",
                 LocalDate.now(),
                 LocalDate.now().plusDays(5),
-                DishStatus.AVAILABLE,
+                DishStatus.TILGÆNGELIG,
                 600.0,
                 20.0,
                 50.0,

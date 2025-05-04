@@ -3,16 +3,17 @@ package dk.patientassist.persistence.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
- * Enum representing dish statuses in the system.
+ * Enum representing the availability status of a dish.
+ * Enum values are written in Danish for end-user readability.
  */
 public enum DishStatus {
-    AVAILABLE,
-    UNAVAILABLE,
-    SOLD_OUT;
+    TILGÆNGELIG, // AVAILABLE
+    UNAVAILABLE, // UNAVAILABLE
+    UDSOLGT; // SOLD_OUT
 
     /**
      * Allows case-insensitive deserialization of DishStatus enum values from JSON.
-     * For example, both "available" and "AVAILABLE" will be mapped to DishStatus.AVAILABLE.
+     * For example, both "udsolgt" and "UDSOLGT" will be mapped to DishStatus.UDSOLGT.
      *
      * @param key the input string from JSON
      * @return the corresponding DishStatus enum value, or null if input is null

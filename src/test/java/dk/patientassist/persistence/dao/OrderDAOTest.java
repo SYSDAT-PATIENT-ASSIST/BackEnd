@@ -1,11 +1,8 @@
 package dk.patientassist.persistence.dao;
 
-import dk.patientassist.control.OrderController;
 import dk.patientassist.persistence.HibernateConfig;
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.dto.OrderDTO;
-import dk.patientassist.persistence.ent.Dish;
-import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.DishStatus;
 import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.EntityManagerFactory;
@@ -64,7 +61,7 @@ class OrderDAOTest{
                 "godt med karry",
                 LocalDate.now(),
                 LocalDate.now().plusDays(5),
-                DishStatus.AVAILABLE,
+                DishStatus.TILGÆNGELIG,
                 600.0,
                 25.0,
                 50.0,
@@ -79,7 +76,7 @@ class OrderDAOTest{
                 LocalDateTime.now(),
                 "Ingen allergier",
                 savedDish,
-                OrderStatus.PENDING
+                OrderStatus.VENTER
         );
 
         OrderDTO savedOrder = orderDAO.createOrder(order);
@@ -88,7 +85,7 @@ class OrderDAOTest{
         orderDAO.cancelOrder(id);
         OrderDTO updatedOrder = orderDAO.getOrder(id);
 
-        assertEquals(OrderStatus.CANCELLED, updatedOrder.getStatus());
+        assertEquals(OrderStatus.ANNULLERET, updatedOrder.getStatus());
     }
 
 }

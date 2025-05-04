@@ -7,22 +7,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  */
 public enum Allergens {
     GLUTEN,
-    LACTOSE,
-    NUTS,
-    EGGS,
-    FISH,
-    SHELLFISH,
-    SOY,
-    WHEAT,
-    SESAME,
-    MUSTARD,
-    CELERY,
-    SULPHITES,
+    LAKTOSE,
+    NØDDER,
+    ÆG,
+    FISK,
+    SKALDYR,
+    SOJA,
+    HVEDE,
+    SESAM,
+    SENNEP,
+    SELLERI,
+    SULFITTER,
     LUPIN;
 
     /**
      * Allows case-insensitive deserialization of Allergens enum values from JSON.
-     * For example, both "nuts" and "NUTS" will be mapped to Allergens.NUTS.
+     * For example, both "ÆG" and "ÆG" will be mapped to Allergens.ÆG.
      *
      * @param key the input string from JSON
      * @return the corresponding Allergens enum value, or null if input is null
@@ -33,14 +33,3 @@ public enum Allergens {
         return key == null ? null : Allergens.valueOf(key.toUpperCase());
     }
 }
-
-/*
-    EGGS – Found in baked goods, pasta, sauces, etc.
-    FISH – Common in many cuisines.
-    SHELLFISH – Includes crustaceans like shrimp, crab, lobster.
-    SOY – Present in many processed foods and sauces.
-    WHEAT – Separate from gluten for clarity; wheat allergies are distinct from gluten intolerance.
-    SESAME – Increasingly common allergen.
-    MUSTARD – Recognized in EU allergen lists.
-    CELERY
- */

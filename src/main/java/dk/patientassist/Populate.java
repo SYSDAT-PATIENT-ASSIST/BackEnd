@@ -8,40 +8,37 @@ import dk.patientassist.persistence.enums.OrderStatus;
 import dk.patientassist.persistence.enums.Role;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Utility class for populating the development database with initial test data.
- * This includes dishes, recipes, ingredients, users, and orders with varied attributes and relationships.
- * <p>
- * Intended for use in development mode only.
+ * Utility class for populating the database with development or test data.
+ * Includes sample users, dishes, recipes, ingredients, and orders.
  */
 public class Populate {
 
     static {
-        // Initialize Hibernate in development mode
         HibernateConfig.Init(HibernateConfig.Mode.DEV);
     }
 
     private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
     /**
-     * Main method to execute the database population.
+     * Entry point to populate the database.
+     * Runs the {@link #populateDatabase()} method.
      *
-     * @param args command-line arguments (not used)
+     * @param args CLI arguments (unused)
      */
     public static void main(String[] args) {
         populateDatabase();
     }
 
     /**
-     * Populates the database with:
-     * - 3 example Danish dishes with different statuses and allergens
-     * - Recipes and ingredients for each dish
-     * - Users with various roles
-     * - Orders linked to the dishes with varied statuses
+     * Populates the database with initial demo data.
+     * Includes one user, two dishes, one recipe, two ingredients, and one order.
      */
     public static void populateDatabase() {
         EntityManager em = emf.createEntityManager();
@@ -49,25 +46,76 @@ public class Populate {
         try {
             em.getTransaction().begin();
 
-            // Add example dishes
-            Dish d1 = addDish(em, "Kylling i karry", "Served with rice", DishStatus.AVAILABLE, Allergens.GLUTEN);
-            Dish d2 = addDish(em, "Frikadeller", "With brown gravy and potatoes", DishStatus.SOLD_OUT, Allergens.EGGS);
-            Dish d3 = addDish(em, "Smørrebrød", "With egg and shrimp", DishStatus.AVAILABLE, Allergens.SHELLFISH);
+            // Create sample user
+            User user = new User();
+            user.setUsername("kok1");
+            user.setPassword("kok1234");
+            user.setRole(Role.HOVEDKOK);
+            em.persist(user);
 
-            // Add test users
-            User u1 = createUser(em, "chef", "chef123", Role.HEADCHEF);
-            User u2 = createUser(em, "nurse", "nurse123", Role.NURSE);
-            User u3 = createUser(em, "cook", "cook123", Role.CHEF);
+            // Add first dish
+            Dish d1 = addDish(em,
+                    "Frikadeller",
+                    "Med brun sovs og kartofler",
+                    LocalDate.now(),
+                    LocalDate.now().plusWeeks(2),
+                    DishStatus.UDSOLGT,
+                    500, 25, 40, 20,
+                    Allergens.ÆG
+            );
 
-            // Add sample orders with varied statuses
-            createOrder(em, 101, d1, "No nuts please", OrderStatus.PENDING);
-            createOrder(em, 102, d2, "Extra gravy", OrderStatus.COMPLETED);
-            createOrder(em, 103, d3, "Low salt", OrderStatus.CANCELLED);
+            // Add second dish
+            Dish d2 = addDish(em,
+                    "Stegt flæsk",
+                    "Med persillesovs og kartofler",
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(10),
+                    DishStatus.TILGÆNGELIG,
+                    600, 35, 30, 30,
+                    Allergens.SULFITTER
+            );
+
+            // Create shared recipe
+            Recipe recipe = new Recipe();
+            recipe.setTitle("Traditionel dansk ret");
+            recipe.setInstructions("Steg grundigt og server varm.");
+            recipe.setDish(d2);
+            em.persist(recipe);
+
+            // Link recipe to dish
+            d2.setRecipe(recipe);
+
+            // Add ingredients
+            Ingredients i1 = new Ingredients();
+            i1.setName("Flæsk");
+            i1.setRecipe(recipe);
+            Ingredients i2 = new Ingredients();
+            i2.setName("Kartofler");
+            i2.setRecipe(recipe);
+
+            Set<Ingredients> ingredientsSet = new HashSet<>();
+            ingredientsSet.add(i1);
+            ingredientsSet.add(i2);
+            recipe.setIngredients(ingredientsSet);
+
+            em.persist(i1);
+            em.persist(i2);
+
+            // Add order
+            Order order = new Order();
+            order.setBed_id(101);
+            order.setOrder_time(LocalDateTime.now());
+            order.setNote("Ingen løg, tak.");
+            order.setDish(d1);
+            order.setStatus(OrderStatus.VENTER);
+            em.persist(order);
 
             em.getTransaction().commit();
-            System.out.println("Database successfully populated with dishes, users, and orders!");
+            System.out.println("✅ Database populated successfully.");
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             e.printStackTrace();
         } finally {
             em.close();
@@ -75,85 +123,38 @@ public class Populate {
     }
 
     /**
-     * Creates and persists a dish, its recipe, and ingredients.
+     * Helper method to create and persist a {@link Dish} entity.
      *
-     * @param em         the EntityManager used for persistence
-     * @param name       the name of the dish
-     * @param description the dish description
-     * @param status     the status of the dish (AVAILABLE, SOLD_OUT, etc.)
-     * @param allergen   primary allergen contained in the dish
+     * @param em          EntityManager instance
+     * @param name        name of the dish
+     * @param description description of the dish
+     * @param from        start availability date
+     * @param until       end availability date
+     * @param status      availability status (e.g., AVAILABLE)
+     * @param kcal        kilocalories
+     * @param protein     protein content
+     * @param carbs       carbohydrates content
+     * @param fat         fat content
+     * @param allergens   allergens (e.g., NUTS, EGGS)
      * @return the persisted Dish entity
      */
-    private static Dish addDish(EntityManager em, String name, String description, DishStatus status, Allergens allergen) {
+    private static Dish addDish(EntityManager em, String name, String description, LocalDate from, LocalDate until,
+                                DishStatus status, double kcal, double protein, double carbs, double fat, Allergens allergens) {
+
         Dish dish = new Dish();
         dish.setName(name);
         dish.setDescription(description);
-        dish.setAvailable_from(LocalDate.now());
-        dish.setAvailable_until(LocalDate.now().plusWeeks(2));
+        dish.setAvailable_from(from);
+        dish.setAvailable_until(until);
         dish.setStatus(status);
-        dish.setKcal(500);
-        dish.setProtein(25);
-        dish.setCarbohydrates(40);
-        dish.setFat(20);
-        dish.setAllergens(allergen);
+        dish.setKcal(kcal);
+        dish.setProtein(protein);
+        dish.setCarbohydrates(carbs);
+        dish.setFat(fat);
+
+        dish.setAllergens(allergens != null ? allergens : Allergens.GLUTEN); // fallback
+
         em.persist(dish);
-
-        Recipe recipe = new Recipe();
-        recipe.setTitle(name + " Recipe");
-        recipe.setInstructions("Prepare according to kitchen manual.");
-        recipe.setDish(dish);
-        dish.setRecipe(recipe);
-        em.persist(recipe);
-
-        Ingredients i1 = new Ingredients();
-        i1.setName("Ingredient A");
-        i1.setRecipe(recipe);
-        Ingredients i2 = new Ingredients();
-        i2.setName("Ingredient B");
-        i2.setRecipe(recipe);
-
-        recipe.setIngredients(new HashSet<>(Arrays.asList(i1, i2)));
-
-        em.persist(i1);
-        em.persist(i2);
-
         return dish;
-    }
-
-    /**
-     * Creates and persists a user with a specific role.
-     *
-     * @param em       the EntityManager used for persistence
-     * @param username the user's login name
-     * @param password the user's password (plain text here for testing purposes)
-     * @param role     the role assigned to the user (e.g., CHEF, NURSE)
-     * @return the persisted User entity
-     */
-    private static User createUser(EntityManager em, String username, String password, Role role) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setRole(role);
-        em.persist(user);
-        return user;
-    }
-
-    /**
-     * Creates and persists an order for a specific dish and patient bed.
-     *
-     * @param em     the EntityManager used for persistence
-     * @param bedId  ID of the hospital bed
-     * @param dish   the dish associated with the order
-     * @param note   any special request notes
-     * @param status the order status (PENDING, COMPLETED, etc.)
-     */
-    private static void createOrder(EntityManager em, int bedId, Dish dish, String note, OrderStatus status) {
-        Order order = new Order();
-        order.setBed_id(bedId);
-        order.setOrder_time(LocalDateTime.now());
-        order.setNote(note);
-        order.setDish(dish);
-        order.setStatus(status);
-        em.persist(order);
     }
 }

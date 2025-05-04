@@ -110,7 +110,7 @@ public class DishManagementStepDefinitions {
                     LocalDate.now().plusDays(10),
                     DishStatus.valueOf(status.toUpperCase()),  // This will throw
                     300, 20, 25, 8,
-                    Allergens.FISH
+                    Allergens.FISK
             );
             dao.createDish(dto);
             responseStatus = 201;

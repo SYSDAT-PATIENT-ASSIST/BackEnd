@@ -7,9 +7,6 @@ import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class OrderDAO{
 
     private static OrderDAO instance;
@@ -56,7 +53,7 @@ public class OrderDAO{
       try (EntityManager em = emf.createEntityManager()){
           em.getTransaction().begin();
           Order order = em.find(Order.class, orderId);
-          order.setStatus(OrderStatus.CANCELLED);
+          order.setStatus(OrderStatus.ANNULLERET);
           em.merge(order);
           em.getTransaction().commit();
           return new OrderDTO(order);

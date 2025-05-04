@@ -77,8 +77,8 @@ public class DishDAO {
             TypedQuery<DishDTO> query = em.createQuery(
                     "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
                             "FROM dk.patientassist.persistence.ent.Dish d " +
-                            "WHERE d.status = dk.patientassist.persistence.enums.DishStatus.AVAILABLE " +
-                            "OR d.status = dk.patientassist.persistence.enums.DishStatus.SOLD_OUT",
+                            "WHERE d.status = dk.patientassist.persistence.enums.DishStatus.TILGÆNGELIG " +
+                            "OR d.status = dk.patientassist.persistence.enums.DishStatus.UDSOLGT",
                     DishDTO.class
             );
             return query.getResultList();

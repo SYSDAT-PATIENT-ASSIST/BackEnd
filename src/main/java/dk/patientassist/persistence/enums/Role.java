@@ -4,17 +4,18 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Enum representing user roles in the system.
+ * Enum values are written in Danish for localization support.
  */
 public enum Role {
-    DOCTOR,
-    NURSE,
-    CHEF,
-    HEADCHEF,
-    KITCHENS_STAFF;
+    LÆGE, //DOCTOR
+    SYGEPLEJERSKE, //NURSE
+    KOK, //CHEF
+    HOVEDKOK, //HEADCHEF
+    KØKKENPERSONALE; //KITCHEN_STAFF
 
     /**
      * Allows case-insensitive deserialization of Role enum values from JSON.
-     * For example, both "chef" and "CHEF" will be mapped to Role.CHEF.
+     * For example, both "kok" and "KOK" will be mapped to Role.KOK.
      *
      * @param key the input string from JSON
      * @return the corresponding Role enum value, or null if input is null

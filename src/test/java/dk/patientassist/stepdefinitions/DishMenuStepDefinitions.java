@@ -38,7 +38,7 @@ public class DishMenuStepDefinitions {
                 "Godt med karry",
                 LocalDate.now(),
                 LocalDate.now().plusDays(7),
-                DishStatus.AVAILABLE,
+                DishStatus.TILGÆNGELIG,
                 600.0,
                 25.0,
                 50.0,
@@ -51,7 +51,7 @@ public class DishMenuStepDefinitions {
                 LocalDateTime.now(),
                 "Ingen allergier",
                 dishDTO,
-                OrderStatus.PENDING
+                OrderStatus.VENTER
         );
     }
 
@@ -106,7 +106,7 @@ public class DishMenuStepDefinitions {
     @Then("the order will be cancelled")
     public void theOrderWillBeCancelled() {
         OrderDTO order = orderController.getOrder(orderId);
-        Assert.assertEquals(OrderStatus.CANCELLED, order.getStatus());
+        Assert.assertEquals(OrderStatus.ANNULLERET, order.getStatus());
     }
 
     @And("the system will be updated.")
