@@ -1,5 +1,6 @@
 package dk.patientassist.control;
-import dk.patientassist.persistence.HibernateConfig;
+
+import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dto.DishDTO;
 import io.javalin.http.Context;
@@ -8,16 +9,15 @@ import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
 
-public class DishController
-{
+public class DishController {
     private final DishDAO dao;
 
-    public DishController(){
+    public DishController() {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
         this.dao = DishDAO.getInstance(emf);
     }
 
-    public void getAllAvailable(Context ctx){
+    public void getAllAvailable(Context ctx) {
         try {
             List<DishDTO> dishDTOS = dao.getAllAvailable();
             ctx.res().setStatus(200);
@@ -27,11 +27,9 @@ public class DishController
         }
     }
 
-    //used for cucumber / menuStepDefinitions
-    public List<DishDTO> getAllAvailable(){
+    // used for cucumber / menuStepDefinitions
+    public List<DishDTO> getAllAvailable() {
         return dao.getAllAvailable();
     }
-
-
 
 }

@@ -1,7 +1,8 @@
 package dk.patientassist.persistence.dao;
 
+import dk.patientassist.config.Mode;
 import dk.patientassist.control.OrderController;
-import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.dto.OrderDTO;
 import dk.patientassist.persistence.ent.Dish;
@@ -17,33 +18,39 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
-class OrderDAOTest{
+class OrderDAOTest {
 
     private static EntityManagerFactory emf;
     private static OrderDAO orderDAO;
     private static DishDAO dishDAO;
 
     @BeforeAll
-    static void setUpAll(){
-        HibernateConfig.Init(HibernateConfig.Mode.TEST);
+    static void setUpAll() {
+        HibernateConfig.init(Mode.TEST);
         emf = HibernateConfig.getEntityManagerFactory();
         orderDAO = new OrderDAO(emf);
         dishDAO = new DishDAO(emf);
     }
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
     }
 
     @Test
-    void cancelOrder(){
-        DishDTO dish = new DishDTO("Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025,24), LocalDate.now(), DishStatus.AVAILABLE);
+    void cancelOrder() {
+        DishDTO dish = new DishDTO("Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025, 24), LocalDate.now(),
+                DishStatus.AVAILABLE);
         DishDTO savedDish = dishDAO.createDish(dish);
-        OrderDTO order = new OrderDTO(201, LocalDateTime.now(), "Ingen allergier", savedDish, OrderStatus.PENDING); //id, bed_id, order_time, note, dish, status
+        OrderDTO order = new OrderDTO(201, LocalDateTime.now(), "Ingen allergier", savedDish, OrderStatus.PENDING); // id,
+                                                                                                                    // bed_id,
+                                                                                                                    // order_time,
+                                                                                                                    // note,
+                                                                                                                    // dish,
+                                                                                                                    // status
         OrderDTO savedOrder = orderDAO.createOrder(order);
 
         Integer id = savedOrder.getId();

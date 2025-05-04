@@ -1,6 +1,8 @@
 package dk.patientassist.persistence.dao;
+
 import dk.patientassist.control.DishController;
-import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.ent.Dish;
 import jakarta.persistence.EntityManagerFactory;
@@ -14,28 +16,28 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DishDAOTest{
+class DishDAOTest {
 
     private static EntityManagerFactory emf;
     private static DishDAO dishDAO;
 
     @BeforeAll
-    static void setUpAll(){
-        HibernateConfig.Init(HibernateConfig.Mode.TEST);
+    static void setUpAll() {
+        HibernateConfig.init(Mode.TEST);
         emf = HibernateConfig.getEntityManagerFactory();
         dishDAO = new DishDAO(emf);
     }
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
     }
 
     @Test
-    void getAllAvailable(){
+    void getAllAvailable() {
         List<DishDTO> dishes = dishDAO.getAllAvailable();
         Assert.assertEquals(0, dishes.size());
     }

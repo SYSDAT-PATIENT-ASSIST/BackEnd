@@ -1,0 +1,39 @@
+package dk.patientassist.service.dto;
+
+import org.mindrot.jbcrypt.BCrypt;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import dk.patientassist.persistence.enums.Role;
+import lombok.EqualsAndHashCode;
+
+/**
+ * Patient Assist
+ */
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class EmployeeDTO {
+    String password; // we don't ever want to read this ideally, before encryption
+    @EqualsAndHashCode.Include
+    @JsonProperty(required = true)
+    public String email; // email == identity
+    public String firstName;
+    public String middleName;
+    public String lastName;
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+    public Role[] roles;
+    @JsonProperty(required = false)
+    public Long[] sections;
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean checkAgainstBCryptPw(String encrPw) {
+        return BCrypt.checkpw(password, encrPw);
+    }
+
+    public String hashPw() {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+}
