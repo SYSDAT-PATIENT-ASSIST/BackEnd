@@ -1,6 +1,7 @@
 package dk.patientassist.persistence.ent;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
  * Patient Assist
  */
 @Entity
+@EqualsAndHashCode
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,7 +3,7 @@ package dk.patientassist.api;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dk.patientassist.api.testresources.TestData;
+import dk.patientassist.api.testresources.EmployeeData;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.control.MasterController;
@@ -29,14 +29,13 @@ import static org.junit.Assert.fail;
 /**
  * Authentication tests
  */
-public class TestAuth
-{
+public class TestAuth {
 
     static EntityManagerFactory emf;
     static Javalin jav;
     static ObjectMapper jsonMapper;
     static String jwt;
-    static TestData testData;
+    static EmployeeData testData;
     static int port;
 
     static String jwtKey;
@@ -45,8 +44,7 @@ public class TestAuth
     static String jwtHdr;
 
     @BeforeAll
-    static void setup()
-    {
+    static void setup() {
         try {
             jsonMapper = Utils.getObjectMapperCompact();
             jwtKey = Utils.getConfigProperty("JWT_SECRET_KEY");
@@ -81,23 +79,20 @@ public class TestAuth
     }
 
     @AfterAll
-    static void teardown()
-    {
+    static void teardown() {
         jav.stop();
     }
 
     @BeforeEach
-    void setupBeforeEach()
-    {
-        testData = new TestData();
+    void setupBeforeEach() {
+        testData = new EmployeeData();
         logout();
     }
 
     /* TESTS */
 
     @Test
-    void testRegistration()
-    {
+    void testRegistration() {
         try {
             register(testData.guest);
             login(testData.guest, "guest");
@@ -123,8 +118,7 @@ public class TestAuth
     }
 
     @Test
-    void testAccessDenied()
-    {
+    void testAccessDenied() {
         visit("auth/guest", 200);
         visit("auth/admin_only", 403);
         visit("auth/chef_only", 403);
@@ -134,11 +128,10 @@ public class TestAuth
     }
 
     @Test
-    void testSectionsAndRoles()
-    { // maybe randomize and hammer these types of tests
-        Long[] sections = new Long[]{1L, 2L, 3L}; // these have to actually exist, consider randomly creating and
+    void testSectionsAndRoles() { // maybe randomize and hammer these types of tests
+        Long[] sections = new Long[] { 1L, 2L, 3L }; // these have to actually exist, consider randomly creating and
         // then fetching at random from db
-        Role[] roles = new Role[]{Role.DOCTOR, Role.ADMIN, Role.GUEST};
+        Role[] roles = new Role[] { Role.DOCTOR, Role.ADMIN, Role.GUEST };
 
         EmployeeDTO emp = new EmployeeDTO();
         emp.email = "test@example.com";
@@ -167,8 +160,7 @@ public class TestAuth
 
     /* HELPER METHODS */
 
-    static String visitAndBody(String endpoint, int expStatus)
-    {
+    static String visitAndBody(String endpoint, int expStatus) {
         return RestAssured.given().port(port)
                 .header("Authorization", "Bearer " + jwt)
                 .when().get("/api/" + endpoint)
@@ -176,16 +168,14 @@ public class TestAuth
                 .and().extract().body().asString();
     }
 
-    static void visit(String endpoint, int expStatus)
-    {
+    static void visit(String endpoint, int expStatus) {
         RestAssured.given().port(port)
                 .header("Authorization", "Bearer " + jwt)
                 .when().get("/api/" + endpoint)
                 .then().assertThat().statusCode(expStatus);
     }
 
-    static void register(EmployeeDTO empDetails)
-    {
+    static void register(EmployeeDTO empDetails) {
         try {
             String empJson = jsonMapper.writeValueAsString(empDetails);
             jwt = RestAssured.given().port(port).contentType("application/json").body(empJson)
@@ -197,8 +187,7 @@ public class TestAuth
         }
     }
 
-    static void login(EmployeeDTO empDetails, String pw)
-    {
+    static void login(EmployeeDTO empDetails, String pw) {
         try {
             String empJson = jsonMapper.writeValueAsString(empDetails);
             empJson = empJson.substring(0, empJson.indexOf('{') + 1)
@@ -212,8 +201,7 @@ public class TestAuth
         }
     }
 
-    static void logout()
-    {
+    static void logout() {
         jwt = "";
     }
 }
