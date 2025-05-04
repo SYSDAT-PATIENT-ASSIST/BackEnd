@@ -1,11 +1,13 @@
 package dk.patientassist.persistence.dto;
+
 import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.enums.DishStatus;
 import lombok.Getter;
+
 import java.time.LocalDate;
 
 @Getter
-public class DishDTO{
+public class DishDTO {
     private Integer id;
     private String name;
     private String description;
@@ -13,7 +15,7 @@ public class DishDTO{
     private LocalDate available_until;
     private DishStatus status;
 
-    public DishDTO(String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status){
+    public DishDTO(String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status) {
         this.name = name;
         this.description = description;
         this.available_from = available_from;
@@ -21,7 +23,7 @@ public class DishDTO{
         this.status = status;
     }
 
-    public DishDTO(Dish dish){
+    public DishDTO(Dish dish) {
         this.id = dish.getId();
         this.name = dish.getName();
         this.description = dish.getDescription();

@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -19,7 +18,7 @@ public class Recipe {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "title" )
+    @Column(name = "title")
     private String title;
 
     @OneToMany(mappedBy = "recipe")

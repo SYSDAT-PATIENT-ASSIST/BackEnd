@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -12,9 +13,8 @@
 
 
   <properties>
-    <MAINCLASS_NAME>App</MAINCLASS_NAME>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <mainClass>App</mainClass>
+    <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jackson.version>2.16.0</jackson.version>
     <lombok.version>1.18.34</lombok.version>
@@ -24,25 +24,20 @@
     <hamcrest.version>3.0</hamcrest.version>
     <testcontainers.version>1.20.6</testcontainers.version>
     <hikari.version>6.0.0</hikari.version>
-    <javalin.version>6.3.0</javalin.version>
+    <javalin.version>6.6.0</javalin.version>
     <jbcrypt.version>0.4</jbcrypt.version>
     <token.security.version>1.0.1</token.security.version>
     <cucumber.version>7.20.1</cucumber.version>
+    <javajwt.version>4.5.0</javajwt.version>
+    <javafaker.version>1.0.2</javafaker.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-    </repository>
-  </repositories>
 
   <dependencies>
 
     <dependency>
-      <groupId>com.github.Hartmannsolution</groupId>
-      <artifactId>TokenSecurity</artifactId>
-      <version>${token.security.version}</version>
+      <groupId>com.auth0</groupId>
+      <artifactId>java-jwt</artifactId>
+      <version>${javajwt.version}</version>
     </dependency>
 
     <dependency>
@@ -175,9 +170,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-hikaricp</artifactId>
       <version>${hibernate.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.javafaker</groupId>
+      <artifactId>javafaker</artifactId>
+      <version>${javafaker.version}</version>
     </dependency>
 
   </dependencies>
@@ -219,7 +220,7 @@
             <disable>true</disable>
           </consoleOutputReporter>
           <statelessTestsetInfoReporter
-                  implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
           </statelessTestsetInfoReporter>
         </configuration>
       </plugin>
@@ -236,8 +237,9 @@
             </goals>
             <configuration>
               <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>${project.groupId}.${MAINCLASS_NAME}</mainClass>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>${project.groupId}.${mainClass}</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -257,7 +259,22 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>${project.groupId}.${MAINCLASS_NAME}</mainClass>
+          <mainClass>${project.groupId}.${mainClass}</mainClass>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.14.0</version>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
 

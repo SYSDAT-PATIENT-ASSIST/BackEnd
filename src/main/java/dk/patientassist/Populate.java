@@ -1,11 +1,13 @@
 package dk.patientassist;
 
-import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
 import dk.patientassist.persistence.ent.*;
-import jakarta.persistence.EntityManagerFactory;
 import dk.patientassist.persistence.enums.DishStatus;
 import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -14,9 +16,8 @@ import java.util.Set;
 public class Populate {
 
     static {
-        HibernateConfig.Init(HibernateConfig.Mode.DEV);
+        HibernateConfig.init(Mode.DEV);
     }
-
 
     private static EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
@@ -100,4 +101,3 @@ public class Populate {
         }
     }
 }
-
