@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
-public class menuStepDefinitions{
+public class DishMenuStepDefinitions {
     private DishController dishController;
     private OrderController orderController;
     private DishDAO dishDAO;
@@ -27,7 +27,7 @@ public class menuStepDefinitions{
     private DishDTO dishDTO;
     private OrderDTO orderDTO;
 
-    public menuStepDefinitions(){
+    public DishMenuStepDefinitions(){
         HibernateConfig.Init(HibernateConfig.Mode.TEST);
 
         dishController = new DishController();

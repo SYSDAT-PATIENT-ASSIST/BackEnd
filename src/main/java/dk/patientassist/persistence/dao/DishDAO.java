@@ -2,27 +2,29 @@ package dk.patientassist.persistence.dao;
 
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.ent.Dish;
+import dk.patientassist.persistence.enums.DishStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
-import dk.patientassist.persistence.enums.DishStatus;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class DishDAO {
 
     private static DishDAO instance;
-    private static EntityManagerFactory emf;
+    private final EntityManagerFactory emf;
     private static final Logger LOGGER = LoggerFactory.getLogger(DishDAO.class);
 
-    public DishDAO(EntityManagerFactory _emf) {
-        emf = _emf;
+    // Private constructor for Singleton
+    DishDAO(EntityManagerFactory emf) {
+        this.emf = emf;
     }
 
-    public static DishDAO getInstance(EntityManagerFactory _emf) {
+    // Singleton accessor
+    public static DishDAO getInstance(EntityManagerFactory emf) {
         if (instance == null) {
-            emf = _emf;
             instance = new DishDAO(emf);
         }
         return instance;
@@ -42,7 +44,7 @@ public class DishDAO {
             dish.setAllergens(dishDTO.getAllergens());
 
             em.persist(dish);
-            em.flush(); // ensure ID is generated
+            em.flush(); // Ensure ID is generated
             em.getTransaction().commit();
 
             LOGGER.info("Dish created with ID: {}", dish.getId());
@@ -85,6 +87,21 @@ public class DishDAO {
         }
     }
 
+    public DishDTO findByName(String name) {
+        try (EntityManager em = emf.createEntityManager()) {
+            LOGGER.info("Finding dish by name: {}", name);
+            TypedQuery<Dish> query = em.createQuery(
+                    "SELECT d FROM Dish d WHERE d.name = :name", Dish.class
+            );
+            query.setParameter("name", name);
+            Dish dish = query.getResultStream().findFirst().orElse(null);
+            return (dish != null) ? new DishDTO(dish) : null;
+        } catch (Exception e) {
+            LOGGER.error("Failed to find dish by name: {}", name, e);
+            throw e;
+        }
+    }
+
     public DishDTO updateDish(Integer id, DishDTO updatedDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             LOGGER.info("Updating dish with ID: {}", id);
@@ -101,7 +118,6 @@ public class DishDAO {
             dish.setAvailable_from(updatedDTO.getAvailable_from());
             dish.setAvailable_until(updatedDTO.getAvailable_until());
             dish.setStatus(updatedDTO.getStatus());
-
             dish.setKcal(updatedDTO.getKcal());
             dish.setProtein(updatedDTO.getProtein());
             dish.setCarbohydrates(updatedDTO.getCarbohydrates());

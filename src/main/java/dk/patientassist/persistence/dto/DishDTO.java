@@ -4,9 +4,12 @@ import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 
 @Getter
+@NoArgsConstructor
 public class DishDTO {
 
     private Integer id;
@@ -23,6 +26,26 @@ public class DishDTO {
 
     public DishDTO(String name, String description, LocalDate available_from, LocalDate available_until,
                    DishStatus status, double kcal, double protein, double carbohydrates, double fat, Allergens allergens) {
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be null or blank");
+        }
+        if (description == null) {
+            throw new IllegalArgumentException("Description cannot be null");
+        }
+        if (available_from == null || available_until == null) {
+            throw new IllegalArgumentException("Available from/until dates cannot be null");
+        }
+        if (available_from.isAfter(available_until)) {
+            throw new IllegalArgumentException("Available from date cannot be after available until date");
+        }
+        if (status == null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+        if (allergens == null) {
+            throw new IllegalArgumentException("Allergens cannot be null");
+        }
+
         this.name = name;
         this.description = description;
         this.available_from = available_from;

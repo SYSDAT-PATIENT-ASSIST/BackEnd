@@ -66,12 +66,38 @@ public class Dish{
         this.status = status;
     }
 
-    public Dish(DishDTO dishDTO){
+    public Dish(DishDTO dishDTO) {
+        if (dishDTO == null) {
+            throw new IllegalArgumentException("DishDTO cannot be null");
+        }
+        if (dishDTO.getName() == null || dishDTO.getName().isBlank()) {
+            throw new IllegalArgumentException("Dish name cannot be null or empty");
+        }
+        if (dishDTO.getDescription() == null) {
+            throw new IllegalArgumentException("Dish description cannot be null");
+        }
+        if (dishDTO.getAvailable_from() == null || dishDTO.getAvailable_until() == null) {
+            throw new IllegalArgumentException("Available from/until dates cannot be null");
+        }
+        if (dishDTO.getAvailable_from().isAfter(dishDTO.getAvailable_until())) {
+            throw new IllegalArgumentException("Available from date cannot be after available until date");
+        }
+        if (dishDTO.getStatus() == null) {
+            throw new IllegalArgumentException("Dish status cannot be null");
+        }
+        if (dishDTO.getAllergens() == null) {
+            throw new IllegalArgumentException("Allergens must be specified");
+        }
+
         this.name = dishDTO.getName();
         this.description = dishDTO.getDescription();
         this.available_from = dishDTO.getAvailable_from();
         this.available_until = dishDTO.getAvailable_until();
         this.status = dishDTO.getStatus();
+        this.kcal = dishDTO.getKcal();
+        this.protein = dishDTO.getProtein();
+        this.carbohydrates = dishDTO.getCarbohydrates();
+        this.fat = dishDTO.getFat();
+        this.allergens = dishDTO.getAllergens();
     }
-
 }

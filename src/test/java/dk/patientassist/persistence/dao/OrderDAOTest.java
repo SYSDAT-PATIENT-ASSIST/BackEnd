@@ -39,8 +39,10 @@ class OrderDAOTest{
     void tearDown(){
     }
 
-    @Test
-    void cancelOrder(){
+
+ /*
+ @Test
+ void cancelOrder(){
         DishDTO dish = new DishDTO("Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025,24), LocalDate.now(), DishStatus.AVAILABLE);
         DishDTO savedDish = dishDAO.createDish(dish);
         OrderDTO order = new OrderDTO(201, LocalDateTime.now(), "Ingen allergier", savedDish, OrderStatus.PENDING); //id, bed_id, order_time, note, dish, status
@@ -53,5 +55,40 @@ class OrderDAOTest{
         OrderDTO updatedOrder = orderDAO.getOrder(id);
 
         assertEquals(OrderStatus.CANCELLED, updatedOrder.getStatus());
+    }*/
+
+    @Test
+    void cancelOrder() {
+        DishDTO dish = new DishDTO(
+                "Kylling i karry",
+                "godt med karry",
+                LocalDate.now(),
+                LocalDate.now().plusDays(5),
+                DishStatus.AVAILABLE,
+                600.0,
+                25.0,
+                50.0,
+                10.0,
+                dk.patientassist.persistence.enums.Allergens.GLUTEN
+        );
+
+        DishDTO savedDish = dishDAO.createDish(dish);
+
+        OrderDTO order = new OrderDTO(
+                201, // bed ID
+                LocalDateTime.now(),
+                "Ingen allergier",
+                savedDish,
+                OrderStatus.PENDING
+        );
+
+        OrderDTO savedOrder = orderDAO.createOrder(order);
+        Integer id = savedOrder.getId();
+
+        orderDAO.cancelOrder(id);
+        OrderDTO updatedOrder = orderDAO.getOrder(id);
+
+        assertEquals(OrderStatus.CANCELLED, updatedOrder.getStatus());
     }
+
 }
