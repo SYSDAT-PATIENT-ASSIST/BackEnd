@@ -21,8 +21,7 @@ import java.util.Map;
 /**
  * Patient Assist
  */
-public class AccessController
-{
+public class AccessController {
 
     private static final Logger logger = LoggerFactory.getLogger(AccessController.class);
 
@@ -31,16 +30,14 @@ public class AccessController
     static Long jwtExp;
     static String jwtHdr;
 
-    public static void init() throws JsonProcessingException
-    {
+    public static void init() throws JsonProcessingException {
         jwtKey = Utils.getConfigProperty("JWT_SECRET_KEY");
         jwtIss = Utils.getConfigProperty("JWT_ISSUER");
         jwtExp = Long.parseLong(Utils.getConfigProperty("JWT_EXPIRE_TIME"));
         jwtHdr = Utils.getObjectMapperCompact().writeValueAsString(Map.of("typ", "JWT", "alg", "HS256"));
     }
 
-    public static void check(@NotNull Context ctx)
-    {
+    public static void check(@NotNull Context ctx) {
         if (ctx.routeRoles().isEmpty() || ctx.routeRoles().contains(Role.GUEST)) {
             return;
         }

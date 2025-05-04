@@ -1,17 +1,19 @@
 package dk.patientassist.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
-import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.javafaker.Faker;
 
 import dk.patientassist.api.testresources.EmployeeData;
 import dk.patientassist.api.testresources.EventData;
@@ -19,6 +21,7 @@ import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.control.MasterController;
 import dk.patientassist.persistence.ent.Event;
+import dk.patientassist.service.Mapper;
 import dk.patientassist.service.dto.EmployeeDTO;
 import dk.patientassist.service.dto.EventDTO;
 import dk.patientassist.utilities.Utils;
@@ -28,7 +31,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
 /**
- * TestEvent
+ * Event API tests
  */
 public class TestEvent {
 
@@ -45,6 +48,9 @@ public class TestEvent {
     static Long jwtExp;
     static String jwtHdr;
 
+    static Faker faker = new Faker();
+    static Random rng = new Random();
+
     @BeforeAll
     static void setup() {
         try {
@@ -54,24 +60,18 @@ public class TestEvent {
             jwtExp = Long.parseLong(Utils.getConfigProperty("JWT_EXPIRE_TIME"));
             jwtHdr = Utils.getObjectMapperCompact().writeValueAsString(Map.of("typ", "JWT", "alg", "HS256"));
         } catch (Exception e) {
-            fail("setup failed");
+            Assertions.fail("setup failed");
         }
 
         HibernateConfig.init(Mode.TEST);
         emf = HibernateConfig.getEntityManagerFactory();
 
-        empData = new EmployeeData();
-        try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
-            em.getTransaction().begin();
-            em.persist(empData.guest);
-            em.persist(empData.admin);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            fail("setup failed");
-        }
-
         port = 9999;
         jav = MasterController.start(Mode.TEST, port);
+
+        empData = new EmployeeData();
+        register(empData.guest);
+        register(empData.admin);
     }
 
     @AfterAll
@@ -90,7 +90,7 @@ public class TestEvent {
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            fail("setup failed");
+            Assertions.fail("setup failed");
         }
         logout();
     }
@@ -99,35 +99,95 @@ public class TestEvent {
 
     @Test
     void read() {
-        try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
-            em.getTransaction().begin();
-            em.persist(eventData.simpleEvent);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            fail("setup failed");
-        }
+        persistEvent(eventData.simpleEvent);
 
         EventDTO[] events = new EventDTO[0];
+        String eventResponse = get("events", 200);
         try {
-            String eventResponse = get("events", 200);
             events = Utils.getObjectMapperCompact().readValue(eventResponse, EventDTO[].class);
         } catch (Exception e) {
-            fail(String.format("reading events failed: %s", e.getMessage()));
+            Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
         }
 
-        assertEquals("expected number of events", events.length, 1);
-        assertEquals("event retrieved equals event stored (name)", eventData.simpleEvent.name, events[0].name);
-        assertEquals("event retrieved equals event stored (description)", eventData.simpleEvent.description,
-                events[0].description);
-        assertEquals("event retrieved equals event stored (startTime)", eventData.simpleEvent.startTime,
-                events[0].startTime);
-        assertEquals("event retrieved equals event stored (duration)", eventData.simpleEvent.duration,
-                events[0].duration);
+        Assertions.assertEquals(events.length, 1, "expected number of events");
+        Assertions.assertEquals(eventData.simpleEvent.name, events[0].name,
+                "event retrieved equals event stored (name)");
+        Assertions.assertEquals(eventData.simpleEvent.description, events[0].description,
+                "event retrieved equals event stored (description)");
+        Assertions.assertEquals(eventData.simpleEvent.startTime, events[0].startTime,
+                "event retrieved equals event stored (startTime)");
+        Assertions.assertEquals(eventData.simpleEvent.duration, events[0].duration,
+                "event retrieved equals event stored (duration)");
     }
 
     @Test
     void create() {
+        login(empData.admin, "admin");
 
+        EventDTO resDTO = null, resDTORetrieved = null;
+        String responseStr = "";
+
+        for (int i = 0; i < 10; i++) {
+            Event event = new Event();
+            event.id = rng.nextInt();
+            event.name = faker.harryPotter().location();
+            event.description = faker.harryPotter().quote();
+            event.startTime = LocalDateTime.now().plusDays(rng.nextLong(-365, 365)).plusHours(rng.nextLong(-12, 12));
+            event.duration = Duration.ofMinutes(rng.nextLong(1, 1000));
+
+            responseStr = putEvent(event);
+            try {
+                resDTO = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO.class);
+            } catch (Exception e) {
+                Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
+            }
+
+            Assertions.assertNotNull(resDTO, "event retrieved equals event stored (name)");
+            Assertions.assertEquals(event.name, resDTO.name,
+                    "event retrieved equals event stored (name)");
+            Assertions.assertEquals(event.description, resDTO.description,
+                    "event retrieved equals event stored (description)");
+            Assertions.assertEquals(event.startTime.withNano(0), resDTO.startTime.withNano(0), // rid of rounding errors
+                    "event retrieved equals event stored (startTime)");
+            Assertions.assertEquals(event.duration.withNanos(0), resDTO.duration.withNanos(0), // rid of rounding errors
+                    "event retrieved equals event stored (duration)");
+
+            responseStr = get("events/" + resDTO.id, 200);
+
+            try {
+                resDTORetrieved = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO.class);
+            } catch (Exception e) {
+                Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
+            }
+
+            Assertions.assertNotNull(resDTORetrieved, "event retrieved equals event stored (name)");
+            Assertions.assertEquals(resDTORetrieved.name, resDTO.name,
+                    "event retrieved equals event stored (name)");
+            Assertions.assertEquals(resDTORetrieved.description, resDTO.description,
+                    "event retrieved equals event stored (description)");
+            Assertions.assertEquals(resDTORetrieved.startTime.withNano(0), resDTO.startTime.withNano(0),
+                    "event retrieved equals event stored (startTime)");
+            Assertions.assertEquals(resDTORetrieved.duration.withNanos(0), resDTO.duration.withNanos(0),
+                    "event retrieved equals event stored (duration)");
+        }
+
+        responseStr = putEvent(eventData.simpleEvent);
+
+        try {
+            resDTO = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO.class);
+        } catch (Exception e) {
+            Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
+        }
+
+        Assertions.assertNotNull(resDTO, "event retrieved equals event stored (name)");
+        Assertions.assertEquals(eventData.simpleEvent.name, resDTO.name,
+                "event retrieved equals event stored (name)");
+        Assertions.assertEquals(eventData.simpleEvent.description, resDTO.description,
+                "event retrieved equals event stored (description)");
+        Assertions.assertEquals(eventData.simpleEvent.startTime.withNano(0), resDTO.startTime.withNano(0),
+                "event retrieved equals event stored (startTime)");
+        Assertions.assertEquals(eventData.simpleEvent.duration.withNanos(0), resDTO.duration.withNanos(0),
+                "event retrieved equals event stored (duration)");
     }
 
     @Test
@@ -160,7 +220,44 @@ public class TestEvent {
                     .then().statusCode(200)
                     .and().extract().path("token");
         } catch (Exception e) {
-            fail("login error");
+            Assertions.fail("login error");
+        }
+    }
+
+    static void register(EmployeeDTO empDetails) {
+        try {
+            String empJson = jsonMapper.writeValueAsString(empDetails);
+            jwt = RestAssured.given().port(port).contentType("application/json").body(empJson)
+                    .when().post("/api/auth/register")
+                    .then().statusCode(201)
+                    .and().extract().path("token");
+        } catch (Exception e) {
+            Assertions.fail("registration error");
+        }
+    }
+
+    static String putEvent(Event event) {
+        try {
+            String empJson = jsonMapper.writeValueAsString(Mapper.EventEntToDTO(event));
+            String res = RestAssured.given().port(port).contentType("application/json").body(empJson)
+                    .header("Authorization", "Bearer " + jwt)
+                    .when().put("/api/events")
+                    .then().statusCode(201)
+                    .and().extract().body().asString();
+            return res;
+        } catch (Exception e) {
+            Assertions.fail("registration error");
+            return null;
+        }
+    }
+
+    static void persistEvent(Event event) {
+        try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
+            em.getTransaction().begin();
+            em.persist(event);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            Assertions.fail("persisting event failed");
         }
     }
 

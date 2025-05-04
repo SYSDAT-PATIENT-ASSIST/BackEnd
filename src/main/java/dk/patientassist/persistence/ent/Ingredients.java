@@ -13,8 +13,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "ingredients")
-public class Ingredients
-{
+public class Ingredients {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -23,8 +22,7 @@ public class Ingredients
     @ManyToOne
     private Recipe recipe;
 
-    public Ingredients(Integer id, Recipe recipe)
-    {
+    public Ingredients(Integer id, Recipe recipe) {
         this.id = id;
         this.recipe = recipe;
     }

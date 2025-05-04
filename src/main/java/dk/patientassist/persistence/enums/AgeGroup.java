@@ -3,7 +3,6 @@ package dk.patientassist.persistence.enums;
 /**
  * Patient Assist
  */
-public enum AgeGroup
-{
+public enum AgeGroup {
     ALL,
 }

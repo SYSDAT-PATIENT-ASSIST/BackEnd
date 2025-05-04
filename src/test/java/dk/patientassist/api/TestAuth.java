@@ -1,8 +1,18 @@
 package dk.patientassist.api;
 
+import java.util.Arrays;
+import java.util.Map;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import dk.patientassist.api.testresources.EmployeeData;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
@@ -15,16 +25,6 @@ import io.javalin.Javalin;
 import io.restassured.RestAssured;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Map;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Authentication tests
@@ -52,7 +52,7 @@ public class TestAuth {
             jwtExp = Long.parseLong(Utils.getConfigProperty("JWT_EXPIRE_TIME"));
             jwtHdr = Utils.getObjectMapperCompact().writeValueAsString(Map.of("typ", "JWT", "alg", "HS256"));
         } catch (Exception e) {
-            fail("setup failed");
+            Assertions.fail("setup failed");
         }
 
         HibernateConfig.init(Mode.TEST);
@@ -74,7 +74,7 @@ public class TestAuth {
             em.persist(sect2);
             em.getTransaction().commit();
         } catch (Exception e) {
-            fail("setup failed");
+            Assertions.fail("setup failed");
         }
     }
 
@@ -96,35 +96,35 @@ public class TestAuth {
         try {
             register(testData.guest);
             login(testData.guest, "guest");
-            visit("auth/guest", 200);
+            get("auth/guest", 200);
             register(testData.admin);
             login(testData.admin, "admin");
-            visit("auth/admin_only", 200);
+            get("auth/admin_only", 200);
             register(testData.chef);
             login(testData.chef, "chef");
-            visit("auth/chef_only", 200);
+            get("auth/chef_only", 200);
             register(testData.headchef);
             login(testData.headchef, "headchef");
-            visit("auth/headchef_only", 200);
+            get("auth/headchef_only", 200);
             register(testData.nurse);
             login(testData.nurse, "nurse");
-            visit("auth/nurse_only", 200);
+            get("auth/nurse_only", 200);
             register(testData.doctor);
             login(testData.doctor, "doctor");
-            visit("auth/doctor_only", 200);
+            get("auth/doctor_only", 200);
         } catch (Exception e) {
-            fail("registration error");
+            Assertions.fail("registration error");
         }
     }
 
     @Test
     void testAccessDenied() {
-        visit("auth/guest", 200);
-        visit("auth/admin_only", 403);
-        visit("auth/chef_only", 403);
-        visit("auth/headchef_only", 403);
-        visit("auth/doctor_only", 403);
-        visit("auth/nurse_only", 403);
+        get("auth/guest", 200);
+        get("auth/admin_only", 403);
+        get("auth/chef_only", 403);
+        get("auth/headchef_only", 403);
+        get("auth/doctor_only", 403);
+        get("auth/nurse_only", 403);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class TestAuth {
 
         register(emp);
         login(emp, "test");
-        visit("auth/doctor_only", 200);
+        get("auth/doctor_only", 200);
 
         DecodedJWT jwtDec = JWT.decode(jwt);
         Long[] sectionsInResp = jwtDec.getClaim("sectionIds").asArray(Long.class);
@@ -154,25 +154,18 @@ public class TestAuth {
         Arrays.sort(roles);
         Arrays.sort(rolesInResp);
 
-        assertArrayEquals(sections, sectionsInResp);
-        assertArrayEquals(roles, rolesInResp);
+        Assertions.assertArrayEquals(sections, sectionsInResp);
+        Assertions.assertArrayEquals(roles, rolesInResp);
     }
 
     /* HELPER METHODS */
 
-    static String visitAndBody(String endpoint, int expStatus) {
+    static String get(String endpoint, int expStatus) {
         return RestAssured.given().port(port)
                 .header("Authorization", "Bearer " + jwt)
                 .when().get("/api/" + endpoint)
                 .then().assertThat().statusCode(expStatus)
                 .and().extract().body().asString();
-    }
-
-    static void visit(String endpoint, int expStatus) {
-        RestAssured.given().port(port)
-                .header("Authorization", "Bearer " + jwt)
-                .when().get("/api/" + endpoint)
-                .then().assertThat().statusCode(expStatus);
     }
 
     static void register(EmployeeDTO empDetails) {
@@ -183,7 +176,7 @@ public class TestAuth {
                     .then().statusCode(201)
                     .and().extract().path("token");
         } catch (Exception e) {
-            fail("registration error");
+            Assertions.fail("registration error");
         }
     }
 
@@ -197,7 +190,7 @@ public class TestAuth {
                     .then().statusCode(200)
                     .and().extract().path("token");
         } catch (Exception e) {
-            fail("login error");
+            Assertions.fail("login error");
         }
     }
 

@@ -1,9 +1,9 @@
 package dk.patientassist.service.dto;
 
+import lombok.EqualsAndHashCode;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
-
-import lombok.EqualsAndHashCode;
 
 /**
  * Patient Assist

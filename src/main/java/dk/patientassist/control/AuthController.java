@@ -32,8 +32,7 @@ import static io.javalin.apibuilder.ApiBuilder.post;
 /**
  * Patient Assist
  */
-public class AuthController
-{
+public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -42,8 +41,7 @@ public class AuthController
     static Long jwtExp;
     static String jwtHdr;
 
-    public static EndpointGroup getEndpoints()
-    {
+    public static EndpointGroup getEndpoints() {
         return () -> {
             path("/auth", () -> {
                 post("/login", AuthController::login, Role.GUEST);
@@ -52,16 +50,14 @@ public class AuthController
         };
     }
 
-    public static void init() throws JsonProcessingException
-    {
+    public static void init() throws JsonProcessingException {
         jwtKey = Utils.getConfigProperty("JWT_SECRET_KEY");
         jwtIss = Utils.getConfigProperty("JWT_ISSUER");
         jwtExp = Long.parseLong(Utils.getConfigProperty("JWT_EXPIRE_TIME"));
         jwtHdr = Utils.getObjectMapperCompact().writeValueAsString(Map.of("typ", "JWT", "alg", "HS256"));
     }
 
-    private static void register(@NotNull Context ctx)
-    {
+    private static void register(@NotNull Context ctx) {
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             EmployeeDTO empDetails = ctx.bodyAsClass(EmployeeDTO.class);
             Employee emp = Mapper.EmployeeDTOToEnt(empDetails);
@@ -115,8 +111,7 @@ public class AuthController
         }
     }
 
-    private static void login(@NotNull Context ctx)
-    {
+    private static void login(@NotNull Context ctx) {
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             EmployeeDTO empDetails = ctx.bodyAsClass(EmployeeDTO.class);
 

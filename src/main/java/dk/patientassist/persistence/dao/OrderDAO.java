@@ -7,19 +7,16 @@ import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
-public class OrderDAO
-{
+public class OrderDAO {
 
     private static OrderDAO instance;
     private static EntityManagerFactory emf;
 
-    public OrderDAO(EntityManagerFactory _emf)
-    {
+    public OrderDAO(EntityManagerFactory _emf) {
         emf = _emf;
     }
 
-    public static OrderDAO getInstance(EntityManagerFactory _emf)
-    {
+    public static OrderDAO getInstance(EntityManagerFactory _emf) {
         if (instance == null) {
             emf = _emf;
             instance = new OrderDAO(emf);
@@ -29,8 +26,7 @@ public class OrderDAO
 
 
     //createOrder only for test
-    public OrderDTO createOrder(OrderDTO orderDTO)
-    {
+    public OrderDTO createOrder(OrderDTO orderDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Order order = new Order(orderDTO);
@@ -46,16 +42,14 @@ public class OrderDAO
     }
 
 
-    public OrderDTO getOrder(Integer orderId)
-    {
+    public OrderDTO getOrder(Integer orderId) {
         try (EntityManager em = emf.createEntityManager()) {
             Order order = em.find(Order.class, orderId);
             return new OrderDTO(order);
         }
     }
 
-    public OrderDTO cancelOrder(Integer orderId)
-    {
+    public OrderDTO cancelOrder(Integer orderId) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Order order = em.find(Order.class, orderId);

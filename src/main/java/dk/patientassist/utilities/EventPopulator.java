@@ -1,20 +1,18 @@
 package dk.patientassist.utilities;
 
+import com.github.javafaker.Faker;
+import com.github.javafaker.HarryPotter;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.persistence.ent.Event;
+import jakarta.persistence.EntityManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.github.javafaker.Faker;
-import com.github.javafaker.HarryPotter;
-
-import dk.patientassist.config.HibernateConfig;
-import dk.patientassist.persistence.ent.Event;
-import jakarta.persistence.EntityManager;
 
 /**
  * EventPopulator

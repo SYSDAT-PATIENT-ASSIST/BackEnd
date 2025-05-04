@@ -12,10 +12,8 @@ import static io.javalin.apibuilder.ApiBuilder.path;
 /**
  * Patient Assist
  */
-public class TestEndpoints
-{
-    public static EndpointGroup getEndpoints()
-    {
+public class TestEndpoints {
+    public static EndpointGroup getEndpoints() {
         return () -> {
             path("/auth", () -> {
                 get("/guest", ctx -> {

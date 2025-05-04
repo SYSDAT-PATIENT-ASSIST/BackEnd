@@ -6,8 +6,7 @@ import dk.patientassist.service.dto.EmployeeDTO;
 /**
  * TestData
  */
-public class EmployeeData
-{
+public class EmployeeData {
 
     public EmployeeDTO guest;
     public EmployeeDTO doctor;
@@ -16,8 +15,7 @@ public class EmployeeData
     public EmployeeDTO headchef;
     public EmployeeDTO admin;
 
-    public EmployeeData()
-    {
+    public EmployeeData() {
         guest = new EmployeeDTO();
         doctor = new EmployeeDTO();
         nurse = new EmployeeDTO();

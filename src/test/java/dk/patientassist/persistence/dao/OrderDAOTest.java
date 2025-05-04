@@ -17,16 +17,14 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class OrderDAOTest
-{
+class OrderDAOTest {
 
     private static EntityManagerFactory emf;
     private static OrderDAO orderDAO;
     private static DishDAO dishDAO;
 
     @BeforeAll
-    static void setUpAll()
-    {
+    static void setUpAll() {
         HibernateConfig.init(Mode.TEST);
         emf = HibernateConfig.getEntityManagerFactory();
         orderDAO = new OrderDAO(emf);
@@ -34,18 +32,15 @@ class OrderDAOTest
     }
 
     @BeforeEach
-    void setUp()
-    {
+    void setUp() {
     }
 
     @AfterEach
-    void tearDown()
-    {
+    void tearDown() {
     }
 
     @Test
-    void cancelOrder()
-    {
+    void cancelOrder() {
         DishDTO dish = new DishDTO("Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025, 24), LocalDate.now(),
                 DishStatus.AVAILABLE);
         DishDTO savedDish = dishDAO.createDish(dish);

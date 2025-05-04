@@ -13,8 +13,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Populate
-{
+public class Populate {
 
     static {
         HibernateConfig.init(Mode.DEV);
@@ -22,13 +21,11 @@ public class Populate
 
     private static EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         populateDatabase();
     }
 
-    public static void populateDatabase()
-    {
+    public static void populateDatabase() {
         EntityManager em = emf.createEntityManager();
 
         try {

@@ -4,7 +4,6 @@ import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.control.MasterController;
 import dk.patientassist.utilities.EventPopulator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,6 @@ public class App {
 
             HibernateConfig.getEntityManagerFactory().close();
             logger.error("Error initializing application: {}{}", e.getMessage(), System.lineSeparator());
-            e.printStackTrace();
 
         }
     }

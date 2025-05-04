@@ -12,33 +12,28 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-class DishDAOTest
-{
+class DishDAOTest {
 
     private static EntityManagerFactory emf;
     private static DishDAO dishDAO;
 
     @BeforeAll
-    static void setUpAll()
-    {
+    static void setUpAll() {
         HibernateConfig.init(Mode.TEST);
         emf = HibernateConfig.getEntityManagerFactory();
         dishDAO = new DishDAO(emf);
     }
 
     @BeforeEach
-    void setUp()
-    {
+    void setUp() {
     }
 
     @AfterEach
-    void tearDown()
-    {
+    void tearDown() {
     }
 
     @Test
-    void getAllAvailable()
-    {
+    void getAllAvailable() {
         List<DishDTO> dishes = dishDAO.getAllAvailable();
         Assert.assertEquals(0, dishes.size());
     }

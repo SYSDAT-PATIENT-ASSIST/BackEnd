@@ -12,8 +12,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "recipe")
-public class Recipe
-{
+public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -31,8 +30,7 @@ public class Recipe
     @Column(name = "instructions")
     private String instructions;
 
-    public Recipe(Integer id, String title, Set<Ingredients> ingredients, Dish dish, String instructions)
-    {
+    public Recipe(Integer id, String title, Set<Ingredients> ingredients, Dish dish, String instructions) {
         this.id = id;
         this.title = title;
         this.ingredients = ingredients;

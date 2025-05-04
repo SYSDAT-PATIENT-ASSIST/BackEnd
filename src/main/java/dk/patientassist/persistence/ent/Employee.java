@@ -20,8 +20,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "employee", uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
-public class Employee
-{
+public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
@@ -43,27 +42,23 @@ public class Employee
     @JoinTable(name = "employee_section", joinColumns = @JoinColumn(name = "section_id"), inverseJoinColumns = @JoinColumn(name = "employee_id"))
     public Set<Section> sections;
 
-    public String getFullName()
-    {
+    public String getFullName() {
         return firstName + " " + (middleName != null ? middleName + " " : "") + lastName;
     }
 
-    public String getRolesAsString()
-    {
+    public String getRolesAsString() {
         if (roles == null || roles.isEmpty())
             return "No roles assigned";
         return String.join(", ", roles.stream().map(Role::name).toList());
     }
 
-    public List<String> getRolesAsStringList()
-    {
+    public List<String> getRolesAsStringList() {
         if (roles == null || roles.isEmpty())
             return new ArrayList<>();
         return roles.stream().map(Role::name).toList();
     }
 
-    public ArrayNode getRolesAsJSONArray()
-    {
+    public ArrayNode getRolesAsJSONArray() {
         ArrayNode arrayNode = Utils.getObjectMapperCompact().createArrayNode();
         if (roles == null || roles.isEmpty())
             return arrayNode;
@@ -73,8 +68,7 @@ public class Employee
         return arrayNode;
     }
 
-    public ArrayNode getSectionsAsJSONArray()
-    {
+    public ArrayNode getSectionsAsJSONArray() {
         ArrayNode arrayNode = Utils.getObjectMapperCompact().createArrayNode();
         if (roles == null || roles.isEmpty())
             return arrayNode;
@@ -84,8 +78,7 @@ public class Employee
         return arrayNode;
     }
 
-    public static Employee fromJson(JsonNode json)
-    {
+    public static Employee fromJson(JsonNode json) {
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             Employee emp = new Employee();
             emp.email = json.get("email").asText();

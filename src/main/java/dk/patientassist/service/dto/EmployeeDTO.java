@@ -10,8 +10,7 @@ import org.mindrot.jbcrypt.BCrypt;
  * Patient Assist
  */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class EmployeeDTO
-{
+public class EmployeeDTO {
     String password; // we don't ever want to read this ideally, before encryption
     @EqualsAndHashCode.Include
     @JsonProperty(required = true)
@@ -24,18 +23,15 @@ public class EmployeeDTO
     @JsonProperty(required = false)
     public Long[] sections;
 
-    public void setPassword(String password)
-    {
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    public boolean checkAgainstBCryptPw(String encrPw)
-    {
+    public boolean checkAgainstBCryptPw(String encrPw) {
         return BCrypt.checkpw(password, encrPw);
     }
 
-    public String hashPw()
-    {
+    public String hashPw() {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 }

@@ -1,13 +1,12 @@
 package dk.patientassist.api.testresources;
 
+import com.github.javafaker.Faker;
+import com.github.javafaker.HarryPotter;
+import dk.patientassist.persistence.ent.Event;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Random;
-
-import com.github.javafaker.Faker;
-import com.github.javafaker.HarryPotter;
-
-import dk.patientassist.persistence.ent.Event;
 
 /**
  * EventData

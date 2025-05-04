@@ -7,8 +7,7 @@ import jakarta.persistence.*;
  * Patient Assist
  */
 @Entity
-public class Bed
-{
+public class Bed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;

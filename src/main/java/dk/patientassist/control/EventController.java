@@ -1,29 +1,22 @@
 package dk.patientassist.control;
 
-import static io.javalin.apibuilder.ApiBuilder.path;
-
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.persistence.ent.Event;
 import dk.patientassist.persistence.enums.Role;
 import dk.patientassist.service.Mapper;
 import dk.patientassist.service.dto.EventDTO;
 import dk.patientassist.utilities.Utils;
-import dk.patientassist.persistence.ent.Event;
 import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import jakarta.persistence.EntityManager;
-
-import static io.javalin.apibuilder.ApiBuilder.get;
-import static io.javalin.apibuilder.ApiBuilder.put;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static io.javalin.apibuilder.ApiBuilder.patch;
-import static io.javalin.apibuilder.ApiBuilder.delete;
+import static io.javalin.apibuilder.ApiBuilder.*;
 
 /**
  * Patient Assist
