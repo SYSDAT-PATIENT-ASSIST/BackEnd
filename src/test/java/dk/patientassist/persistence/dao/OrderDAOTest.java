@@ -40,6 +40,23 @@ class OrderDAOTest{
     }
 
     @Test
+    void createOrder(){
+        DishDTO dish = new DishDTO("Lasagne", "med laks", LocalDate.of(2025, 5, 10), LocalDate.of(2025, 6, 10), DishStatus.AVAILABLE);
+        DishDTO savedDish = dishDAO.createDish(dish);
+
+        OrderDTO order = new OrderDTO(101, LocalDateTime.now(), "ingen gluten", savedDish, OrderStatus.PENDING);
+
+        OrderDTO savedOrder = orderDAO.createOrder(order);
+
+        assertNotNull(savedOrder.getId());
+        assertEquals(101, savedOrder.getBed_id());
+        assertEquals("ingen gluten", savedOrder.getNote());
+        assertEquals(OrderStatus.PENDING, savedOrder.getStatus());
+        assertEquals(savedDish.getId(), savedOrder.getDish().getId());
+    }
+
+
+    @Test
     void cancelOrder(){
         DishDTO dish = new DishDTO("Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025,24), LocalDate.now(), DishStatus.AVAILABLE);
         DishDTO savedDish = dishDAO.createDish(dish);
