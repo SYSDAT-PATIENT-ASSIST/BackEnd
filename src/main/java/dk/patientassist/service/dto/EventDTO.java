@@ -14,5 +14,5 @@ public class EventDTO {
     public String name;
     public String description;
     public LocalDateTime startTime;
-    public Duration dur;
+    public Duration duration;
 }
