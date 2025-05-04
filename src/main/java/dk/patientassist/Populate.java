@@ -2,10 +2,12 @@ package dk.patientassist;
 
 import dk.patientassist.persistence.HibernateConfig;
 import dk.patientassist.persistence.ent.*;
-import jakarta.persistence.EntityManagerFactory;
+import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -17,8 +19,7 @@ public class Populate {
         HibernateConfig.Init(HibernateConfig.Mode.DEV);
     }
 
-
-    private static EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+    private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
     public static void main(String[] args) {
         populateDatabase();
@@ -41,6 +42,7 @@ public class Populate {
             dish.setProtein(30);
             dish.setCarbohydrates(15);
             dish.setFat(10);
+            dish.setAllergens(Allergens.GLUTEN);
 
             em.persist(dish);
 
@@ -52,20 +54,21 @@ public class Populate {
 
             em.persist(recipe);
 
-            // Link Dish to Recipe (two-way)
+            // Link Recipe to Dish (two-way)
             dish.setRecipe(recipe);
 
             // Create Ingredients
             Ingredients ingredient1 = new Ingredients();
+            ingredient1.setName("Chicken breast");
             ingredient1.setRecipe(recipe);
 
             Ingredients ingredient2 = new Ingredients();
+            ingredient2.setName("Lettuce");
             ingredient2.setRecipe(recipe);
 
             Set<Ingredients> ingredientsSet = new HashSet<>();
             ingredientsSet.add(ingredient1);
             ingredientsSet.add(ingredient2);
-
             recipe.setIngredients(ingredientsSet);
 
             em.persist(ingredient1);
@@ -89,7 +92,7 @@ public class Populate {
             em.persist(order);
 
             em.getTransaction().commit();
-            System.out.println("Database populated successfully! 🚀");
+            System.out.println("Database populated successfully!");
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
@@ -100,4 +103,3 @@ public class Populate {
         }
     }
 }
-
