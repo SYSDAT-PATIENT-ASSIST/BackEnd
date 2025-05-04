@@ -1,16 +1,19 @@
 package dk.patientassist.service;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import dk.patientassist.service.dto.EmployeeDTO;
 import dk.patientassist.persistence.ent.Employee;
 import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.service.dto.EmployeeDTO;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Patient Assist
  */
-public class Mapper {
-    public static EmployeeDTO EmployeeEntToDTO(Employee ent) {
+public class Mapper
+{
+    public static EmployeeDTO EmployeeEntToDTO(Employee ent)
+    {
         EmployeeDTO dto = new EmployeeDTO();
         dto.firstName = ent.firstName;
         dto.middleName = ent.middleName;
@@ -20,7 +23,8 @@ public class Mapper {
         return dto;
     }
 
-    public static Employee EmployeeDTOToEnt(EmployeeDTO dto) {
+    public static Employee EmployeeDTOToEnt(EmployeeDTO dto)
+    {
         Employee ent = new Employee();
         ent.firstName = dto.firstName;
         ent.middleName = dto.middleName;

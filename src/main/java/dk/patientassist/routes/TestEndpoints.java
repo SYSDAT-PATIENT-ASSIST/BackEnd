@@ -1,19 +1,21 @@
 package dk.patientassist.routes;
 
-import static io.javalin.apibuilder.ApiBuilder.get;
-import static io.javalin.apibuilder.ApiBuilder.path;
+import dk.patientassist.persistence.enums.Role;
+import io.javalin.apibuilder.EndpointGroup;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import dk.patientassist.persistence.enums.Role;
-import io.javalin.apibuilder.EndpointGroup;
+import static io.javalin.apibuilder.ApiBuilder.get;
+import static io.javalin.apibuilder.ApiBuilder.path;
 
 /**
  * Patient Assist
  */
-public class TestEndpoints {
-    public static EndpointGroup getEndpoints() {
+public class TestEndpoints
+{
+    public static EndpointGroup getEndpoints()
+    {
         return () -> {
             path("/auth", () -> {
                 get("/guest", ctx -> {

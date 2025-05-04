@@ -6,7 +6,8 @@ import lombok.EqualsAndHashCode;
  * Patient Assist
  */
 @EqualsAndHashCode
-public class BedDTO {
+public class BedDTO
+{
     public Integer id;
     public Boolean occupied;
     public String patientName;

@@ -1,15 +1,16 @@
 package dk.patientassist.persistence.enums;
 
+import io.javalin.security.RouteRole;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import io.javalin.security.RouteRole;
-
 /**
  * Patient Assist
  */
-public enum Role implements RouteRole {
+public enum Role implements RouteRole
+{
     GUEST,
     DOCTOR,
     NURSE,
@@ -18,23 +19,28 @@ public enum Role implements RouteRole {
     KITCHEN_STAFF,
     ADMIN;
 
-    public static String stringify(Role[] roles) {
+    public static String stringify(Role[] roles)
+    {
         return String.join(",", Arrays.stream(roles).map(r -> r.name()).toList());
     }
 
-    public static String stringify(List<Role> roles) {
+    public static String stringify(List<Role> roles)
+    {
         return String.join(",", roles.stream().map(r -> r.name()).toList());
     }
 
-    public static boolean find(Role role, List<Role> roles) {
+    public static boolean find(Role role, List<Role> roles)
+    {
         return roles != null && roles.contains(role);
     }
 
-    public static boolean find(Role role, Role[] roles) {
+    public static boolean find(Role role, Role[] roles)
+    {
         return roles != null && Arrays.asList(roles).contains(role);
     }
 
-    public static boolean find(Collection<RouteRole> roles_a, Role[] roles_b) {
+    public static boolean find(Collection<RouteRole> roles_a, Role[] roles_b)
+    {
         if (roles_a == null || roles_b == null) {
             return false;
         }

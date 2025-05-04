@@ -1,4 +1,5 @@
 package dk.patientassist.persistence.ent;
+
 import dk.patientassist.persistence.dto.OrderDTO;
 import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.*;
@@ -13,7 +14,8 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "_order")
-public class Order{
+public class Order
+{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +41,8 @@ public class Order{
     private Dish dish;
 
 
-    public Order(Integer bed_id, LocalDateTime order_time, String note, Dish dish, OrderStatus status){
+    public Order(Integer bed_id, LocalDateTime order_time, String note, Dish dish, OrderStatus status)
+    {
         this.bed_id = bed_id;
         this.order_time = order_time;
         this.note = note;
@@ -47,7 +50,8 @@ public class Order{
         this.status = status;
     }
 
-    public Order(OrderDTO orderDTO){
+    public Order(OrderDTO orderDTO)
+    {
         this.bed_id = orderDTO.getBed_id();
         this.order_time = orderDTO.getOrder_time();
         this.note = orderDTO.getNote();

@@ -1,16 +1,16 @@
 package dk.patientassist.persistence.ent;
 
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Set;
 
 /**
  * Patient Assist
  */
 @Entity
-public class Section {
+public class Section
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;

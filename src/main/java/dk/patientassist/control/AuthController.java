@@ -1,27 +1,15 @@
 package dk.patientassist.control;
 
-import static io.javalin.apibuilder.ApiBuilder.path;
-import static io.javalin.apibuilder.ApiBuilder.post;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import dk.patientassist.config.HibernateConfig;
-import dk.patientassist.service.dto.EmployeeDTO;
 import dk.patientassist.persistence.ent.Employee;
 import dk.patientassist.persistence.ent.Section;
 import dk.patientassist.persistence.enums.Role;
 import dk.patientassist.service.Mapper;
+import dk.patientassist.service.dto.EmployeeDTO;
 import dk.patientassist.utilities.Utils;
 import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.http.Context;
@@ -30,11 +18,22 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.NoResultException;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
+import static io.javalin.apibuilder.ApiBuilder.path;
+import static io.javalin.apibuilder.ApiBuilder.post;
 
 /**
  * Patient Assist
  */
-public class AuthController {
+public class AuthController
+{
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -43,7 +42,8 @@ public class AuthController {
     static Long jwtExp;
     static String jwtHdr;
 
-    public static EndpointGroup getEndpoints() {
+    public static EndpointGroup getEndpoints()
+    {
         return () -> {
             path("/auth", () -> {
                 post("/login", AuthController::login, Role.GUEST);
@@ -52,14 +52,16 @@ public class AuthController {
         };
     }
 
-    public static void init() throws JsonProcessingException {
+    public static void init() throws JsonProcessingException
+    {
         jwtKey = Utils.getConfigProperty("JWT_SECRET_KEY");
         jwtIss = Utils.getConfigProperty("JWT_ISSUER");
         jwtExp = Long.parseLong(Utils.getConfigProperty("JWT_EXPIRE_TIME"));
         jwtHdr = Utils.getObjectMapperCompact().writeValueAsString(Map.of("typ", "JWT", "alg", "HS256"));
     }
 
-    private static void register(@NotNull Context ctx) {
+    private static void register(@NotNull Context ctx)
+    {
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             EmployeeDTO empDetails = ctx.bodyAsClass(EmployeeDTO.class);
             Employee emp = Mapper.EmployeeDTOToEnt(empDetails);
@@ -113,7 +115,8 @@ public class AuthController {
         }
     }
 
-    private static void login(@NotNull Context ctx) {
+    private static void login(@NotNull Context ctx)
+    {
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             EmployeeDTO empDetails = ctx.bodyAsClass(EmployeeDTO.class);
 

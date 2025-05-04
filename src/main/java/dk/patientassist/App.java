@@ -1,21 +1,22 @@
 package dk.patientassist;
 
-import static dk.patientassist.config.Mode.DEV;
-
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
+import dk.patientassist.control.MasterController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.patientassist.config.Mode;
-import dk.patientassist.control.MasterController;
-import dk.patientassist.config.HibernateConfig;
+import static dk.patientassist.config.Mode.DEV;
 
 /**
  * Patient Assist
  */
-public class App {
+public class App
+{
     private static final Logger logger = LoggerFactory.getLogger(App.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         HibernateConfig.init(DEV);
 
         try {

@@ -1,6 +1,7 @@
 package dk.patientassist.persistence.enums;
 
-public enum DishStatus{
+public enum DishStatus
+{
     AVAILABLE,
     UNAVAILABLE,
     SOLD_OUT

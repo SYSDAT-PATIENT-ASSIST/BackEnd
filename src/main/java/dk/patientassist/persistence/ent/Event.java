@@ -1,18 +1,15 @@
 package dk.patientassist.persistence.ent;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import java.time.LocalDateTime;
 
 /**
  * Patient Assist
  */
 @Entity
-public class Event {
+public class Event
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
