@@ -2,6 +2,7 @@ package dk.patientassist.persistence.dao;
 
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.ent.Dish;
+import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -156,4 +157,21 @@ public class DishDAO {
             throw e;
         }
     }
+
+    public List<DishDTO> getDishesByStatusAndAllergen(DishStatus status, Allergens allergen) {
+        try (EntityManager em = emf.createEntityManager()) {
+            String jpql = "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
+                    "FROM Dish d " +
+                    "WHERE (:status IS NULL OR d.status = :status) " +
+                    "AND (:allergen IS NULL OR d.allergens = :allergen)";
+            TypedQuery<DishDTO> query = em.createQuery(jpql, DishDTO.class);
+            query.setParameter("status", status);
+            query.setParameter("allergen", allergen);
+            return query.getResultList();
+        } catch (Exception e) {
+            LOGGER.error("Failed to filter dishes by status/allergen", e);
+            throw e;
+        }
+    }
+
 }

@@ -3,13 +3,15 @@ package dk.patientassist.persistence.dto;
 import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
+@Setter
 @Getter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class DishDTO {
 
     private Integer id;

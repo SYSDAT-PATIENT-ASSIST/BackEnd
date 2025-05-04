@@ -152,4 +152,25 @@ public class DishController {
             throw new RuntimeException("Could not delete dish.");
         }
     }
+
+
+    public void getFilteredDishes(Context ctx) {
+        try {
+            String statusParam = ctx.queryParam("status");
+            String allergenParam = ctx.queryParam("allergen");
+
+            DishStatus status = statusParam != null ? DishStatus.fromString(statusParam) : null;
+            Allergens allergen = allergenParam != null ? Allergens.fromString(allergenParam) : null;
+
+            List<DishDTO> result = dishDao.getDishesByStatusAndAllergen(status, allergen);
+            ctx.status(200).json(result);
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Invalid enum input in filter: {}", e.getMessage());
+            ctx.status(400).result("Invalid status or allergen filter value.");
+        } catch (Exception e) {
+            LOGGER.error("Failed to fetch filtered dishes", e);
+            throw new RuntimeException("Could not fetch filtered dishes.");
+        }
+    }
+
 }
