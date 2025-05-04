@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Controller responsible for handling HTTP requests related to Dish resources.
- * Supports full CRUD operations and validation of enum inputs.
+ * Controller responsible for managing Dish resources.
+ * Supports full CRUD operations including validation and filtering.
  */
 public class DishController {
 
@@ -28,9 +28,8 @@ public class DishController {
     }
 
     /**
-     * Returns a list of all available or sold-out dishes.
-     *
-     * @param ctx the HTTP context
+     * Returns a list of all dishes that are AVAILABLE or SOLD_OUT.
+     * @param ctx HTTP context
      */
     public void getAllAvailableDishes(Context ctx) {
         try {
@@ -38,14 +37,13 @@ public class DishController {
             ctx.status(200).json(dishes);
         } catch (Exception e) {
             LOGGER.error("Failed to fetch available dishes", e);
-            throw new NotFoundResponse("Could not retrieve dishes. Please try again later.");
+            throw new NotFoundResponse("Could not retrieve dishes.");
         }
     }
 
     /**
-     * Returns all available dishes (for internal testing).
-     *
-     * @return list of DishDTOs
+     * Internal access method for test usage.
+     * @return all available dishes
      */
     public List<DishDTO> getAllAvailableDishes() {
         return dishDao.getAllAvailableDishes();
@@ -53,107 +51,82 @@ public class DishController {
 
     /**
      * Retrieves a dish by its ID.
-     *
-     * @param ctx the HTTP context with path param "id"
+     * @param ctx Context with pathParam("id")
      */
     public void getDishById(Context ctx) {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
-            DishDTO dishDTO = dishDao.getDish(id);
-            if (dishDTO == null) {
-                LOGGER.warn("Dish with ID {} not found", id);
+            DishDTO dish = dishDao.getDish(id);
+            if (dish == null) {
                 throw new NotFoundResponse("Dish with ID " + id + " not found");
             }
-            ctx.status(200).json(dishDTO);
+            ctx.status(200).json(dish);
         } catch (NumberFormatException e) {
-            LOGGER.error("Invalid dish ID format", e);
-            throw new NotFoundResponse("Invalid dish ID format");
-        } catch (Exception e) {
-            LOGGER.error("Error retrieving dish by ID", e);
-            throw new NotFoundResponse("Could not retrieve dish");
+            throw new BadRequestResponse("Invalid dish ID format.");
         }
     }
 
     /**
-     * Creates a new dish from the JSON request body.
-     * Validates enum fields before persisting.
-     *
-     * @param ctx the HTTP context
+     * Creates a new dish and returns it.
+     * @param ctx JSON body with dish details
      */
     public void createNewDish(Context ctx) {
         try {
-            DishDTO dishDTO = ctx.bodyAsClass(DishDTO.class);
+            DishDTO dto = ctx.bodyAsClass(DishDTO.class);
+            if (dto.getStatus() != null) DishStatus.valueOf(dto.getStatus().name());
+            if (dto.getAllergens() != null) Allergens.valueOf(dto.getAllergens().name());
 
-            // Validate enum inputs to catch invalid strings early
-            try {
-                if (dishDTO.getStatus() != null) {
-                    Enum.valueOf(DishStatus.class, dishDTO.getStatus().name());
-                }
-                if (dishDTO.getAllergens() != null) {
-                    Enum.valueOf(Allergens.class, dishDTO.getAllergens().name());
-                }
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn("Invalid enum value in dish creation: {}", e.getMessage());
-                throw new BadRequestResponse("Invalid enum value: " + e.getMessage());
-            }
-
-            DishDTO created = dishDao.createDish(dishDTO);
-            ctx.status(201).json(created);
+            DishDTO created = dishDao.createDish(dto);
+            ctx.status(201).json(created).result("Dish created successfully.");
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse("Invalid enum: " + e.getMessage());
         } catch (Exception e) {
-            LOGGER.error("Failed to create new dish", e);
-            throw new RuntimeException("Failed to create dish. Please check your input.");
+            LOGGER.error("Error creating dish", e);
+            throw new BadRequestResponse("Failed to create dish.");
         }
     }
 
     /**
-     * Updates an existing dish by ID.
-     * Validates enum fields before updating.
-     *
-     * @param ctx the HTTP context with path param "id"
+     * Updates a dish with a given ID.
+     * @param ctx Path param "id" and JSON body
      */
     public void updateExistingDish(Context ctx) {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
-            DishDTO updatedDTO = ctx.bodyAsClass(DishDTO.class);
+            DishDTO dto = ctx.bodyAsClass(DishDTO.class);
+            if (dto.getStatus() != null) DishStatus.valueOf(dto.getStatus().name());
+            if (dto.getAllergens() != null) Allergens.valueOf(dto.getAllergens().name());
 
-            // Validate enum inputs to catch invalid strings early
-            try {
-                if (updatedDTO.getStatus() != null) {
-                    Enum.valueOf(DishStatus.class, updatedDTO.getStatus().name());
-                }
-                if (updatedDTO.getAllergens() != null) {
-                    Enum.valueOf(Allergens.class, updatedDTO.getAllergens().name());
-                }
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn("Invalid enum value in dish update: {}", e.getMessage());
-                throw new BadRequestResponse("Invalid enum value: " + e.getMessage());
-            }
-
-            DishDTO updated = dishDao.updateDish(id, updatedDTO);
-            ctx.status(200).json(updated);
+            DishDTO updated = dishDao.updateDish(id, dto);
+            ctx.status(200).json(updated).result("Dish updated successfully.");
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse("Invalid enum: " + e.getMessage());
         } catch (Exception e) {
-            LOGGER.error("Failed to update dish with ID {}", ctx.pathParam("id"), e);
-            throw new RuntimeException("Could not update dish. Please verify the ID and data.");
+            LOGGER.error("Error updating dish", e);
+            throw new BadRequestResponse("Failed to update dish.");
         }
     }
 
     /**
      * Deletes a dish by ID.
-     *
-     * @param ctx the HTTP context with path param "id"
+     * @param ctx Context with dish ID pathParam
      */
     public void deleteExistingDish(Context ctx) {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             DishDTO deleted = dishDao.deleteDish(id);
-            ctx.status(200).json(deleted);
+            if (deleted == null) throw new NotFoundResponse("Dish not found.");
+            ctx.status(200).json(deleted).result("Dish deleted successfully.");
         } catch (Exception e) {
-            LOGGER.error("Failed to delete dish with ID {}", ctx.pathParam("id"), e);
-            throw new RuntimeException("Could not delete dish.");
+            LOGGER.error("Error deleting dish", e);
+            throw new BadRequestResponse("Could not delete dish.");
         }
     }
 
-
+    /**
+     * Filters dishes by optional query parameters: status and allergen.
+     * @param ctx HTTP query parameters "status" and "allergen"
+     */
     public void getFilteredDishes(Context ctx) {
         try {
             String statusParam = ctx.queryParam("status");
@@ -165,12 +138,8 @@ public class DishController {
             List<DishDTO> result = dishDao.getDishesByStatusAndAllergen(status, allergen);
             ctx.status(200).json(result);
         } catch (IllegalArgumentException e) {
-            LOGGER.warn("Invalid enum input in filter: {}", e.getMessage());
-            ctx.status(400).result("Invalid status or allergen filter value.");
-        } catch (Exception e) {
-            LOGGER.error("Failed to fetch filtered dishes", e);
-            throw new RuntimeException("Could not fetch filtered dishes.");
+            LOGGER.warn("Invalid filter input: {}", e.getMessage());
+            ctx.status(400).result("Invalid filter value.");
         }
     }
-
 }
