@@ -121,6 +121,7 @@ public class EventController {
                     .setParameter(1, id)
                     .getSingleResult();
             em.remove(event);
+            em.getTransaction().commit();
             ctx.status(200);
             ctx.json(Mapper.EventEntToDTO(event));
         } catch (Exception e) {

@@ -1,18 +1,17 @@
 package dk.patientassist.utilities;
 
-import com.github.javafaker.Faker;
-import com.github.javafaker.HarryPotter;
-import dk.patientassist.config.HibernateConfig;
-import dk.patientassist.persistence.ent.Event;
-import jakarta.persistence.EntityManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.javafaker.Faker;
+
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.persistence.ent.Event;
+import jakarta.persistence.EntityManager;
 
 /**
  * EventPopulator
@@ -36,13 +35,7 @@ public class EventPopulator {
 
             List<Event> events = new ArrayList<>();
             for (int i = 0; i < max - eventsFromDB.size(); i++) {
-                Event e = new Event();
-                HarryPotter hp = fakeGenerator.harryPotter();
-                e.name = hp.location();
-                e.description = hp.quote();
-                e.startTime = LocalDateTime.now().plusDays(rng.nextLong(-365, 365)).plusHours(rng.nextLong(-24, 24));
-                e.duration = Duration.ofMinutes(rng.nextLong(30, 300));
-                events.add(e);
+                events.add(MockData.event());
             }
 
             for (Event e : events) {
