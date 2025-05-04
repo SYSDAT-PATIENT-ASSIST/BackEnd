@@ -11,101 +11,185 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DishDAOTest {
+/**
+ * Unit tests for {@link DishDAO} using JUnit 5.
+ * Covers creation, retrieval, update, delete, and filtering operations for Dish entities.
+ */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class DishDAOTest {
 
-    private static DishDAO dao;
+    private static DishDAO dishDAO;
 
     @BeforeAll
-    static void setupClass() {
+    static void setup() {
         HibernateConfig.Init(HibernateConfig.Mode.TEST);
-        dao = DishDAO.getInstance(HibernateConfig.getEntityManagerFactory());
+        dishDAO = DishDAO.getInstance(HibernateConfig.getEntityManagerFactory());
     }
 
     @BeforeEach
     void cleanUp() {
-        dao.getAllAvailableDishes().forEach(d -> dao.deleteDish(d.getId()));
+        dishDAO.getAllAvailableDishes().forEach(d -> dishDAO.deleteDish(d.getId()));
+    }
+
+    private DishDTO createTestDish(String name) {
+        return new DishDTO(
+                name,
+                "Beskrivelse af retten: " + name,
+                LocalDate.now(),
+                LocalDate.now().plusDays(7),
+                DishStatus.TILGÆNGELIG,
+                500.0,
+                20.0,
+                40.0,
+                15.0,
+                Allergens.GLUTEN
+        );
     }
 
     @Test
     void testCreateDish() {
-        DishDTO dto = createTestDishDTO("Boller i karry");
-        DishDTO saved = dao.createDish(dto);
-
-        assertNotNull(saved.getId());
-        assertEquals(dto.getName(), saved.getName());
+        DishDTO created = dishDAO.createDish(createTestDish("Mørbradgryde"));
+        assertNotNull(created.getId());
+        assertEquals("Mørbradgryde", created.getName());
+        assertEquals("Beskrivelse af retten: Mørbradgryde", created.getDescription());
     }
 
     @Test
-    void testGetDishById() {
-        DishDTO dto = dao.createDish(createTestDishDTO("Frikadeller"));
-        DishDTO fetched = dao.getDish(dto.getId());
-
+    void testGetDish() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Brændende kærlighed"));
+        DishDTO fetched = dishDAO.getDish(dto.getId());
         assertNotNull(fetched);
-        assertEquals("Frikadeller", fetched.getName());
+        assertEquals(dto.getId(), fetched.getId());
+        assertEquals("Brændende kærlighed", fetched.getName());
     }
 
     @Test
     void testUpdateDish() {
-        DishDTO original = dao.createDish(createTestDishDTO("Rugbrød"));
-        DishDTO updatedDTO = createTestDishDTO("Smørrebrød");
-        updatedDTO = new DishDTO(
-                "Smørrebrød",
-                "Updated description",
-                original.getAvailable_from(),
-                original.getAvailable_until(),
-                DishStatus.UDSOLGT,
-                500, 30, 40, 15,
-                Allergens.ÆG
-        );
-
-        DishDTO updated = dao.updateDish(original.getId(), updatedDTO);
-
-        assertEquals("Smørrebrød", updated.getName());
-        assertEquals(DishStatus.UDSOLGT, updated.getStatus());
+        DishDTO original = dishDAO.createDish(createTestDish("Rødgrød med fløde"));
+        original.setDescription("Opdateret: Klassisk dansk dessert");
+        DishDTO updated = dishDAO.updateDish(original.getId(), original);
+        assertEquals("Opdateret: Klassisk dansk dessert", updated.getDescription());
     }
 
     @Test
     void testDeleteDish() {
-        DishDTO dto = dao.createDish(createTestDishDTO("Pasta Carbonara"));
-        DishDTO deleted = dao.deleteDish(dto.getId());
-
+        DishDTO dto = dishDAO.createDish(createTestDish("Citronfromage"));
+        DishDTO deleted = dishDAO.deleteDish(dto.getId());
         assertNotNull(deleted);
-        assertEquals(dto.getId(), deleted.getId());
+        assertNull(dishDAO.getDish(dto.getId()));
+    }
 
-        assertNull(dao.getDish(dto.getId()));
+    @Test
+    void testFindDishByName() {
+        dishDAO.createDish(createTestDish("Æbleflæsk"));
+        DishDTO found = dishDAO.findDishByName("Æbleflæsk");
+        assertNotNull(found);
+        assertEquals("Æbleflæsk", found.getName());
     }
 
     @Test
     void testGetAllAvailableDishes() {
-        dao.createDish(createTestDishDTO("Lasagne"));
-        dao.createDish(createTestDishDTO("Tacos"));
-
-        List<DishDTO> dishes = dao.getAllAvailableDishes();
+        dishDAO.createDish(createTestDish("Hakkebøf med bløde løg"));
+        dishDAO.createDish(createTestDish("Stegt rødspætte"));
+        List<DishDTO> dishes = dishDAO.getAllAvailableDishes();
         assertTrue(dishes.size() >= 2);
     }
 
     @Test
-    void testFindByName() {
-        dao.createDish(createTestDishDTO("Pizza"));
-        DishDTO found = dao.findByName("Pizza");
-
-        assertNotNull(found);
-        assertEquals("Pizza", found.getName());
+    void testUpdateDishStatus() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Fiskefrikadeller"));
+        DishDTO updated = dishDAO.updateDishStatus(dto.getId(), DishStatus.UDSOLGT);
+        assertEquals(DishStatus.UDSOLGT, updated.getStatus());
     }
 
-    // Utility method
-    private DishDTO createTestDishDTO(String name) {
-        return new DishDTO(
-                name,
-                "Test description",
-                LocalDate.now(),
-                LocalDate.now().plusDays(5),
-                DishStatus.TILGÆNGELIG,
-                600.0,
-                20.0,
-                50.0,
-                10.0,
-                Allergens.GLUTEN
-        );
+    @Test
+    void testUpdateDishAllergens() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Pandekager"));
+        DishDTO updated = dishDAO.updateDishAllergens(dto.getId(), Allergens.LAKTOSE);
+        assertEquals(Allergens.LAKTOSE, updated.getAllergens());
+    }
+
+    @Test
+    void testUpdateDishName() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Forloren hare"));
+        DishDTO updated = dishDAO.updateDishName(dto.getId(), "Ovnbagt laks med spinat");
+        assertEquals("Ovnbagt laks med spinat", updated.getName());
+    }
+
+    @Test
+    void testUpdateDishDescription() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Klassisk gryderet"));
+        DishDTO updated = dishDAO.updateDishDescription(dto.getId(), "Langtidsstegt med rødvin og rodfrugter");
+        assertEquals("Langtidsstegt med rødvin og rodfrugter", updated.getDescription());
+    }
+
+    @Test
+    void testUpdateDishKcal() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Kalorieeksempel"));
+        DishDTO updated = dishDAO.updateDishKcal(dto.getId(), 845.0);
+        assertEquals(845.0, updated.getKcal());
+    }
+
+    @Test
+    void testUpdateDishProtein() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Proteinrig ret"));
+        DishDTO updated = dishDAO.updateDishProtein(dto.getId(), 37.5);
+        assertEquals(37.5, updated.getProtein());
+    }
+
+    @Test
+    void testUpdateDishCarbohydrates() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Kartoffelret"));
+        DishDTO updated = dishDAO.updateDishCarbohydrates(dto.getId(), 92.0);
+        assertEquals(92.0, updated.getCarbohydrates());
+    }
+
+    @Test
+    void testUpdateDishFat() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Ret med smør"));
+        DishDTO updated = dishDAO.updateDishFat(dto.getId(), 33.3);
+        assertEquals(33.3, updated.getFat());
+    }
+
+    @Test
+    void testUpdateDishAvailableFrom() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Tilgængelig fra test"));
+        LocalDate newDate = LocalDate.now().plusDays(3);
+        DishDTO updated = dishDAO.updateDishAvailableFrom(dto.getId(), newDate);
+        assertEquals(newDate, updated.getAvailable_from());
+    }
+
+    @Test
+    void testUpdateDishAvailableUntil() {
+        DishDTO dto = dishDAO.createDish(createTestDish("Tilgængelig til test"));
+        LocalDate newDate = LocalDate.now().plusDays(12);
+        DishDTO updated = dishDAO.updateDishAvailableUntil(dto.getId(), newDate);
+        assertEquals(newDate, updated.getAvailable_until());
+    }
+
+    @Test
+    void testGetDishesByStatus() {
+        dishDAO.createDish(createTestDish("Ratatouille (tilgængelig)"));
+        List<DishDTO> filtered = dishDAO.getDishesByStatus(DishStatus.TILGÆNGELIG);
+        assertFalse(filtered.isEmpty());
+        assertTrue(filtered.stream().allMatch(d -> d.getStatus() == DishStatus.TILGÆNGELIG));
+    }
+
+    @Test
+    void testGetDishesByAllergen() {
+        dishDAO.createDish(createTestDish("Pastaret med gluten"));
+        List<DishDTO> filtered = dishDAO.getDishesByAllergen(Allergens.GLUTEN);
+        assertFalse(filtered.isEmpty());
+        assertTrue(filtered.stream().allMatch(d -> d.getAllergens() == Allergens.GLUTEN));
+    }
+
+    @Test
+    void testGetDishesByStatusAndAllergen() {
+        dishDAO.createDish(createTestDish("Linsesalat med glutenfri brød"));
+        List<DishDTO> filtered = dishDAO.getDishesByStatusAndAllergen(DishStatus.TILGÆNGELIG, Allergens.GLUTEN);
+        assertFalse(filtered.isEmpty());
+        assertTrue(filtered.stream().allMatch(d ->
+                d.getStatus() == DishStatus.TILGÆNGELIG &&
+                        d.getAllergens() == Allergens.GLUTEN));
     }
 }

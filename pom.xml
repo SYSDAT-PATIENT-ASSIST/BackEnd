@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>dk.patientassist</groupId>
   <artifactId>patientassist</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>patient-assist</name>
-  <!-- FIXME change it to the project's website -->
-  <url>https://www.example.com</url>
+  <url>https://www.example.com</url> <!-- Placeholder for project homepage -->
 
-
+  <!-- Java & dependency versions -->
   <properties>
     <MAINCLASS_NAME>App</MAINCLASS_NAME>
     <maven.compiler.source>17</maven.compiler.source>
@@ -21,28 +22,32 @@
     <hibernate.version>6.6.13.Final</hibernate.version>
     <postgresql.version>42.7.4</postgresql.version>
     <junit.version>5.11.1</junit.version>
-    <hamcrest.version>3.0</hamcrest.version>
+    <hamcrest.version>2.2</hamcrest.version> <!-- Explicit version -->
     <testcontainers.version>1.20.6</testcontainers.version>
     <hikari.version>6.0.0</hikari.version>
     <javalin.version>6.3.0</javalin.version>
     <jbcrypt.version>0.4</jbcrypt.version>
     <token.security.version>1.0.1</token.security.version>
     <cucumber.version>7.20.1</cucumber.version>
+    <mockito.version>5.12.0</mockito.version>
   </properties>
 
+  <!-- Maven repositories -->
   <repositories>
-    <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-    </repository>
     <repository>
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
   </repositories>
+
 
   <dependencies>
 
+    <!-- Security and hashing -->
     <dependency>
       <groupId>com.github.Hartmannsolution</groupId>
       <artifactId>TokenSecurity</artifactId>
@@ -55,6 +60,7 @@
       <version>${jbcrypt.version}</version>
     </dependency>
 
+    <!-- REST API Testing -->
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
@@ -62,13 +68,13 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Cucumber for BDD testing -->
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-java</artifactId>
-      <version>7.20.1</version>
+      <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-junit-platform-engine</artifactId>
@@ -76,6 +82,7 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- JUnit 5 Suite support -->
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-suite</artifactId>
@@ -83,62 +90,63 @@
       <scope>test</scope>
     </dependency>
 
-
+    <!-- HTML parsing for optional usage -->
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
       <version>1.18.1</version>
     </dependency>
 
+    <!-- Web framework -->
     <dependency>
       <groupId>io.javalin</groupId>
       <artifactId>javalin</artifactId>
       <version>${javalin.version}</version>
     </dependency>
 
+    <!-- Logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>2.0.16</version>
     </dependency>
-
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.5.15</version>
     </dependency>
 
+    <!-- ORM / Database -->
     <dependency>
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>${hibernate.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>${postgresql.version}</version>
     </dependency>
 
+    <!-- JSON handling -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
     </dependency>
-
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
       <version>${jackson.version}</version>
     </dependency>
 
+    <!-- Unit testing (JUnit 5) -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
@@ -146,6 +154,23 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Mockito for mocking in unit tests -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Hamcrest for readable assertions -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>${hamcrest.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Lombok for reducing boilerplate -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -153,26 +178,24 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Testcontainers for integration tests -->
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
       <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
       <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>jdbc</artifactId>
       <version>${testcontainers.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -180,12 +203,12 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- HikariCP connection pool -->
     <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <version>${hikari.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-hikaricp</artifactId>
@@ -194,10 +217,12 @@
 
   </dependencies>
 
+  <!-- Build plugins -->
   <build>
-    <finalName>app</finalName> <!-- This is the name of the jar file -->
+    <finalName>app</finalName>
     <plugins>
 
+      <!-- Inject project properties into a file -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>properties-maven-plugin</artifactId>
@@ -215,20 +240,16 @@
         </executions>
       </plugin>
 
+      <!-- Run JUnit 5 tests -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.3.1</version>
         <configuration>
           <reportFormat>plain</reportFormat>
-          <consoleOutputReporter>
-            <disable>true</disable>
-          </consoleOutputReporter>
-          <statelessTestsetInfoReporter
-                  implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
-          </statelessTestsetInfoReporter>
         </configuration>
       </plugin>
 
+      <!-- Create a fat JAR for deployment -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -250,6 +271,7 @@
         </executions>
       </plugin>
 
+      <!-- Allow execution of the application -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -267,7 +289,6 @@
       </plugin>
 
     </plugins>
-
   </build>
 
 </project>

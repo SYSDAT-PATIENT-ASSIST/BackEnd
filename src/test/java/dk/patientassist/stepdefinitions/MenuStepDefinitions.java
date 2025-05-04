@@ -16,7 +16,7 @@ import org.junit.Assert;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class DishMenuStepDefinitions {
+public class MenuStepDefinitions {
 
     private final DishController dishController;
     private final OrderController orderController;
@@ -26,7 +26,7 @@ public class DishMenuStepDefinitions {
     private DishDTO dishDTO;
     private OrderDTO orderDTO;
 
-    public DishMenuStepDefinitions() {
+    public MenuStepDefinitions() {
         HibernateConfig.Init(HibernateConfig.Mode.TEST);
         this.dishController = new DishController();
         this.orderController = new OrderController();

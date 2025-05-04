@@ -1,6 +1,7 @@
 package dk.patientassist.security.routes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dk.patientassist.control.DishController;
 import dk.patientassist.security.controllers.SecurityController;
 import dk.patientassist.utilities.Utils;
 import dk.patientassist.security.enums.Role;
@@ -31,4 +32,30 @@ public class SecurityRoutes {
             });
         };
     }
+
+    public static EndpointGroup getDishRoutes() {
+        return () -> {
+            path("/dishes", () -> {
+                get(ctx -> new DishController().getAllAvailableDishes(ctx), Role.ANYONE);
+                get("/filter", ctx -> new DishController().getFilteredDishes(ctx), Role.ANYONE);
+                get("{id}", ctx -> new DishController().getDishById(ctx), Role.ANYONE);
+
+                post(ctx -> new DishController().createNewDish(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                put("{id}", ctx -> new DishController().updateExistingDish(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                delete("{id}", ctx -> new DishController().deleteExistingDish(ctx), Role.HEAD_CHEF, Role.ANYONE);
+
+                patch("{id}/status", ctx -> new DishController().updateDishStatus(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/allergens", ctx -> new DishController().updateDishAllergens(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/name", ctx -> new DishController().updateDishName(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/description", ctx -> new DishController().updateDishDescription(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/kcal", ctx -> new DishController().updateDishKcal(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/protein", ctx -> new DishController().updateDishProtein(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/carbohydrates", ctx -> new DishController().updateDishCarbohydrates(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/fat", ctx -> new DishController().updateDishFat(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/available_from", ctx -> new DishController().updateDishAvailableFrom(ctx), Role.HEAD_CHEF, Role.ANYONE);
+                patch("{id}/available_until", ctx -> new DishController().updateDishAvailableUntil(ctx), Role.HEAD_CHEF, Role.ANYONE);
+            });
+        };
+    }
+
 }

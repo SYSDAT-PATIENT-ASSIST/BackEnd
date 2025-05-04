@@ -18,7 +18,7 @@ import java.util.Set;
  * Utility class for populating the database with development or test data.
  * Includes sample users, dishes, recipes, ingredients, and orders.
  */
-public class Populate {
+public class Populator {
 
     static {
         HibernateConfig.Init(HibernateConfig.Mode.DEV);

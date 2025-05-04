@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  */
 public enum DishStatus {
     TILGÆNGELIG, // AVAILABLE
-    UNAVAILABLE, // UNAVAILABLE
+    UDGÅET, // UNAVAILABLE
     UDSOLGT; // SOLD_OUT
 
     /**
