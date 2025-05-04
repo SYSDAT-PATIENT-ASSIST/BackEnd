@@ -29,6 +29,7 @@
     <token.security.version>1.0.1</token.security.version>
     <cucumber.version>7.20.1</cucumber.version>
     <javajwt.version>4.5.0</javajwt.version>
+    <javafaker.version>1.0.2</javafaker.version>
   </properties>
 
   <dependencies>
@@ -172,6 +173,12 @@
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-hikaricp</artifactId>
       <version>${hibernate.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.javafaker</groupId>
+      <artifactId>javafaker</artifactId>
+      <version>${javafaker.version}</version>
     </dependency>
 
   </dependencies>
