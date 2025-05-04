@@ -15,13 +15,13 @@ POST {{url}}/auth/register
 Content-Type: application/json
 
 {
-  "email": "admin@example.com",
+  "email": "admin2@example.com",
   "password": "admin",
   "firstName": "John",
   "middleName": "Doe",
   "lastName": "Smith",
   "roles": [
-    "admin"
+    "admin", "doctor", "guest"
   ],
   "sections": [
     1,

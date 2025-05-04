@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.Type;
+
 /**
  * Patient Assist
  */
@@ -16,6 +18,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
     public String name;
+    @Column(columnDefinition = "text")
     public String description;
     @Column(name = "start_time")
     public LocalDateTime startTime;
