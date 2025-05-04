@@ -1,4 +1,4 @@
-package dk.patientassist.api.testresources;
+package dk.patientassist.api.resources;
 
 import com.github.javafaker.Faker;
 import com.github.javafaker.HarryPotter;
