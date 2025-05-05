@@ -1,26 +1,28 @@
 package dk.patientassist.persistence.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Enum representing the availability status of a dish.
- * Enum values are written in Danish for end-user readability.
  */
 public enum DishStatus {
-    TILGÆNGELIG, // AVAILABLE
-    UDGÅET, // UNAVAILABLE
-    UDSOLGT; // SOLD_OUT
+    TILGÆNGELIG,  // AVAILABLE
+    UDGÅET,       // DISCONTINUED
+    UDSOLGT;      // SOLD_OUT
 
-    /**
-     * Allows case-insensitive deserialization of DishStatus enum values from JSON.
-     * For example, both "udsolgt" and "UDSOLGT" will be mapped to DishStatus.UDSOLGT.
-     *
-     * @param key the input string from JSON
-     * @return the corresponding DishStatus enum value, or null if input is null
-     * @throws IllegalArgumentException if the key does not match any enum value
-     */
+    @JsonValue
+    public String toValue() {
+        return name().toLowerCase();
+    }
+
     @JsonCreator
     public static DishStatus fromString(String key) {
-        return key == null ? null : DishStatus.valueOf(key.toUpperCase());
+        if (key == null) return null;
+        try {
+            return DishStatus.valueOf(key.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ugyldig dish status: " + key);
+        }
     }
 }

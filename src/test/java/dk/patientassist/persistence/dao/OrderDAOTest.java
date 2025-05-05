@@ -70,7 +70,7 @@ class OrderDAOTest{
                 dk.patientassist.persistence.enums.Allergens.GLUTEN
         );
 
-        DishDTO savedDish = dishDAO.createDish(dish);
+        DishDTO savedDish = dishDAO.create(dish);
 
         OrderDTO order = new OrderDTO(
                 201, // bed ID

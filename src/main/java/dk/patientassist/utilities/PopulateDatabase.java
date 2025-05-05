@@ -1,4 +1,4 @@
-package dk.patientassist;
+package dk.patientassist.utilities;
 
 import dk.patientassist.persistence.HibernateConfig;
 import dk.patientassist.persistence.ent.*;
@@ -18,7 +18,7 @@ import java.util.Set;
  * Utility class for populating the database with development or test data.
  * Includes sample users, dishes, recipes, ingredients, and orders.
  */
-public class Populator {
+public class PopulateDatabase {
 
     static {
         HibernateConfig.Init(HibernateConfig.Mode.DEV);
@@ -79,7 +79,7 @@ public class Populator {
             Recipe recipe = new Recipe();
             recipe.setTitle("Traditionel dansk ret");
             recipe.setInstructions("Steg grundigt og server varm.");
-            recipe.setDish(d2);
+            recipe.setDish(d2);  // Linking recipe to dish
             em.persist(recipe);
 
             // Link recipe to dish
@@ -96,7 +96,7 @@ public class Populator {
             Set<Ingredients> ingredientsSet = new HashSet<>();
             ingredientsSet.add(i1);
             ingredientsSet.add(i2);
-            recipe.setIngredients(ingredientsSet);
+            recipe.setIngredients(ingredientsSet);  // Setting ingredients to recipe
 
             em.persist(i1);
             em.persist(i2);
@@ -106,7 +106,7 @@ public class Populator {
             order.setBed_id(101);
             order.setOrder_time(LocalDateTime.now());
             order.setNote("Ingen løg, tak.");
-            order.setDish(d1);
+            order.setDish(d1);  // Assigning the dish to the order
             order.setStatus(OrderStatus.VENTER);
             em.persist(order);
 
@@ -144,8 +144,8 @@ public class Populator {
         Dish dish = new Dish();
         dish.setName(name);
         dish.setDescription(description);
-        dish.setAvailable_from(from);
-        dish.setAvailable_until(until);
+        dish.setAvailableFrom(from);
+        dish.setAvailableUntil(until);
         dish.setStatus(status);
         dish.setKcal(kcal);
         dish.setProtein(protein);

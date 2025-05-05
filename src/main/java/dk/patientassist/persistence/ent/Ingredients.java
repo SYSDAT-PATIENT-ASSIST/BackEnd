@@ -22,7 +22,7 @@ public class Ingredients {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Integer id;
 
     /**
@@ -35,16 +35,16 @@ public class Ingredients {
      * The recipe this ingredient belongs to.
      * Many ingredients can be part of one recipe.
      */
-    @ManyToOne
-    @JoinColumn(name = "recipe_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
 
     /**
-     * Constructor with all parameters.
+     * Full constructor to initialize an Ingredient entity.
      *
-     * @param id     the unique ID of the ingredient
-     * @param name   the name of the ingredient
-     * @param recipe the recipe this ingredient belongs to
+     * @param id     the unique identifier of the ingredient
+     * @param name   the ingredient name
+     * @param recipe the parent recipe this ingredient belongs to
      */
     public Ingredients(Integer id, String name, Recipe recipe) {
         this.id = id;

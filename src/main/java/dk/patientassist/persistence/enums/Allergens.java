@@ -1,6 +1,7 @@
 package dk.patientassist.persistence.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Enum representing common food allergens that may be present in dishes.
@@ -21,15 +22,26 @@ public enum Allergens {
     LUPIN;
 
     /**
-     * Allows case-insensitive deserialization of Allergens enum values from JSON.
-     * For example, both "ÆG" and "ÆG" will be mapped to Allergens.ÆG.
-     *
-     * @param key the input string from JSON
-     * @return the corresponding Allergens enum value, or null if input is null
-     * @throws IllegalArgumentException if the key does not match any enum value
+     * Serialize enum as lowercase string.
+     * @return lowercase string value of enum
+     */
+    @JsonValue
+    public String toValue() {
+        return name().toLowerCase();
+    }
+
+    /**
+     * Deserialize enum from case-insensitive string.
+     * @param key input string
+     * @return matching enum or throws exception
      */
     @JsonCreator
     public static Allergens fromString(String key) {
-        return key == null ? null : Allergens.valueOf(key.toUpperCase());
+        if (key == null) return null;
+        try {
+            return Allergens.valueOf(key.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ugyldig allergen: " + key);
+        }
     }
 }

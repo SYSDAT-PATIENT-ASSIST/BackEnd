@@ -1,4 +1,5 @@
 package dk.patientassist.persistence.ent;
+
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
@@ -10,94 +11,137 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * JPA entity representing a dish in the system.
+ * Stores nutritional values, status, availability, and allergen information.
+ */
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "dish")
-public class Dish{
+public class Dish {
+
+    /**
+     * Auto-generated ID of the dish.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Integer id;
 
-    @Column(name = "name")
+    /**
+     * Name of the dish.
+     */
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description")
+    /**
+     * Description of the dish.
+     */
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "available_from")
-    private LocalDate available_from;
+    /**
+     * The date from which the dish is available.
+     */
+    @Column(name = "available_from", nullable = false)
+    private LocalDate availableFrom;
 
-    @Column(name = "available_until")
-    private LocalDate available_until;
+    /**
+     * The date until which the dish is available.
+     */
+    @Column(name = "available_until", nullable = false)
+    private LocalDate availableUntil;
 
+    /**
+     * Current status of the dish.
+     */
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private DishStatus status;
 
-    @Column(name = "kcal")
+    /**
+     * Energy content in kilocalories.
+     */
+    @Column(name = "kcal", nullable = false)
     private double kcal;
 
-    @Column(name = "protein")
+    /**
+     * Protein content in grams.
+     */
+    @Column(name = "protein", nullable = false)
     private double protein;
 
-    @Column(name = "carbohydrates")
+    /**
+     * Carbohydrate content in grams.
+     */
+    @Column(name = "carbohydrates", nullable = false)
     private double carbohydrates;
 
-    @Column(name = "fat")
+    /**
+     * Fat content in grams.
+     */
+    @Column(name = "fat", nullable = false)
     private double fat;
 
+    /**
+     * Allergen type associated with this dish.
+     */
     @Enumerated(EnumType.STRING)
+    @Column(name = "allergens", nullable = false)
     private Allergens allergens;
 
+    /**
+     * Orders that include this dish.
+     */
     @OneToMany(mappedBy = "dish")
     private List<Order> orders;
 
+    /**
+     * Recipe associated with this dish.
+     */
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    public Dish(String name, String description, LocalDate available_from, LocalDate available_until, DishStatus status){
+    /**
+     * Constructor used for quick dish instantiation (status only).
+     */
+    public Dish(String name, String description, LocalDate availableFrom, LocalDate availableUntil, DishStatus status) {
         this.name = name;
         this.description = description;
-        this.available_from = available_from;
-        this.available_until = available_until;
+        this.availableFrom = availableFrom;
+        this.availableUntil = availableUntil;
         this.status = status;
     }
 
-    public Dish(DishDTO dishDTO) {
-        if (dishDTO == null) {
-            throw new IllegalArgumentException("DishDTO cannot be null");
-        }
-        if (dishDTO.getName() == null || dishDTO.getName().isBlank()) {
-            throw new IllegalArgumentException("Dish name cannot be null or empty");
-        }
-        if (dishDTO.getDescription() == null) {
-            throw new IllegalArgumentException("Dish description cannot be null");
-        }
-        if (dishDTO.getAvailable_from() == null || dishDTO.getAvailable_until() == null) {
+    /**
+     * Constructs a Dish entity from a {@link DishDTO}.
+     * Includes all nutritional and status fields.
+     * @param dto the DTO containing dish data
+     * @throws IllegalArgumentException if required fields are null or invalid
+     */
+    public Dish(DishDTO dto) {
+        if (dto == null) throw new IllegalArgumentException("DishDTO cannot be null");
+        if (dto.getName() == null || dto.getName().isBlank()) throw new IllegalArgumentException("Dish name cannot be null or blank");
+        if (dto.getDescription() == null) throw new IllegalArgumentException("Dish description cannot be null");
+        if (dto.getAvailableFrom() == null || dto.getAvailableUntil() == null)
             throw new IllegalArgumentException("Available from/until dates cannot be null");
-        }
-        if (dishDTO.getAvailable_from().isAfter(dishDTO.getAvailable_until())) {
+        if (dto.getAvailableFrom().isAfter(dto.getAvailableUntil()))
             throw new IllegalArgumentException("Available from date cannot be after available until date");
-        }
-        if (dishDTO.getStatus() == null) {
-            throw new IllegalArgumentException("Dish status cannot be null");
-        }
-        if (dishDTO.getAllergens() == null) {
-            throw new IllegalArgumentException("Allergens must be specified");
-        }
+        if (dto.getStatus() == null) throw new IllegalArgumentException("Dish status cannot be null");
+        if (dto.getAllergens() == null) throw new IllegalArgumentException("Allergens must be specified");
 
-        this.name = dishDTO.getName();
-        this.description = dishDTO.getDescription();
-        this.available_from = dishDTO.getAvailable_from();
-        this.available_until = dishDTO.getAvailable_until();
-        this.status = dishDTO.getStatus();
-        this.kcal = dishDTO.getKcal();
-        this.protein = dishDTO.getProtein();
-        this.carbohydrates = dishDTO.getCarbohydrates();
-        this.fat = dishDTO.getFat();
-        this.allergens = dishDTO.getAllergens();
+        this.name = dto.getName();
+        this.description = dto.getDescription();
+        this.availableFrom = dto.getAvailableFrom();
+        this.availableUntil = dto.getAvailableUntil();
+        this.status = dto.getStatus();
+        this.kcal = dto.getKcal();
+        this.protein = dto.getProtein();
+        this.carbohydrates = dto.getCarbohydrates();
+        this.fat = dto.getFat();
+        this.allergens = dto.getAllergens();
     }
 }

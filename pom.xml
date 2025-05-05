@@ -9,9 +9,8 @@
   <artifactId>patientassist</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>patient-assist</name>
-  <url>https://www.example.com</url> <!-- Placeholder for project homepage -->
+  <url>https://www.example.com</url>
 
-  <!-- Java & dependency versions -->
   <properties>
     <MAINCLASS_NAME>App</MAINCLASS_NAME>
     <maven.compiler.source>17</maven.compiler.source>
@@ -22,7 +21,7 @@
     <hibernate.version>6.6.13.Final</hibernate.version>
     <postgresql.version>42.7.4</postgresql.version>
     <junit.version>5.11.1</junit.version>
-    <hamcrest.version>2.2</hamcrest.version> <!-- Explicit version -->
+    <hamcrest.version>2.2</hamcrest.version>
     <testcontainers.version>1.20.6</testcontainers.version>
     <hikari.version>6.0.0</hikari.version>
     <javalin.version>6.3.0</javalin.version>
@@ -32,7 +31,6 @@
     <mockito.version>5.12.0</mockito.version>
   </properties>
 
-  <!-- Maven repositories -->
   <repositories>
     <repository>
       <id>central</id>
@@ -44,23 +42,33 @@
     </repository>
   </repositories>
 
-
   <dependencies>
 
-    <!-- Security and hashing -->
+    <!-- Validation -->
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>8.0.1.Final</version>
+    </dependency>
+
+    <!-- Security -->
     <dependency>
       <groupId>com.github.Hartmannsolution</groupId>
       <artifactId>TokenSecurity</artifactId>
       <version>${token.security.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.mindrot</groupId>
       <artifactId>jbcrypt</artifactId>
       <version>${jbcrypt.version}</version>
     </dependency>
 
-    <!-- REST API Testing -->
+    <!-- REST Testing -->
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
@@ -68,7 +76,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Cucumber for BDD testing -->
+    <!-- Cucumber -->
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-java</artifactId>
@@ -82,7 +90,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- JUnit 5 Suite support -->
+    <!-- JUnit Platform Suite -->
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-suite</artifactId>
@@ -90,14 +98,14 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- HTML parsing for optional usage -->
+    <!-- Jsoup -->
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
       <version>1.18.1</version>
     </dependency>
 
-    <!-- Web framework -->
+    <!-- Javalin -->
     <dependency>
       <groupId>io.javalin</groupId>
       <artifactId>javalin</artifactId>
@@ -116,7 +124,7 @@
       <version>1.5.15</version>
     </dependency>
 
-    <!-- ORM / Database -->
+    <!-- ORM -->
     <dependency>
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
@@ -128,7 +136,7 @@
       <version>${postgresql.version}</version>
     </dependency>
 
-    <!-- JSON handling -->
+    <!-- JSON -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
@@ -140,7 +148,7 @@
       <version>${jackson.version}</version>
     </dependency>
 
-    <!-- Unit testing (JUnit 5) -->
+    <!-- JUnit -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -154,7 +162,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Mockito for mocking in unit tests -->
+    <!-- Mockito -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -162,7 +170,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Hamcrest for readable assertions -->
+    <!-- Hamcrest -->
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
@@ -170,7 +178,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Lombok for reducing boilerplate -->
+    <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -178,7 +186,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Testcontainers for integration tests -->
+    <!-- Testcontainers -->
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
@@ -203,7 +211,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- HikariCP connection pool -->
+    <!-- HikariCP -->
     <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
@@ -217,12 +225,10 @@
 
   </dependencies>
 
-  <!-- Build plugins -->
   <build>
     <finalName>app</finalName>
     <plugins>
 
-      <!-- Inject project properties into a file -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>properties-maven-plugin</artifactId>
@@ -240,7 +246,6 @@
         </executions>
       </plugin>
 
-      <!-- Run JUnit 5 tests -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.3.1</version>
@@ -249,7 +254,6 @@
         </configuration>
       </plugin>
 
-      <!-- Create a fat JAR for deployment -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -257,9 +261,7 @@
         <executions>
           <execution>
             <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
+            <goals><goal>shade</goal></goals>
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -271,16 +273,13 @@
         </executions>
       </plugin>
 
-      <!-- Allow execution of the application -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.4.1</version>
         <executions>
           <execution>
-            <goals>
-              <goal>java</goal>
-            </goals>
+            <goals><goal>java</goal></goals>
           </execution>
         </executions>
         <configuration>

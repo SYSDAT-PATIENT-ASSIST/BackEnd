@@ -12,21 +12,31 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * DAO class for managing {@link Dish} entities.
- * Provides CRUD operations and query methods for filtering and updating dish data.
+ * DAO implementation for managing {@link Dish} entities using JPA.
+ * Provides CRUD operations, filtered queries, and partial updates via {@link DishDTO}.
  */
-public class DishDAO {
+public class DishDAO implements IDAO<DishDTO, Integer> {
 
     private static DishDAO instance;
     private final EntityManagerFactory emf;
     private static final Logger LOGGER = LoggerFactory.getLogger(DishDAO.class);
 
+    /**
+     * Private constructor used for singleton pattern.
+     * @param emf EntityManagerFactory instance
+     */
     DishDAO(EntityManagerFactory emf) {
         this.emf = emf;
     }
 
+    /**
+     * Get the singleton instance of {@link DishDAO}.
+     * @param emf EntityManagerFactory for persistence context
+     * @return DishDAO singleton instance
+     */
     public static DishDAO getInstance(EntityManagerFactory emf) {
         if (instance == null) {
             instance = new DishDAO(emf);
@@ -34,15 +44,51 @@ public class DishDAO {
         return instance;
     }
 
-    public DishDTO createDish(DishDTO dishDTO) {
+    /**
+     * Fetch a dish by its unique ID.
+     * @param id the dish ID
+     * @return Optional containing DishDTO if found, or empty
+     */
+    @Override
+    public Optional<DishDTO> get(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Creating new dish: {}", dishDTO.getName());
+            Dish dish = em.find(Dish.class, id);
+            return Optional.ofNullable(dish).map(DishDTO::new);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get dish with ID {}", id, e);
+            throw e;
+        }
+    }
+
+    /**
+     * Fetch all dishes in the database.
+     * @return List of DishDTO
+     */
+    @Override
+    public List<DishDTO> getAll() {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<DishDTO> query = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d", DishDTO.class);
+            return query.getResultList();
+        } catch (Exception e) {
+            LOGGER.error("Failed to get all dishes", e);
+            throw e;
+        }
+    }
+
+    /**
+     * Persist a new dish to the database.
+     * @param dto DishDTO with the input data
+     * @return newly created DishDTO with generated ID
+     */
+    @Override
+    public DishDTO create(DishDTO dto) {
+        try (EntityManager em = emf.createEntityManager()) {
+            Dish dish = new Dish(dto);
             em.getTransaction().begin();
-            Dish dish = new Dish(dishDTO);
             em.persist(dish);
             em.flush();
             em.getTransaction().commit();
-            LOGGER.info("Dish created with ID: {}", dish.getId());
             return new DishDTO(dish);
         } catch (Exception e) {
             LOGGER.error("Failed to create dish", e);
@@ -50,121 +96,32 @@ public class DishDAO {
         }
     }
 
-    public DishDTO getDish(Integer dishId) {
+    /**
+     * Update all fields of a dish with new data.
+     * @param id dish ID to update
+     * @param dto DTO containing updated values
+     * @return updated DishDTO, or null if not found
+     */
+    @Override
+    public DishDTO update(Integer id, DishDTO dto) {
         try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Fetching dish with ID: {}", dishId);
-            Dish dish = em.find(Dish.class, dishId);
-            return dish != null ? new DishDTO(dish) : null;
-        } catch (Exception e) {
-            LOGGER.error("Failed to fetch dish with ID {}", dishId, e);
-            throw e;
-        }
-    }
-
-    public List<DishDTO> getAllAvailableDishes() {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Fetching all available or sold-out dishes");
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
-                            "FROM Dish d " +
-                            "WHERE d.status = dk.patientassist.persistence.enums.DishStatus.TILGÆNGELIG " +
-                            "OR d.status = dk.patientassist.persistence.enums.DishStatus.UDSOLGT", DishDTO.class);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Failed to fetch available dishes", e);
-            throw e;
-        }
-    }
-
-    public List<DishDTO> getDishesByStatus(DishStatus status) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Filtering dishes by status: {}", status);
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE d.status = :status",
-                    DishDTO.class);
-            query.setParameter("status", status);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Failed to filter dishes by status", e);
-            throw e;
-        }
-    }
-
-    public List<DishDTO> getDishesByAllergen(Allergens allergen) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Filtering dishes by allergen: {}", allergen);
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE d.allergens = :allergen",
-                    DishDTO.class);
-            query.setParameter("allergen", allergen);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Failed to filter dishes by allergen", e);
-            throw e;
-        }
-    }
-
-    public List<DishDTO> getDishesByStatusAndAllergen(DishStatus status, Allergens allergen) {
-        try {
-            if (status != null && allergen == null) {
-                return getDishesByStatus(status);
-            } else if (status == null && allergen != null) {
-                return getDishesByAllergen(allergen);
-            } else if (status != null && allergen != null) {
-                try (EntityManager em = emf.createEntityManager()) {
-                    TypedQuery<DishDTO> query = em.createQuery(
-                            "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
-                                    "FROM Dish d WHERE d.status = :status AND d.allergens = :allergen", DishDTO.class);
-                    query.setParameter("status", status);
-                    query.setParameter("allergen", allergen);
-                    return query.getResultList();
-                }
-            } else {
-                return getAllAvailableDishes();
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed to filter dishes by status and/or allergen", e);
-            throw e;
-        }
-    }
-
-    public DishDTO findDishByName(String name) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Finding dish by name: {}", name);
-            TypedQuery<Dish> query = em.createQuery(
-                    "SELECT d FROM Dish d WHERE d.name = :name", Dish.class);
-            query.setParameter("name", name);
-            Dish dish = query.getResultStream().findFirst().orElse(null);
-            return dish != null ? new DishDTO(dish) : null;
-        } catch (Exception e) {
-            LOGGER.error("Failed to find dish by name: {}", name, e);
-            throw e;
-        }
-    }
-
-    public DishDTO updateDish(Integer id, DishDTO updatedDTO) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating full dish with ID: {}", id);
-            em.getTransaction().begin();
             Dish dish = em.find(Dish.class, id);
-            if (dish == null) {
-                LOGGER.warn("Dish with ID {} not found", id);
-                return null;
-            }
+            if (dish == null) return null;
 
-            dish.setName(updatedDTO.getName());
-            dish.setDescription(updatedDTO.getDescription());
-            dish.setAvailable_from(updatedDTO.getAvailable_from());
-            dish.setAvailable_until(updatedDTO.getAvailable_until());
-            dish.setStatus(updatedDTO.getStatus());
-            dish.setKcal(updatedDTO.getKcal());
-            dish.setProtein(updatedDTO.getProtein());
-            dish.setCarbohydrates(updatedDTO.getCarbohydrates());
-            dish.setFat(updatedDTO.getFat());
-            dish.setAllergens(updatedDTO.getAllergens());
-
+            em.getTransaction().begin();
+            dish.setName(dto.getName());
+            dish.setDescription(dto.getDescription());
+            dish.setAvailableFrom(dto.getAvailableFrom());
+            dish.setAvailableUntil(dto.getAvailableUntil());
+            dish.setStatus(dto.getStatus());
+            dish.setKcal(dto.getKcal());
+            dish.setProtein(dto.getProtein());
+            dish.setCarbohydrates(dto.getCarbohydrates());
+            dish.setFat(dto.getFat());
+            dish.setAllergens(dto.getAllergens());
             em.merge(dish);
             em.getTransaction().commit();
+
             return new DishDTO(dish);
         } catch (Exception e) {
             LOGGER.error("Failed to update dish with ID {}", id, e);
@@ -172,182 +129,121 @@ public class DishDAO {
         }
     }
 
-    public DishDTO deleteDish(Integer id) {
+    /**
+     * Delete a dish from the database.
+     * @param id the dish ID to remove
+     * @return true if the dish was found and deleted, false otherwise
+     */
+    @Override
+    public boolean delete(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Deleting dish with ID: {}", id);
-            em.getTransaction().begin();
             Dish dish = em.find(Dish.class, id);
-            if (dish == null) {
-                LOGGER.warn("Dish with ID {} not found", id);
-                return null;
-            }
+            if (dish == null) return false;
+
+            em.getTransaction().begin();
             em.remove(dish);
             em.getTransaction().commit();
-            return new DishDTO(dish);
+            return true;
         } catch (Exception e) {
             LOGGER.error("Failed to delete dish with ID {}", id, e);
             throw e;
         }
     }
 
-    public DishDTO updateDishStatus(Integer id, DishStatus newStatus) {
+    /**
+     * Filter dishes by their {@link DishStatus}.
+     * @param status dish status to filter by
+     * @return List of matching DishDTOs
+     */
+    public List<DishDTO> getDishesByStatus(DishStatus status) {
         try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating status of dish ID: {}", id);
-            em.getTransaction().begin();
+            TypedQuery<DishDTO> query = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE d.status = :status",
+                    DishDTO.class);
+            query.setParameter("status", status);
+            return query.getResultList();
+        }
+    }
+
+    /**
+     * Filter dishes by allergen.
+     * @param allergen allergen type
+     * @return List of matching DishDTOs
+     */
+    public List<DishDTO> getDishesByAllergen(Allergens allergen) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<DishDTO> query = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE d.allergens = :allergen",
+                    DishDTO.class);
+            query.setParameter("allergen", allergen);
+            return query.getResultList();
+        }
+    }
+
+    /**
+     * Filter dishes by both {@link DishStatus} and {@link Allergens}.
+     * @param status dish status
+     * @param allergen allergen type
+     * @return List of matching dishes
+     */
+    public List<DishDTO> getDishesByStatusAndAllergen(DishStatus status, Allergens allergen) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<DishDTO> query = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE d.status = :status AND d.allergens = :allergen",
+                    DishDTO.class);
+            query.setParameter("status", status);
+            query.setParameter("allergen", allergen);
+            return query.getResultList();
+        }
+    }
+
+    /**
+     * Partially update a single field on a dish.
+     * @param id ID of the dish
+     * @param field name of the field to update (e.g., "kcal")
+     * @param value new value to assign
+     * @return Optional with updated DishDTO, or empty if dish not found
+     */
+    public Optional<DishDTO> updateDishField(Integer id, String field, Object value) {
+        try (EntityManager em = emf.createEntityManager()) {
             Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setStatus(newStatus);
+            if (dish == null) return Optional.empty();
+
+            em.getTransaction().begin();
+
+            switch (field) {
+                case "name" -> dish.setName((String) value);
+                case "description" -> dish.setDescription((String) value);
+                case "kcal" -> dish.setKcal(castDouble(value));
+                case "protein" -> dish.setProtein(castDouble(value));
+                case "carbohydrates" -> dish.setCarbohydrates(castDouble(value));
+                case "fat" -> dish.setFat(castDouble(value));
+                case "status" -> dish.setStatus((DishStatus) value);
+                case "allergens" -> dish.setAllergens((Allergens) value);
+                case "availableFrom" -> dish.setAvailableFrom((LocalDate) value);
+                case "availableUntil" -> dish.setAvailableUntil((LocalDate) value);
+                default -> throw new IllegalArgumentException("Unsupported field: " + field);
+            }
+
             em.merge(dish);
             em.getTransaction().commit();
-            return new DishDTO(dish);
+            return Optional.of(new DishDTO(dish));
         } catch (Exception e) {
-            LOGGER.error("Failed to update status for dish ID {}", id, e);
+            LOGGER.error("Failed to patch field '{}' on dish ID {}", field, id, e);
             throw e;
         }
     }
 
-    public DishDTO updateDishAllergens(Integer id, Allergens newAllergen) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating allergens of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setAllergens(newAllergen);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update allergens for dish ID {}", id, e);
-            throw e;
+    /**
+     * Utility method for converting numeric objects to {@code double}.
+     * @param value the input value
+     * @return casted double value
+     * @throws IllegalArgumentException if value is not a number
+     */
+    private double castDouble(Object value) {
+        if (value instanceof Number number) {
+            return number.doubleValue();
         }
+        throw new IllegalArgumentException("Expected numeric value but got: " + value);
     }
-
-    public DishDTO updateDishName(Integer id, String newName) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating name of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setName(newName);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update name for dish ID {}", id, e);
-            throw e;
-        }
-    }
-
-    public DishDTO updateDishDescription(Integer id, String newValue) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating description of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setDescription(newValue);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update description for dish ID {}", id, e);
-            throw e;
-        }
-    }
-
-    public DishDTO updateDishKcal(Integer id, double newValue) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating kcal of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setKcal(newValue);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update kcal for dish ID {}", id, e);
-            throw e;
-        }
-    }
-
-    public DishDTO updateDishProtein(Integer id, double newValue) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating protein of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setProtein(newValue);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update protein for dish ID {}", id, e);
-            throw e;
-        }
-    }
-
-    public DishDTO updateDishCarbohydrates(Integer id, double newValue) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating carbohydrates of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setCarbohydrates(newValue);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update carbohydrates for dish ID {}", id, e);
-            throw e;
-        }
-    }
-
-    public DishDTO updateDishFat(Integer id, double newValue) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating fat of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setFat(newValue);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update fat for dish ID {}", id, e);
-            throw e;
-        }
-    }
-
-    public DishDTO updateDishAvailableFrom(Integer id, LocalDate newValue) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating available_from of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setAvailable_from(newValue);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update available_from for dish ID {}", id, e);
-            throw e;
-        }
-    }
-
-    public DishDTO updateDishAvailableUntil(Integer id, LocalDate newValue) {
-        try (EntityManager em = emf.createEntityManager()) {
-            LOGGER.info("Updating available_until of dish ID: {}", id);
-            em.getTransaction().begin();
-            Dish dish = em.find(Dish.class, id);
-            if (dish == null) return null;
-            dish.setAvailable_until(newValue);
-            em.merge(dish);
-            em.getTransaction().commit();
-            return new DishDTO(dish);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update available_until for dish ID {}", id, e);
-            throw e;
-        }
-    }
-
 }

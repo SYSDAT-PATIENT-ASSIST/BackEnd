@@ -1,25 +1,38 @@
 package dk.patientassist.persistence.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Enum representing the status of an order in the system.
  */
 public enum OrderStatus {
-    VENTER, //PENDING
-    FÆRDIG, //COMPLETED
-    ANNULLERET; //CANCELLED
+    VENTER,      // PENDING
+    FÆRDIG,      // COMPLETED
+    ANNULLERET;  // CANCELLED
 
-     /**
-     * Allows case-insensitive deserialization of OrderStatus enum values from JSON.
-     * For example, both "færdig" and "FÆRDIG" will be mapped to OrderStatus.FÆRDIG.
+    /**
+     * JSON output as lowercase string (e.g., "færdig").
+     */
+    @JsonValue
+    public String toValue() {
+        return name().toLowerCase();
+    }
+
+    /**
+     * Case-insensitive deserialization from JSON.
      *
-     * @param key the input string from JSON
-     * @return the corresponding OrderStatus enum value, or null if input is null
-     * @throws IllegalArgumentException if the key does not match any enum value
+     * @param key input string (e.g., "færdig")
+     * @return matching OrderStatus enum value
+     * @throws IllegalArgumentException if the input does not match any enum
      */
     @JsonCreator
     public static OrderStatus fromString(String key) {
-        return key == null ? null : OrderStatus.valueOf(key.toUpperCase());
+        if (key == null) return null;
+        try {
+            return OrderStatus.valueOf(key.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ugyldig ordrestatus: " + key);
+        }
     }
 }
