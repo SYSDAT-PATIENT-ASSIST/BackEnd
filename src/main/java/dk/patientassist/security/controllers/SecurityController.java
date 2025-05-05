@@ -121,7 +121,7 @@ public class SecurityController implements ISecurityController {
     // Check if the user's roles contain any of the allowed roles
     public boolean authorize(UserDTO user, Set<RouteRole> allowedRoles) {
         if (user == null) {
-            throw new UnauthorizedResponse("You need to log in, dude!");
+            throw new UnauthorizedResponse("You need to log in!");
         }
         Set<String> roleNames = allowedRoles.stream()
                 .map(RouteRole::toString)  // Convert RouteRoles to  Set of Strings
