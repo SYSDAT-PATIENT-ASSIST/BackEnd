@@ -7,7 +7,10 @@ import lombok.Setter;
 
 /**
  * Represents a unique ingredient definition, such as "Gulerod", "Tomat", or "Smør".
- * This acts as a catalog of possible ingredient types, ensuring uniqueness and reuse.
+ * <p>
+ * IngredientType acts as a catalog entry that can be reused across multiple {@link Ingredient} entities.
+ * This prevents duplication of common ingredient names across recipes.
+ * </p>
  */
 @Getter
 @Setter
@@ -17,22 +20,23 @@ import lombok.Setter;
 public class IngredientType {
 
     /**
-     * Unique ID of the ingredient type (primary key).
+     * Auto-generated unique identifier for this ingredient type.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     /**
-     * The unique name of the ingredient, e.g. "Gulerod", "Smør".
+     * The unique name of the ingredient (e.g., "Gulerod", "Smør").
+     * Must not be null and must be unique in the database.
      */
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     /**
-     * Constructs an ingredient type with a given name.
+     * Constructs a new IngredientType with the specified name.
      *
-     * @param name the name of the ingredient type
+     * @param name the name of the ingredient type (must not be null or blank)
      */
     public IngredientType(String name) {
         this.name = name;

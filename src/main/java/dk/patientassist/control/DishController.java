@@ -23,6 +23,11 @@ public class DishController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DishController.class);
     private final DishDAO dishDAO;
+    private static final Set<String> PATCHABLE_FIELDS = Set.of(
+            "name", "description", "kcal", "protein", "carbohydrates",
+            "fat", "status", "allergens", "available_from", "available_until"
+    );
+
 
     public DishController() {
         this.dishDAO = DishDAO.getInstance(HibernateConfig.getEntityManagerFactory());
@@ -121,6 +126,11 @@ public class DishController {
     }
 
     private void handlePatch(Context ctx, String field) {
+        if (!PATCHABLE_FIELDS.contains(field)) {
+            ctx.status(400).result("Unsupported patch field: " + field);
+            return;
+        }
+
         int id = Integer.parseInt(ctx.pathParam("id"));
         String rawValue = ctx.body();
 
