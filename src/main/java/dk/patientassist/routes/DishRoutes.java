@@ -21,8 +21,7 @@ public class DishRoutes {
                 post("/full", controller::createDishWithRecipeAndIngredients, Role.ANYONE);
                 patch("/{id}/recipe-and-allergens", controller::updateDishRecipeAndAllergens, Role.ANYONE);
                 get("/most-ordered", controller::getMostOrderedDishes, Role.ANYONE);
-
-
+                get("/available", controller::getAvailableDishes);
 
                 // PATCH endpoints
                 patch("/{id}/name", controller::updateDishName, Role.ANYONE);

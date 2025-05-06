@@ -17,17 +17,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Controller for handling HTTP requests related to Dish entities.
+ * REST Controller for handling HTTP endpoints related to {@link DishDTO}.
+ * Supports full CRUD operations, patch updates, filtering, and business logic
+ * including dish availability and popularity.
  */
 public class DishController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DishController.class);
     private final DishDAO dishDAO;
+
     private static final Set<String> PATCHABLE_FIELDS = Set.of(
             "name", "description", "kcal", "protein", "carbohydrates",
-            "fat", "status", "allergens", "available_from", "available_until"
+            "fat", "status", "allergens", "availableFrom", "availableUntil"
     );
-
 
     public DishController() {
         this.dishDAO = DishDAO.getInstance(HibernateConfig.getEntityManagerFactory());
@@ -37,27 +39,42 @@ public class DishController {
         this.dishDAO = dishDAO;
     }
 
+    /**
+     * Returns all dishes in the system.
+     */
     public void getAllDishes(Context ctx) {
         ctx.json(dishDAO.getAll());
     }
 
+    /**
+     * Creates a new dish from the request body.
+     */
     public void createNewDish(Context ctx) {
         DishDTO dto = ctx.bodyAsClass(DishDTO.class);
         DishDTO created = dishDAO.create(dto);
         ctx.status(201).json(created);
     }
 
+    /**
+     * Returns a single dish by ID.
+     */
     public void getDishById(Context ctx) {
         int id = Integer.parseInt(ctx.pathParam("id"));
         dishDAO.get(id).ifPresentOrElse(ctx::json, () -> ctx.status(404).result("Not found"));
     }
 
+    /**
+     * Deletes a dish by ID.
+     */
     public void deleteExistingDish(Context ctx) {
         int id = Integer.parseInt(ctx.pathParam("id"));
         boolean deleted = dishDAO.delete(id);
         ctx.status(deleted ? 200 : 404);
     }
 
+    /**
+     * Returns dishes filtered by optional status and allergen.
+     */
     public void getFilteredDishes(Context ctx) {
         String statusParam = ctx.queryParam("status");
         String allergenParam = ctx.queryParam("allergen");
@@ -68,63 +85,9 @@ public class DishController {
         ctx.json(dishDAO.getDishesByStatusAndAllergen(status, allergen));
     }
 
-    public void updateDishName(Context ctx) {
-        handlePatch(ctx, "name");
-    }
-
-    public void updateDishDescription(Context ctx) {
-        handlePatch(ctx, "description");
-    }
-
-    public void updateDishKcal(Context ctx) {
-        handlePatch(ctx, "kcal");
-    }
-
-    public void updateDishProtein(Context ctx) {
-        handlePatch(ctx, "protein");
-    }
-
-    public void updateDishCarbohydrates(Context ctx) {
-        handlePatch(ctx, "carbohydrates");
-    }
-
-    public void updateDishFat(Context ctx) {
-        handlePatch(ctx, "fat");
-    }
-
-    public void updateDishStatus(Context ctx) {
-        handlePatch(ctx, "status");
-    }
-
-    public void updateDishAllergens(Context ctx) {
-        int id = Integer.parseInt(ctx.pathParam("id"));
-        try {
-            List<String> allergenStrings = ctx.bodyAsClass(List.class);
-            Set<Allergens> allergens = allergenStrings.stream()
-                    .map(Allergens::fromString)
-                    .collect(Collectors.toSet());
-
-            Optional<DishDTO> updated = dishDAO.updateDishField(id, "allergens", allergens);
-
-            if (updated.isPresent()) {
-                ctx.json(updated.get());
-            } else {
-                ctx.status(404).result("Dish not found");
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed to update allergens on dish {}", id, e);
-            ctx.status(400).result("Invalid input: " + e.getMessage());
-        }
-    }
-
-    public void updateDishAvailableFrom(Context ctx) {
-        handlePatch(ctx, "available_from");
-    }
-
-    public void updateDishAvailableUntil(Context ctx) {
-        handlePatch(ctx, "available_until");
-    }
-
+    /**
+     * Handles PATCH updates to a dish by field name.
+     */
     private void handlePatch(Context ctx, String field) {
         if (!PATCHABLE_FIELDS.contains(field)) {
             ctx.status(400).result("Unsupported patch field: " + field);
@@ -149,13 +112,16 @@ public class DishController {
         }
     }
 
+    /**
+     * Parses string input into the appropriate object type for partial updates.
+     */
     private Object parsePatchValue(String field, String value) {
         try {
             return switch (field) {
                 case "kcal", "protein", "carbohydrates", "fat" -> Double.parseDouble(value);
                 case "status" -> DishStatus.fromString(value);
                 case "allergens" -> Allergens.fromString(value);
-                case "available_from", "available_until" -> LocalDate.parse(value);
+                case "availableFrom", "availableUntil" -> LocalDate.parse(value);
                 default -> value;
             };
         } catch (Exception e) {
@@ -163,10 +129,60 @@ public class DishController {
         }
     }
 
+    // Individual field update endpoints
+    public void updateDishName(Context ctx)              { handlePatch(ctx, "name"); }
+    public void updateDishDescription(Context ctx)       { handlePatch(ctx, "description"); }
+    public void updateDishKcal(Context ctx)              { handlePatch(ctx, "kcal"); }
+    public void updateDishProtein(Context ctx)           { handlePatch(ctx, "protein"); }
+    public void updateDishCarbohydrates(Context ctx)     { handlePatch(ctx, "carbohydrates"); }
+    public void updateDishFat(Context ctx)               { handlePatch(ctx, "fat"); }
+    public void updateDishStatus(Context ctx)            { handlePatch(ctx, "status"); }
+    public void updateDishAvailableFrom(Context ctx)     { handlePatch(ctx, "availableFrom"); }
+    public void updateDishAvailableUntil(Context ctx)    { handlePatch(ctx, "availableUntil"); }
+
     /**
-     * Creates a new dish including its recipe and ingredients.
-     *
-     * @param ctx the HTTP context containing the full {@link DishDTO}
+     * Updates the allergens on a dish using a JSON array of strings.
+     */
+    public void updateDishAllergens(Context ctx) {
+        int id = Integer.parseInt(ctx.pathParam("id"));
+        try {
+            List<String> allergenStrings = ctx.bodyAsClass(List.class);
+            Set<Allergens> allergens = allergenStrings.stream()
+                    .map(Allergens::fromString)
+                    .collect(Collectors.toSet());
+
+            Optional<DishDTO> updated = dishDAO.updateDishField(id, "allergens", allergens);
+            updated.ifPresentOrElse(ctx::json, () -> ctx.status(404).result("Dish not found"));
+        } catch (Exception e) {
+            LOGGER.error("Failed to update allergens on dish {}", id, e);
+            ctx.status(400).result("Invalid input: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Fully updates the availability window (from/until) on a dish.
+     */
+    public void updateDishAvailability(Context ctx) {
+        int id = Integer.parseInt(ctx.pathParam("id"));
+        DishDTO dto = ctx.bodyAsClass(DishDTO.class);
+
+        if (dto.getAvailableFrom() == null || dto.getAvailableUntil() == null) {
+            ctx.status(400).result("Both availableFrom and availableUntil are required.");
+            return;
+        }
+
+        try {
+            Optional<DishDTO> updated = dishDAO.updateDishField(id, "availableFrom", dto.getAvailableFrom());
+            dishDAO.updateDishField(id, "availableUntil", dto.getAvailableUntil());
+
+            updated.ifPresentOrElse(ctx::json, () -> ctx.status(404).result("Dish not found"));
+        } catch (Exception e) {
+            ctx.status(500).result("Server error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Creates a new dish including its nested recipe and ingredients.
      */
     public void createDishWithRecipeAndIngredients(Context ctx) {
         DishDTO dto = ctx.bodyAsClass(DishDTO.class);
@@ -182,9 +198,7 @@ public class DishController {
     }
 
     /**
-     * Updates allergens and recipe on an existing dish.
-     *
-     * @param ctx the HTTP context containing updated {@link DishDTO}
+     * Updates the allergens and recipe (including ingredients) of a dish.
      */
     public void updateDishRecipeAndAllergens(Context ctx) {
         int id = Integer.parseInt(ctx.pathParam("id"));
@@ -193,7 +207,6 @@ public class DishController {
 
         try {
             DishDTO updated = dishDAO.updateDishRecipeAndAllergens(id, dto.getAllergens(), dto.getRecipe());
-
             if (updated != null) {
                 ctx.json(updated);
             } else {
@@ -206,12 +219,7 @@ public class DishController {
     }
 
     /**
-     * Validates a full {@link DishDTO} including recipe and ingredients.
-     * Responds with HTTP 400 and message if invalid.
-     *
-     * @param dto the dish to validate
-     * @param ctx the HTTP context to return errors to
-     * @return true if valid, false if not
+     * Validates a full dish structure with required fields, recipe, and ingredients.
      */
     private boolean isDishValid(DishDTO dto, Context ctx) {
         if (dto.getAllergens() == null || dto.getAllergens().isEmpty()) {
@@ -256,10 +264,7 @@ public class DishController {
     }
 
     /**
-     * Returns the top N most ordered dishes.
-     * Example: /api/dishes/most-ordered?limit=5
-     *
-     * @param ctx the HTTP context
+     * Returns a list of the most popular dishes based on order count.
      */
     public void getMostOrderedDishes(Context ctx) {
         int limit = Optional.ofNullable(ctx.queryParam("limit"))
@@ -267,6 +272,30 @@ public class DishController {
                 .orElse(5);
 
         ctx.json(dishDAO.getMostOrderedDishes(limit));
+    }
+
+    /**
+     * Returns dishes that are currently available based on today's date.
+     * If an allergen is provided as a query param, filters results to dishes that include that allergen.
+     * Example:
+     *  GET /api/dishes/available
+     *  GET /api/dishes/available?allergen=SENNEP
+     *
+     * @param ctx the HTTP context
+     */
+    public void getAvailableDishes(Context ctx) {
+        String allergenParam = ctx.queryParam("allergen");
+
+        if (allergenParam != null) {
+            try {
+                Allergens allergen = Allergens.fromString(allergenParam);
+                ctx.json(dishDAO.getAvailableDishesByAllergen(allergen));
+            } catch (IllegalArgumentException e) {
+                ctx.status(400).result("Invalid allergen: " + allergenParam);
+            }
+        } else {
+            ctx.json(dishDAO.getCurrentlyAvailableDishes());
+        }
     }
 
 }

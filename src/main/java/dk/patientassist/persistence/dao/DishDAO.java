@@ -268,4 +268,51 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             return query.getResultList().stream().map(DishDTO::new).collect(Collectors.toList());
         }
     }
+
+    /**
+     * Retrieves dishes that are currently available.
+     * A dish is considered available if:
+     * - Its status is TILGÆNGELIG
+     * - AND today's date is between availableFrom and availableUntil
+     *
+     * @return list of currently available DishDTOs
+     */
+    public List<DishDTO> getCurrentlyAvailableDishes() {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<DishDTO> query = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
+                            "FROM Dish d " +
+                            "WHERE d.status = :status " +
+                            "AND :today BETWEEN d.availableFrom AND d.availableUntil",
+                    DishDTO.class
+            );
+            query.setParameter("status", DishStatus.TILGÆNGELIG);
+            query.setParameter("today", LocalDate.now());
+            return query.getResultList();
+        }
+    }
+
+    /**
+     * Retrieves available dishes filtered by a specific allergen.
+     *
+     * @param allergen allergen to match
+     * @return list of available DishDTOs with the specified allergen
+     */
+    public List<DishDTO> getAvailableDishesByAllergen(Allergens allergen) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<DishDTO> query = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
+                            "FROM Dish d " +
+                            "WHERE d.status = :status " +
+                            "AND :today BETWEEN d.availableFrom AND d.availableUntil " +
+                            "AND :allergen MEMBER OF d.allergens",
+                    DishDTO.class
+            );
+            query.setParameter("status", DishStatus.TILGÆNGELIG);
+            query.setParameter("today", LocalDate.now());
+            query.setParameter("allergen", allergen);
+            return query.getResultList();
+        }
+    }
+
 }
