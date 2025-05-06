@@ -10,15 +10,15 @@ import dk.patientassist.security.entities.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.mindrot.jbcrypt.BCrypt;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 /**
  * Utility class used to populate the development database with test data.
- * This includes users, roles, ingredients, ingredient types, dishes, recipes, and orders.
- * <p>
- * The goal is to provide consistent sample data for development and testing purposes.
+ * This includes users, roles, ingredient types, dishes, recipes, and orders.
+ * Ensures uniqueness for ingredient types and consistent test data setup.
  */
 public class PopulateDatabase {
 
@@ -41,20 +41,19 @@ public class PopulateDatabase {
     /**
      * Entry point to trigger database population.
      *
-     * @param args ignored
+     * @param args unused
      */
     public static void main(String[] args) {
         populateDatabase();
     }
 
     /**
-     * Main method for inserting demo data into the database.
-     * This includes:
+     * Inserts demo data into the database.
      * <ul>
-     *     <li>Users with hashed passwords and roles</li>
-     *     <li>Ingredient types with unique names</li>
-     *     <li>Dishes, each with a recipe and ingredients</li>
-     *     <li>Orders linked to dishes</li>
+     *     <li>Creates roles and users</li>
+     *     <li>Creates or reuses existing ingredient types</li>
+     *     <li>Creates a dish with recipe and ingredients</li>
+     *     <li>Creates example orders</li>
      * </ul>
      */
     public static void populateDatabase() {
@@ -70,15 +69,25 @@ public class PopulateDatabase {
             createUser("Hovedkok", "1234", "HOVEDKOK", em);
             createUser("Køkken", "1234", "KØKKENPERSONALE", em);
 
-            // --- Ingredient Types ---
+            // --- Ingredient Types (find or create to prevent duplicates) ---
             Map<String, IngredientType> ingredientTypeMap = new HashMap<>();
             for (String name : ingredientNames) {
-                IngredientType type = new IngredientType(name);
-                em.persist(type);
-                ingredientTypeMap.put(name, type);
+                IngredientType existing = em.createQuery(
+                                "SELECT i FROM IngredientType i WHERE i.name = :name", IngredientType.class)
+                        .setParameter("name", name)
+                        .getResultStream()
+                        .findFirst()
+                        .orElse(null);
+
+                if (existing == null) {
+                    existing = new IngredientType(name);
+                    em.persist(existing);
+                }
+
+                ingredientTypeMap.put(name, existing);
             }
 
-            // --- Example Dish: --
+            // --- Create a Dish ---
             Dish dish = new Dish("Spaghetti med kødsovs", "Spaghetti med oksekød og tomatsauce",
                     LocalDate.now(), LocalDate.now().plusDays(7), DishStatus.TILGÆNGELIG);
             dish.setKcal(550);
@@ -88,7 +97,7 @@ public class PopulateDatabase {
             dish.setAllergens(Set.of(Allergens.GLUTEN));
             em.persist(dish);
 
-            // --- Recipe for the dish ---
+            // --- Create Recipe ---
             Recipe recipe = new Recipe();
             recipe.setTitle("Spaghetti med kødsovs");
             recipe.setInstructions("Brun kød, tilsæt tomatsauce og krydderier. Kog spaghetti og server.");
@@ -96,7 +105,7 @@ public class PopulateDatabase {
             dish.setRecipe(recipe);
             em.persist(recipe);
 
-            // --- Ingredients using predefined IngredientTypes ---
+            // --- Add Ingredients to Recipe ---
             Set<Ingredient> ingredients = Set.of(
                     new Ingredient(ingredientTypeMap.get("Pasta"), recipe),
                     new Ingredient(ingredientTypeMap.get("Oksekød"), recipe),
@@ -108,7 +117,7 @@ public class PopulateDatabase {
             ingredients.forEach(em::persist);
             recipe.setIngredients(ingredients);
 
-            // --- Orders ---
+            // --- Example Orders ---
             em.persist(new Order(1, LocalDateTime.now(), "Ekstra tomat", dish, OrderStatus.VENTER));
             em.persist(new Order(2, LocalDateTime.now(), "Ingen hvidløg", dish, OrderStatus.BEKRÆFTET));
 
@@ -123,13 +132,12 @@ public class PopulateDatabase {
     }
 
     /**
-     * Creates a user with the specified credentials and role.
-     * If the role does not exist in the database, it will be created and persisted.
+     * Creates a new user and role (if missing), hashes the password, and persists them.
      *
-     * @param username the user's username
-     * @param password the user's plaintext password (will be encrypted)
+     * @param username the username of the user
+     * @param password the plain-text password
      * @param roleName the role to assign
-     * @param em       active EntityManager for persistence context
+     * @param em       the entity manager
      */
     private static void createUser(String username, String password, String roleName, EntityManager em) {
         User user = new User();
