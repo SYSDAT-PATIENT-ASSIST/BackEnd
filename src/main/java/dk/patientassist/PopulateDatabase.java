@@ -14,11 +14,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility class used to populate the development database with test data.
- * This includes users, roles, ingredient types, dishes, recipes, and orders.
- * Ensures uniqueness for ingredient types and consistent test data setup.
+ * This includes users, roles, ingredients, ingredient types, dishes, recipes, and orders.
  */
 public class PopulateDatabase {
 
@@ -28,9 +28,6 @@ public class PopulateDatabase {
 
     private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
-    /**
-     * A list of unique ingredient names used to populate {@link IngredientType} entities.
-     */
     private static final List<String> ingredientNames = List.of(
             "Gulerod", "Kartofler", "Tomat", "Smør", "Mælk", "Løg", "Hvidløg", "Persille",
             "Kylling", "Rejer", "Ris", "Æg", "Rugbrød", "Citron", "Dild", "Pasta",
@@ -38,38 +35,23 @@ public class PopulateDatabase {
             "Revet ost", "Spidskommen", "Bouillon"
     );
 
-    /**
-     * Entry point to trigger database population.
-     *
-     * @param args unused
-     */
     public static void main(String[] args) {
         populateDatabase();
     }
 
-    /**
-     * Inserts demo data into the database.
-     * <ul>
-     *     <li>Creates roles and users</li>
-     *     <li>Creates or reuses existing ingredient types</li>
-     *     <li>Creates a dish with recipe and ingredients</li>
-     *     <li>Creates example orders</li>
-     * </ul>
-     */
     public static void populateDatabase() {
         EntityManager em = emf.createEntityManager();
-
         try {
             em.getTransaction().begin();
 
             // --- Users with roles ---
-            createUser("Læge", "1234", "LÆGE", em);
-            createUser("Sygeplejerske", "1234", "SYGEPLEJERSKE", em);
-            createUser("Kok", "1234", "KOK", em);
-            createUser("Hovedkok", "1234", "HOVEDKOK", em);
-            createUser("Køkken", "1234", "KØKKENPERSONALE", em);
+            createUser("læge", "1234", "LÆGE", em);
+            createUser("sygeplejerske", "1234", "SYGEPLEJERSKE", em);
+            createUser("kok", "1234", "KOK", em);
+            createUser("hovedkok", "1234", "HOVEDKOK", em);
+            createUser("køkken", "1234", "KØKKENPERSONALE", em);
 
-            // --- Ingredient Types (find or create to prevent duplicates) ---
+            // --- Ingredient Types ---
             Map<String, IngredientType> ingredientTypeMap = new HashMap<>();
             for (String name : ingredientNames) {
                 IngredientType existing = em.createQuery(
@@ -83,43 +65,47 @@ public class PopulateDatabase {
                     existing = new IngredientType(name);
                     em.persist(existing);
                 }
-
                 ingredientTypeMap.put(name, existing);
             }
 
-            // --- Create a Dish ---
-            Dish dish = new Dish("Spaghetti med kødsovs", "Spaghetti med oksekød og tomatsauce",
-                    LocalDate.now(), LocalDate.now().plusDays(7), DishStatus.TILGÆNGELIG);
-            dish.setKcal(550);
-            dish.setProtein(28);
-            dish.setCarbohydrates(60);
-            dish.setFat(20);
-            dish.setAllergens(Set.of(Allergens.GLUTEN));
-            em.persist(dish);
+            // --- Example Dishes ---
+            List<Dish> dishes = new ArrayList<>();
 
-            // --- Create Recipe ---
-            Recipe recipe = new Recipe();
-            recipe.setTitle("Spaghetti med kødsovs");
-            recipe.setInstructions("Brun kød, tilsæt tomatsauce og krydderier. Kog spaghetti og server.");
-            recipe.setDish(dish);
-            dish.setRecipe(recipe);
-            em.persist(recipe);
+            dishes.add(createDishWithRecipe(
+                    em, "Pasta Bolognese", "Med oksekød og tomatsauce",
+                    LocalDate.now(), 5, DishStatus.TILGÆNGELIG, Set.of(Allergens.GLUTEN),
+                    "Pasta med kødsovs",
+                    "Brun oksekød, tilsæt tomat og krydderier, kog pasta.",
+                    List.of("Pasta", "Oksekød", "Tomat", "Løg", "Hvidløg")));
 
-            // --- Add Ingredients to Recipe ---
-            Set<Ingredient> ingredients = Set.of(
-                    new Ingredient(ingredientTypeMap.get("Pasta"), recipe),
-                    new Ingredient(ingredientTypeMap.get("Oksekød"), recipe),
-                    new Ingredient(ingredientTypeMap.get("Tomat"), recipe),
-                    new Ingredient(ingredientTypeMap.get("Løg"), recipe),
-                    new Ingredient(ingredientTypeMap.get("Hvidløg"), recipe),
-                    new Ingredient(ingredientTypeMap.get("Spidskommen"), recipe)
-            );
-            ingredients.forEach(em::persist);
-            recipe.setIngredients(ingredients);
+            dishes.add(createDishWithRecipe(
+                    em, "Kylling i karry", "Serveres med ris",
+                    LocalDate.now(), 7, DishStatus.TILGÆNGELIG, Set.of(Allergens.SELLERI),
+                    "Karrykylling med ris",
+                    "Steg kylling, tilsæt karry og kokosmælk. Server med ris.",
+                    List.of("Kylling", "Karry", "Løg", "Ris", "Bouillon")));
 
-            // --- Example Orders ---
-            em.persist(new Order(1, LocalDateTime.now(), "Ekstra tomat", dish, OrderStatus.VENTER));
-            em.persist(new Order(2, LocalDateTime.now(), "Ingen hvidløg", dish, OrderStatus.BEKRÆFTET));
+            dishes.add(createDishWithRecipe(
+                    em, "Grøntsagslasagne", "Vegetarlasagne med ost",
+                    LocalDate.now(), 10, DishStatus.TILGÆNGELIG, Set.of(Allergens.GLUTEN, Allergens.LAKTOSE),
+                    "Ovnbagt grøntsagslasagne",
+                    "Lag squash, aubergine, tomat og ost. Bag ved 200°C i 45 min.",
+                    List.of("Lasagneplader", "Squash", "Aubergine", "Tomat", "Revet ost", "Bechamelsauce")));
+
+            dishes.add(createDishWithRecipe(
+                    em, "Rugbrød med æg og rejer", "Klassisk dansk smørrebrød",
+                    LocalDate.now(), 4, DishStatus.TILGÆNGELIG, Set.of(Allergens.GLUTEN, Allergens.SKALDYR, Allergens.ÆG),
+                    "Smørrebrød",
+                    "Kog æg, læg på rugbrød med rejer og pynt.",
+                    List.of("Rugbrød", "Æg", "Rejer", "Citron", "Dild", "Smør")));
+
+            // --- Orders ---
+            em.persist(new Order(1, LocalDateTime.now(), "Ingen hvidløg", dishes.get(0), OrderStatus.VENTER));
+            em.persist(new Order(2, LocalDateTime.now(), "Ekstra ris", dishes.get(1), OrderStatus.BEKRÆFTET));
+            em.persist(new Order(3, LocalDateTime.now(), "Ingen squash", dishes.get(2), OrderStatus.VENTER));
+            em.persist(new Order(4, LocalDateTime.now(), "Uden citron", dishes.get(3), OrderStatus.BEKRÆFTET));
+            em.persist(new Order(5, LocalDateTime.now(), "Ekstra ost", dishes.get(2), OrderStatus.AFSENDT));
+            em.persist(new Order(6, LocalDateTime.now(), "Skal være varm", dishes.get(0), OrderStatus.VENTER));
 
             em.getTransaction().commit();
             System.out.println("✅ Database populated successfully.");
@@ -131,26 +117,50 @@ public class PopulateDatabase {
         }
     }
 
-    /**
-     * Creates a new user and role (if missing), hashes the password, and persists them.
-     *
-     * @param username the username of the user
-     * @param password the plain-text password
-     * @param roleName the role to assign
-     * @param em       the entity manager
-     */
     private static void createUser(String username, String password, String roleName, EntityManager em) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-
         Role role = em.find(Role.class, roleName);
         if (role == null) {
             role = new Role(roleName);
             em.persist(role);
         }
-
         user.addRole(role);
         em.persist(user);
+    }
+
+    private static Dish createDishWithRecipe(EntityManager em, String name, String description,
+                                             LocalDate from, int daysAvailable, DishStatus status,
+                                             Set<Allergens> allergens, String recipeTitle, String instructions,
+                                             List<String> ingredientNames) {
+        Dish dish = new Dish(name, description, from, from.plusDays(daysAvailable), status);
+        dish.setKcal(400 + new Random().nextInt(200));
+        dish.setProtein(20 + new Random().nextInt(10));
+        dish.setCarbohydrates(30 + new Random().nextInt(20));
+        dish.setFat(10 + new Random().nextInt(10));
+        dish.setAllergens(allergens);
+        em.persist(dish);
+
+        Recipe recipe = new Recipe();
+        recipe.setTitle(recipeTitle);
+        recipe.setInstructions(instructions);
+        recipe.setDish(dish);
+        dish.setRecipe(recipe);
+        em.persist(recipe);
+
+        Set<Ingredient> ingredients = ingredientNames.stream()
+                .map(nameStr -> new Ingredient(findIngredientTypeByName(em, nameStr), recipe))
+                .collect(Collectors.toSet());
+        ingredients.forEach(em::persist);
+        recipe.setIngredients(ingredients);
+
+        return dish;
+    }
+
+    private static IngredientType findIngredientTypeByName(EntityManager em, String name) {
+        return em.createQuery("SELECT i FROM IngredientType i WHERE i.name = :name", IngredientType.class)
+                .setParameter("name", name)
+                .getSingleResult();
     }
 }
