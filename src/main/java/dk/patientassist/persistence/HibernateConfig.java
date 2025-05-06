@@ -36,7 +36,7 @@ public class HibernateConfig
         configuration.addAnnotatedClass(Order.class);
         configuration.addAnnotatedClass(Recipe.class);
         configuration.addAnnotatedClass(User.class);
-        configuration.addAnnotatedClass(Ingredients.class);
+        configuration.addAnnotatedClass(Ingredient.class);
         configuration.addAnnotatedClass(User.class);
         configuration.addAnnotatedClass(Role.class);
     }

@@ -7,15 +7,14 @@ import lombok.Setter;
 
 /**
  * Represents a single ingredient used in a {@link Recipe}.
- * Each ingredient has a name and is associated with one recipe.
- * Used to model the composition of dishes in the hospital's meal system.
+ * Each ingredient has a name and is linked to one recipe.
  */
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "ingredients")
-public class Ingredients {
+@Table(name = "ingredient")
+public class Ingredient {
 
     /**
      * Unique ID for the ingredient (primary key).
@@ -26,28 +25,25 @@ public class Ingredients {
     private Integer id;
 
     /**
-     * The name or label of the ingredient (e.g., "Carrot", "Salt").
+     * Name of the ingredient (e.g., "Carrot", "Salt").
      */
     @Column(name = "name", nullable = false)
     private String name;
 
     /**
      * The recipe this ingredient belongs to.
-     * Many ingredients can be part of one recipe.
      */
     @ManyToOne(optional = false)
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
 
     /**
-     * Full constructor to initialize an Ingredient entity.
+     * Constructs a new Ingredient with name and parent recipe.
      *
-     * @param id     the unique identifier of the ingredient
      * @param name   the ingredient name
-     * @param recipe the parent recipe this ingredient belongs to
+     * @param recipe the recipe it belongs to
      */
-    public Ingredients(Integer id, String name, Recipe recipe) {
-        this.id = id;
+    public Ingredient(String name, Recipe recipe) {
         this.name = name;
         this.recipe = recipe;
     }

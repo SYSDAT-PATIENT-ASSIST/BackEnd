@@ -18,6 +18,10 @@ public class DishRoutes {
                 get("/{id}", controller::getDishById, Role.ANYONE);
                 get("/filter", controller::getFilteredDishes, Role.ANYONE);
                 delete("/{id}", controller::deleteExistingDish, Role.ANYONE);
+                post("/full", controller::createDishWithRecipeAndIngredients, Role.ANYONE);
+                patch("/{id}/recipe-and-allergens", controller::updateDishRecipeAndAllergens, Role.ANYONE);
+
+
 
                 // PATCH endpoints
                 patch("/{id}/name", controller::updateDishName, Role.ANYONE);

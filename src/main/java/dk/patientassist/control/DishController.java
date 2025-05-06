@@ -10,7 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+/**
+ * Controller for handling HTTP requests related to Dish entities.
+ */
 public class DishController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DishController.class);
@@ -84,7 +92,24 @@ public class DishController {
     }
 
     public void updateDishAllergens(Context ctx) {
-        handlePatch(ctx, "allergens");
+        int id = Integer.parseInt(ctx.pathParam("id"));
+        try {
+            List<String> allergenStrings = ctx.bodyAsClass(List.class);
+            Set<Allergens> allergens = allergenStrings.stream()
+                    .map(Allergens::fromString)
+                    .collect(Collectors.toSet());
+
+            Optional<DishDTO> updated = dishDAO.updateDishField(id, "allergens", allergens);
+
+            if (updated.isPresent()) {
+                ctx.json(updated.get());
+            } else {
+                ctx.status(404).result("Dish not found");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to update allergens on dish {}", id, e);
+            ctx.status(400).result("Invalid input: " + e.getMessage());
+        }
     }
 
     public void updateDishAvailableFrom(Context ctx) {
@@ -108,19 +133,115 @@ public class DishController {
             } else {
                 ctx.status(404).result("Dish not found");
             }
-        } catch (Exception e) {
+        } catch (IllegalArgumentException | DateTimeParseException e) {
             LOGGER.warn("Patch failed on field={} for ID={} : {}", field, id, e.getMessage());
             ctx.status(400).result("Invalid input: " + e.getMessage());
         }
     }
 
     private Object parsePatchValue(String field, String value) {
-        return switch (field) {
-            case "kcal", "protein", "carbohydrates", "fat" -> Double.parseDouble(value);
-            case "status" -> DishStatus.fromString(value);
-            case "allergens" -> Allergens.fromString(value);
-            case "available_from", "available_until" -> LocalDate.parse(value);
-            default -> value;
-        };
+        try {
+            return switch (field) {
+                case "kcal", "protein", "carbohydrates", "fat" -> Double.parseDouble(value);
+                case "status" -> DishStatus.fromString(value);
+                case "allergens" -> Allergens.fromString(value);
+                case "available_from", "available_until" -> LocalDate.parse(value);
+                default -> value;
+            };
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Creates a new dish including its recipe and ingredients.
+     *
+     * @param ctx the HTTP context containing the full {@link DishDTO}
+     */
+    public void createDishWithRecipeAndIngredients(Context ctx) {
+        DishDTO dto = ctx.bodyAsClass(DishDTO.class);
+        if (!isDishValid(dto, ctx)) return;
+
+        try {
+            DishDTO created = dishDAO.createWithRecipeAndIngredients(dto);
+            ctx.status(201).json(created);
+        } catch (Exception e) {
+            LOGGER.error("Failed to create dish with recipe and ingredients", e);
+            ctx.status(500).result("Server error while creating dish with recipe and ingredients");
+        }
+    }
+
+    /**
+     * Updates allergens and recipe on an existing dish.
+     *
+     * @param ctx the HTTP context containing updated {@link DishDTO}
+     */
+    public void updateDishRecipeAndAllergens(Context ctx) {
+        int id = Integer.parseInt(ctx.pathParam("id"));
+        DishDTO dto = ctx.bodyAsClass(DishDTO.class);
+        if (!isDishValid(dto, ctx)) return;
+
+        try {
+            DishDTO updated = dishDAO.updateDishRecipeAndAllergens(id, dto.getAllergens(), dto.getRecipe());
+
+            if (updated != null) {
+                ctx.json(updated);
+            } else {
+                ctx.status(404).result("Dish not found");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to update allergens and recipe for dish {}", id, e);
+            ctx.status(500).result("Error updating dish");
+        }
+    }
+
+    /**
+     * Validates a full {@link DishDTO} including recipe and ingredients.
+     * Responds with HTTP 400 and message if invalid.
+     *
+     * @param dto the dish to validate
+     * @param ctx the HTTP context to return errors to
+     * @return true if valid, false if not
+     */
+    private boolean isDishValid(DishDTO dto, Context ctx) {
+        if (dto.getAllergens() == null || dto.getAllergens().isEmpty()) {
+            ctx.status(400).result("Allergens must not be empty.");
+            return false;
+        }
+
+        if (dto.getRecipe() == null) {
+            ctx.status(400).result("Recipe must be provided.");
+            return false;
+        }
+
+        if (dto.getRecipe().getTitle() == null || dto.getRecipe().getTitle().isBlank()) {
+            ctx.status(400).result("Recipe title is required.");
+            return false;
+        }
+
+        if (dto.getRecipe().getInstructions() == null || dto.getRecipe().getInstructions().isBlank()) {
+            ctx.status(400).result("Recipe instructions are required.");
+            return false;
+        }
+
+        if (dto.getRecipe().getIngredients() == null || dto.getRecipe().getIngredients().isEmpty()) {
+            ctx.status(400).result("At least one ingredient is required.");
+            return false;
+        }
+
+        boolean hasEmptyIngredient = dto.getRecipe().getIngredients().stream()
+                .anyMatch(i -> i.getName() == null || i.getName().isBlank());
+
+        if (hasEmptyIngredient) {
+            ctx.status(400).result("All ingredients must have a name.");
+            return false;
+        }
+
+        if (dto.getKcal() < 0 || dto.getProtein() < 0 || dto.getFat() < 0 || dto.getCarbohydrates() < 0) {
+            ctx.status(400).result("Nutritional values must be non-negative.");
+            return false;
+        }
+
+        return true;
     }
 }

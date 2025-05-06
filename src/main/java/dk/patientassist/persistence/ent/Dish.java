@@ -10,10 +10,11 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 /**
  * JPA entity representing a dish in the system.
- * Stores nutritional values, status, availability, and allergen information.
+ * Stores nutritional values, availability, status, associated allergens, and recipe.
  */
 @NoArgsConstructor
 @Getter
@@ -86,11 +87,20 @@ public class Dish {
     private double fat;
 
     /**
-     * Allergen type associated with this dish.
+     * Multiple allergens associated with this dish.
      */
+    @ElementCollection(targetClass = Allergens.class)
+    @CollectionTable(name = "dish_allergens", joinColumns = @JoinColumn(name = "dish_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "allergens", nullable = false)
-    private Allergens allergens;
+    @Column(name = "allergen")
+    private Set<Allergens> allergens;
+
+    /**
+     * One recipe associated with this dish.
+     */
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "recipe_id")
+    private Recipe recipe;
 
     /**
      * Orders that include this dish.
@@ -99,14 +109,13 @@ public class Dish {
     private List<Order> orders;
 
     /**
-     * Recipe associated with this dish.
-     */
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "recipe_id")
-    private Recipe recipe;
-
-    /**
-     * Constructor used for quick dish instantiation (status only).
+     * Constructor used for quick dish instantiation (name, description, availability, and status).
+     *
+     * @param name          the name of the dish
+     * @param description   the description of the dish
+     * @param availableFrom the date the dish is available from
+     * @param availableUntil the date the dish is available until
+     * @param status        the dish status
      */
     public Dish(String name, String description, LocalDate availableFrom, LocalDate availableUntil, DishStatus status) {
         this.name = name;
@@ -118,7 +127,8 @@ public class Dish {
 
     /**
      * Constructs a Dish entity from a {@link DishDTO}.
-     * Includes all nutritional and status fields.
+     * Includes all nutritional and status fields. Recipe and orders must be set separately.
+     *
      * @param dto the DTO containing dish data
      * @throws IllegalArgumentException if required fields are null or invalid
      */
@@ -130,8 +140,6 @@ public class Dish {
             throw new IllegalArgumentException("Available from/until dates cannot be null");
         if (dto.getAvailableFrom().isAfter(dto.getAvailableUntil()))
             throw new IllegalArgumentException("Available from date cannot be after available until date");
-        if (dto.getStatus() == null) throw new IllegalArgumentException("Dish status cannot be null");
-        if (dto.getAllergens() == null) throw new IllegalArgumentException("Allergens must be specified");
 
         this.name = dto.getName();
         this.description = dto.getDescription();
@@ -143,5 +151,15 @@ public class Dish {
         this.carbohydrates = dto.getCarbohydrates();
         this.fat = dto.getFat();
         this.allergens = dto.getAllergens();
+        // Recipe is set manually after construction (e.g., in DAO or service logic)
+    }
+
+    /**
+     * Returns the set of allergens (used for DTO mapping).
+     *
+     * @return set of allergens
+     */
+    public Set<Allergens> getAllergensSet() {
+        return allergens;
     }
 }

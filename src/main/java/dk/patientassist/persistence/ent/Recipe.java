@@ -36,34 +36,31 @@ public class Recipe {
      * Ingredients used in the recipe.
      */
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Ingredients> ingredients;
-
-    /**
-     * Dish associated with this recipe (optional).
-     */
-    @OneToOne(mappedBy = "recipe", optional = true)
-    private Dish dish;
+    private Set<Ingredient> ingredients;
 
     /**
      * Cooking or preparation instructions for the dish.
      */
-    @Column(name = "instructions", columnDefinition = "TEXT")
+    @Column(name = "instructions", columnDefinition = "TEXT", nullable = false)
     private String instructions;
 
     /**
-     * Full constructor for initializing a Recipe entity.
-     *
-     * @param id           the unique ID
-     * @param title        the recipe title
-     * @param ingredients  set of ingredients
-     * @param dish         the linked dish (optional)
-     * @param instructions step-by-step instructions
+     * Dish associated with this recipe.
      */
-    public Recipe(Integer id, String title, Set<Ingredients> ingredients, Dish dish, String instructions) {
-        this.id = id;
+    @OneToOne
+    @JoinColumn(name = "dish_id") // FK managed on this side
+    private Dish dish;
+
+    /**
+     * Full constructor excluding dish reference (set separately if needed).
+     *
+     * @param title        the title of the recipe
+     * @param ingredients  ingredients used
+     * @param instructions preparation steps
+     */
+    public Recipe(String title, Set<Ingredient> ingredients, String instructions) {
         this.title = title;
         this.ingredients = ingredients;
-        this.dish = dish;
         this.instructions = instructions;
     }
 }
