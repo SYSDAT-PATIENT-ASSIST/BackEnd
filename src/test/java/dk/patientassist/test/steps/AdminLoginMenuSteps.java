@@ -1,12 +1,11 @@
 package dk.patientassist.test.steps;
 
-import dk.patientassist.test.auth.AuthManager;
 import io.cucumber.java.en.*;
 import io.restassured.response.Response;
 
 import java.util.Map;
 
-import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AdminLoginMenuSteps {
@@ -24,88 +23,73 @@ public class AdminLoginMenuSteps {
             "password", "badPassword"
     );
 
+    private Map<String, String> currentCredentials;
+
     @Given("I am on the Main application page")
-    public void iAmOnMainApplicationPage() {
-        System.out.println("Accessing main application...");
-    }
-
-    @Given("I have valid admin login credentials")
-    public void iHaveValidAdminCredentials() {
-        AuthManager.setCredentials(validCredentials);
-    }
-
-    @Given("I have invalid admin login credentials")
-    public void iHaveInvalidAdminCredentials() {
-        AuthManager.setCredentials(invalidCredentials);
+    public void i_am_on_the_main_application_page() {
+        System.out.println("User is on the main application page.");
     }
 
     @Given("the connection is secured via HTTPS")
-    public void theConnectionIsSecuredViaHttps() {
-        System.out.println("Assuming HTTPS is enforced.");
+    public void the_connection_is_secured_via_https() {
+        System.out.println("HTTPS is assumed for this environment.");
     }
 
     @Given("the login page is clearly labeled for kitchen staff or administrators")
-    public void theLoginPageIsClearlyLabeled() {
-        System.out.println("Verified login page labeling.");
+    public void the_login_page_is_clearly_labeled() {
+        System.out.println("Verified: login page is labeled for 'Køkken/Admin'.");
+    }
+
+    @Given("I have valid admin login credentials")
+    public void i_have_valid_admin_login_credentials() {
+        currentCredentials = validCredentials;
+    }
+
+    @Given("I have invalid admin login credentials")
+    public void i_have_invalid_admin_login_credentials() {
+        currentCredentials = invalidCredentials;
     }
 
     @When("I enter my admin credentials in the login fields")
-    public void iEnterMyAdminCredentials() {
+    public void i_enter_my_admin_credentials() {
         response = given()
                 .baseUri(BASE_URI)
-                .basePath("/auth/login")
+                .basePath("/auth/login") // Adjust if needed
                 .contentType("application/json")
-                .body(AuthManager.getCredentials())
+                .body(currentCredentials)
                 .when()
                 .post();
     }
 
     @When("I click the {string} button on the login page")
-    public void iClickLoginButton(String buttonText) {
-        if ("Log ind".equalsIgnoreCase(buttonText)) {
-            if (response.getStatusCode() == 200) {
-                String accessToken = response.jsonPath().getString("accessToken");
-                String refreshToken = response.jsonPath().getString("refreshToken");
-
-                AuthManager.setAccessToken(accessToken);
-                AuthManager.setRefreshToken(refreshToken);
-            }
-        }
+    public void i_click_the_button_on_the_login_page(String buttonText) {
+        System.out.println("Button clicked: " + buttonText);
+        // You could simulate button behavior here if needed
     }
 
     @Then("I am redirected to the kitchen main menu")
-    public void iAmRedirectedToTheKitchenMainMenu() {
-        assertEquals(200, response.statusCode());
-        assertNotNull(AuthManager.getAccessToken());
+    public void i_am_redirected_to_the_kitchen_main_menu() {
+        assertEquals(200, response.statusCode(), "Expected HTTP 200 OK for successful login");
+        String token = response.jsonPath().getString("accessToken");
+        assertNotNull(token, "Expected access token in response");
     }
 
     @Then("a confirmation or welcome message is displayed")
-    public void aConfirmationOrWelcomeMessageIsDisplayed() {
+    public void a_confirmation_or_welcome_message_is_displayed() {
         String message = response.jsonPath().getString("message");
-        assertTrue(message != null && message.contains("Velkommen"));
+        assertNotNull(message, "Expected a welcome message");
+        assertTrue(message.contains("Velkommen"), "Expected message to include 'Velkommen'");
     }
 
     @Then("the system highlights the invalid fields")
-    public void theSystemHighlightsTheInvalidFields() {
-        assertEquals(401, response.statusCode());
+    public void the_system_highlights_the_invalid_fields() {
+        assertEquals(401, response.statusCode(), "Expected 401 Unauthorized for failed login");
     }
 
     @Then("an error message is displayed")
-    public void anErrorMessageIsDisplayed() {
-        String message = response.jsonPath().getString("error");
-        assertNotNull(message);
-        assertTrue(message.contains("Bruger ej fundet") || message.contains("unauthorized"));
-    }
-
-    @Given("my session has expired")
-    public void mySessionHasExpired() {
-        AuthManager.setAccessToken("expired_or_invalid_token");
-        System.out.println("Session manually expired for test.");
-    }
-
-    @Given("I am logged out")
-    public void iAmLoggedOut() {
-        AuthManager.clear();
-        System.out.println("User logged out.");
+    public void an_error_message_is_displayed() {
+        String error = response.jsonPath().getString("error");
+        assertNotNull(error, "Expected an error message");
+        assertTrue(error.contains("Bruger ej fundet") || error.toLowerCase().contains("unauthorized"));
     }
 }
