@@ -56,7 +56,7 @@ public class OrderDAO{
       try (EntityManager em = emf.createEntityManager()){
           em.getTransaction().begin();
           Order order = em.find(Order.class, orderId);
-          order.setStatus(OrderStatus.CANCELLED);
+          order.setStatus(OrderStatus.ANNULLERET);
           em.merge(order);
           em.getTransaction().commit();
           return new OrderDTO(order);

@@ -2,20 +2,22 @@ package dk.patientassist;
 
 import dk.patientassist.config.ApplicationConfig;
 import dk.patientassist.persistence.HibernateConfig;
-import jakarta.persistence.EntityManagerFactory;
+import io.javalin.Javalin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- *
- * Patient Assist
- *
- */
-public class App{
-    private static EntityManagerFactory EMF;
+public class App {
 
-    public static void main(String[] args){
+    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+
+    public static void main(String[] args) {
+        // Init Hibernate
         HibernateConfig.Init(HibernateConfig.Mode.DEV);
-        EMF = HibernateConfig.getEntityManagerFactory();
+        LOGGER.info("Hibernate initialized in DEV mode");
 
-        ApplicationConfig.startServer(7070);
+        // Start Javalin server with pre-configured routes
+        Javalin app = ApplicationConfig.startServer(7070);
+
+        LOGGER.info("Server running at http://localhost:7070");
     }
 }
