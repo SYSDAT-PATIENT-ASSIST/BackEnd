@@ -1,0 +1,25 @@
+### Create new recipe
+POST http://localhost:7070/api/recipes
+Content-Type: application/json
+
+{
+  "title": "Frikadelle-opskrift",
+  "instructions": "1. Hak løg. 2. Bland med kød. 3. Steg.",
+  "ingredients": [
+    { "name": "Hakket svinekød", "amount": "400g" },
+    { "name": "Løg", "amount": "1 stk" },
+    { "name": "Mel", "amount": "2 spsk" }
+  ]
+}
+
+### Get recipe by ID
+GET http://localhost:7070/api/recipes/1
+
+### Update recipe title
+PATCH http://localhost:7070/api/recipes/1/title
+Content-Type: text/plain
+
+Frikadelle-opskrift deluxe
+
+### Delete recipe
+DELETE http://localhost:7070/api/recipes/1
