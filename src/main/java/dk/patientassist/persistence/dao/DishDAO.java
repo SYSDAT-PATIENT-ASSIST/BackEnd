@@ -395,4 +395,25 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
         }
     }
 
+    /**
+     * Returns a list of DishDTOs sorted by number of orders in descending order.
+     *
+     * @param limit maximum number of results to return (e.g. 5 for "top 5")
+     * @return List of DishDTO sorted by popularity (most ordered first)
+     */
+    public List<DishDTO> getMostOrderedDishes(int limit) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Dish> query = em.createQuery(
+                    "SELECT d FROM Dish d LEFT JOIN d.orders o GROUP BY d ORDER BY COUNT(o) DESC",
+                    Dish.class
+            );
+            query.setMaxResults(limit);
+            return query.getResultList().stream().map(DishDTO::new).collect(Collectors.toList());
+        } catch (Exception e) {
+            LOGGER.error("Failed to retrieve most ordered dishes", e);
+            throw e;
+        }
+    }
+
+
 }

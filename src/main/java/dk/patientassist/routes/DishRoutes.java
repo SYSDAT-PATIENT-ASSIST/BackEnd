@@ -20,6 +20,7 @@ public class DishRoutes {
                 delete("/{id}", controller::deleteExistingDish, Role.ANYONE);
                 post("/full", controller::createDishWithRecipeAndIngredients, Role.ANYONE);
                 patch("/{id}/recipe-and-allergens", controller::updateDishRecipeAndAllergens, Role.ANYONE);
+                get("/most-ordered", controller::getMostOrderedDishes, Role.ANYONE);
 
 
 

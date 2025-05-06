@@ -244,4 +244,19 @@ public class DishController {
 
         return true;
     }
+
+    /**
+     * Returns the top N most ordered dishes.
+     * Example: /api/dishes/most-ordered?limit=5
+     *
+     * @param ctx the HTTP context
+     */
+    public void getMostOrderedDishes(Context ctx) {
+        int limit = Optional.ofNullable(ctx.queryParam("limit"))
+                .map(Integer::parseInt)
+                .orElse(5);
+
+        ctx.json(dishDAO.getMostOrderedDishes(limit));
+    }
+
 }
