@@ -1,7 +1,6 @@
 package dk.patientassist;
 
 import dk.patientassist.persistence.HibernateConfig;
-import dk.patientassist.persistence.dao.IngredientTypeDAO;
 import dk.patientassist.persistence.ent.*;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
@@ -11,14 +10,15 @@ import dk.patientassist.security.entities.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.mindrot.jbcrypt.BCrypt;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.*;
 
 /**
- * Utility class used to populate the development database with test data,
- * including users, roles, dishes, recipes, ingredients, and orders.
+ * Utility class used to populate the development database with test data.
+ * This includes users, roles, ingredients, ingredient types, dishes, recipes, and orders.
+ * <p>
+ * The goal is to provide consistent sample data for development and testing purposes.
  */
 public class PopulateDatabase {
 
@@ -28,81 +28,92 @@ public class PopulateDatabase {
 
     private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
+    /**
+     * A list of unique ingredient names used to populate {@link IngredientType} entities.
+     */
+    private static final List<String> ingredientNames = List.of(
+            "Gulerod", "Kartofler", "Tomat", "Smør", "Mælk", "Løg", "Hvidløg", "Persille",
+            "Kylling", "Rejer", "Ris", "Æg", "Rugbrød", "Citron", "Dild", "Pasta",
+            "Oksekød", "Karry", "Lasagneplader", "Squash", "Aubergine", "Bechamelsauce",
+            "Revet ost", "Spidskommen", "Bouillon"
+    );
+
+    /**
+     * Entry point to trigger database population.
+     *
+     * @param args ignored
+     */
     public static void main(String[] args) {
         populateDatabase();
     }
 
     /**
-     * Populates the database with sample data using unique ingredient types.
+     * Main method for inserting demo data into the database.
+     * This includes:
+     * <ul>
+     *     <li>Users with hashed passwords and roles</li>
+     *     <li>Ingredient types with unique names</li>
+     *     <li>Dishes, each with a recipe and ingredients</li>
+     *     <li>Orders linked to dishes</li>
+     * </ul>
      */
     public static void populateDatabase() {
         EntityManager em = emf.createEntityManager();
-        IngredientTypeDAO ingredientTypeDAO = new IngredientTypeDAO(emf);
 
         try {
             em.getTransaction().begin();
 
-            User doctor = createUser("laege1", "laege1234", "LÆGE", em);
-            em.persist(doctor);
+            // --- Users with roles ---
+            createUser("Læge", "1234", "LÆGE", em);
+            createUser("Sygeplejerske", "1234", "SYGEPLEJERSKE", em);
+            createUser("Kok", "1234", "KOK", em);
+            createUser("Hovedkok", "1234", "HOVEDKOK", em);
+            createUser("Køkken", "1234", "KØKKENPERSONALE", em);
 
-            User nurse = createUser("sygeplejerske1", "nurse123", "SYGEPLEJERSKE", em);
-            em.persist(nurse);
+            // --- Ingredient Types ---
+            Map<String, IngredientType> ingredientTypeMap = new HashMap<>();
+            for (String name : ingredientNames) {
+                IngredientType type = new IngredientType(name);
+                em.persist(type);
+                ingredientTypeMap.put(name, type);
+            }
 
-            User chef = createUser("kok1", "kok1234", "KOK", em);
-            em.persist(chef);
+            // --- Example Dish: --
+            Dish dish = new Dish("Spaghetti med kødsovs", "Spaghetti med oksekød og tomatsauce",
+                    LocalDate.now(), LocalDate.now().plusDays(7), DishStatus.TILGÆNGELIG);
+            dish.setKcal(550);
+            dish.setProtein(28);
+            dish.setCarbohydrates(60);
+            dish.setFat(20);
+            dish.setAllergens(Set.of(Allergens.GLUTEN));
+            em.persist(dish);
 
-            User headChef = createUser("hovedkok1", "hoved123", "HOVEDKOK", em);
-            em.persist(headChef);
+            // --- Recipe for the dish ---
+            Recipe recipe = new Recipe();
+            recipe.setTitle("Spaghetti med kødsovs");
+            recipe.setInstructions("Brun kød, tilsæt tomatsauce og krydderier. Kog spaghetti og server.");
+            recipe.setDish(dish);
+            dish.setRecipe(recipe);
+            em.persist(recipe);
 
-            User kitchenStaff = createUser("kitchen1", "kitchen1234", "KØKKENPERSONALE", em);
-            em.persist(kitchenStaff);
-
-            // Dish 1
-            Dish d1 = new Dish("Frikadeller", "Med brun sovs og kartofler",
-                    LocalDate.now(), LocalDate.now().plusWeeks(2), DishStatus.UDSOLGT);
-            d1.setKcal(500);
-            d1.setProtein(25);
-            d1.setCarbohydrates(40);
-            d1.setFat(20);
-            d1.setAllergens(Set.of(Allergens.ÆG));
-            em.persist(d1);
-
-            // Dish 2
-            Dish d2 = new Dish("Stegt flæsk", "Med persillesovs og kartofler",
-                    LocalDate.now(), LocalDate.now().plusDays(10), DishStatus.TILGÆNGELIG);
-            d2.setKcal(600);
-            d2.setProtein(35);
-            d2.setCarbohydrates(30);
-            d2.setFat(30);
-            d2.setAllergens(Set.of(Allergens.SULFITTER));
-            em.persist(d2);
-
-            // Recipe for Dish 2
-            Recipe r2 = new Recipe();
-            r2.setTitle("Traditionel dansk ret");
-            r2.setInstructions("Steg flæsket sprødt. Kog kartofler og lav persillesovs med smør og mælk.");
-            r2.setDish(d2);
-
-            Set<Ingredient> i2 = Set.of(
-                    new Ingredient(ingredientTypeDAO.findOrCreate("Flæsk", em), r2),
-                    new Ingredient(ingredientTypeDAO.findOrCreate("Kartofler", em), r2),
-                    new Ingredient(ingredientTypeDAO.findOrCreate("Persille", em), r2),
-                    new Ingredient(ingredientTypeDAO.findOrCreate("Smør", em), r2),
-                    new Ingredient(ingredientTypeDAO.findOrCreate("Mælk", em), r2)
+            // --- Ingredients using predefined IngredientTypes ---
+            Set<Ingredient> ingredients = Set.of(
+                    new Ingredient(ingredientTypeMap.get("Pasta"), recipe),
+                    new Ingredient(ingredientTypeMap.get("Oksekød"), recipe),
+                    new Ingredient(ingredientTypeMap.get("Tomat"), recipe),
+                    new Ingredient(ingredientTypeMap.get("Løg"), recipe),
+                    new Ingredient(ingredientTypeMap.get("Hvidløg"), recipe),
+                    new Ingredient(ingredientTypeMap.get("Spidskommen"), recipe)
             );
+            ingredients.forEach(em::persist);
+            recipe.setIngredients(ingredients);
 
-            r2.setIngredients(i2);
-            d2.setRecipe(r2);
-            em.persist(r2);
-            i2.forEach(em::persist);
-
-            // Orders
-            em.persist(new Order(101, LocalDateTime.now(), "Ingen løg, tak.", d1, OrderStatus.VENTER));
-            em.persist(new Order(102, LocalDateTime.now(), "Ekstra brun sovs", d2, OrderStatus.BEKRÆFTET));
+            // --- Orders ---
+            em.persist(new Order(1, LocalDateTime.now(), "Ekstra tomat", dish, OrderStatus.VENTER));
+            em.persist(new Order(2, LocalDateTime.now(), "Ingen hvidløg", dish, OrderStatus.BEKRÆFTET));
 
             em.getTransaction().commit();
             System.out.println("✅ Database populated successfully.");
-
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             e.printStackTrace();
@@ -112,15 +123,15 @@ public class PopulateDatabase {
     }
 
     /**
-     * Helper method to create a user with encrypted password and a role.
+     * Creates a user with the specified credentials and role.
+     * If the role does not exist in the database, it will be created and persisted.
      *
-     * @param username username
-     * @param password raw password
-     * @param roleName role name
-     * @param em       entity manager
-     * @return constructed user
+     * @param username the user's username
+     * @param password the user's plaintext password (will be encrypted)
+     * @param roleName the role to assign
+     * @param em       active EntityManager for persistence context
      */
-    private static User createUser(String username, String password, String roleName, EntityManager em) {
+    private static void createUser(String username, String password, String roleName, EntityManager em) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
@@ -132,6 +143,6 @@ public class PopulateDatabase {
         }
 
         user.addRole(role);
-        return user;
+        em.persist(user);
     }
 }
