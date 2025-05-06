@@ -4,6 +4,7 @@ import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.util.Set;
  */
 @Getter
 @Setter
+@NoArgsConstructor
 public class DishDTO {
 
     /**

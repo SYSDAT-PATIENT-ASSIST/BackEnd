@@ -27,6 +27,18 @@ public class IngredientDTO {
     private String name;
 
     /**
+     * Test-only constructor for IngredientDTO with name and amount.
+     *
+     * @param name   the name of the ingredient
+     * @param amount a descriptive quantity (not used in core DTO)
+     */
+    public IngredientDTO(String name, String amount) {
+        this.name = name;
+        // amount is ignored — used only in test for readability
+    }
+
+
+    /**
      * Constructs an IngredientDTO with a given name.
      * Used for incoming POST/PUT requests when ID is not yet known.
      *
