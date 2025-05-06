@@ -11,7 +11,7 @@ import java.util.List;
  * Utility class to populate the database with predefined {@link IngredientType} entries.
  * This can be run independently to ensure a fixed set of reusable ingredients is loaded into the database.
  */
-public class IngredientTypePopulator {
+public class PopulateIngredientType {
 
     static {
         HibernateConfig.Init(HibernateConfig.Mode.DEV);
