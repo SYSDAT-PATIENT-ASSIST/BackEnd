@@ -6,45 +6,45 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents a single ingredient used in a {@link Recipe}.
- * Each ingredient has a name and is linked to one recipe.
+ * Represents a usage of an ingredient within a specific recipe.
+ * Each Ingredient is linked to a {@link Recipe} and references a unique {@link IngredientType}.
  */
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "ingredient")
 public class Ingredient {
 
     /**
-     * Unique ID for the ingredient (primary key).
+     * Unique ID of this specific ingredient entry.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, updatable = false)
     private Integer id;
 
     /**
-     * Name of the ingredient (e.g., "Carrot", "Salt").
+     * The ingredient type (e.g. "Gulerod", "Smør") used in this recipe.
      */
-    @Column(name = "name", nullable = false)
-    private String name;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "ingredient_type_id", nullable = false)
+    private IngredientType type;
 
     /**
-     * The recipe this ingredient belongs to.
+     * The recipe this ingredient is part of.
      */
     @ManyToOne(optional = false)
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
 
     /**
-     * Constructs a new Ingredient with name and parent recipe.
+     * Constructs an ingredient used in a specific recipe.
      *
-     * @param name   the ingredient name
-     * @param recipe the recipe it belongs to
+     * @param type   the ingredient type
+     * @param recipe the recipe this ingredient is part of
      */
-    public Ingredient(String name, Recipe recipe) {
-        this.name = name;
+    public Ingredient(IngredientType type, Recipe recipe) {
+        this.type = type;
         this.recipe = recipe;
     }
 }
