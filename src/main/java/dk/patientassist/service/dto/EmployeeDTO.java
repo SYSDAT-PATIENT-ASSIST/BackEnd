@@ -3,6 +3,7 @@ package dk.patientassist.service.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dk.patientassist.persistence.enums.Role;
+import jakarta.persistence.Column;
 import lombok.EqualsAndHashCode;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -12,6 +13,7 @@ import org.mindrot.jbcrypt.BCrypt;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class EmployeeDTO {
     String password; // we don't ever want to read this ideally, before encryption
+    @Column(unique = true)
     @EqualsAndHashCode.Include
     @JsonProperty(required = true)
     public String email; // email == identity

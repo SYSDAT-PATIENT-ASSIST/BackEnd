@@ -3,6 +3,7 @@ package dk.patientassist;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.control.MasterController;
+import dk.patientassist.utilities.EmployeePopulator;
 import dk.patientassist.utilities.EventPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,8 @@ public class App {
             MasterController.start(Mode.DEV, 9999);
 
             /* TEST DATA */
-            EventPopulator.populate(50);
+            EmployeePopulator.addAdmin();
+            EventPopulator.populate(150);
 
         } catch (Exception e) {
 

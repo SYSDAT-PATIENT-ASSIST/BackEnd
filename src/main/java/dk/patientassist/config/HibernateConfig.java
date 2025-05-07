@@ -1,6 +1,7 @@
 package dk.patientassist.config;
 
 import dk.patientassist.persistence.ent.*;
+import dk.patientassist.security.entities.Role;
 import dk.patientassist.utilities.Utils;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
@@ -9,6 +10,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import dk.patientassist.security.entities.User;
 
 import java.util.Properties;
 
@@ -30,11 +32,15 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(Order.class);
         configuration.addAnnotatedClass(Recipe.class);
         configuration.addAnnotatedClass(User.class);
-        configuration.addAnnotatedClass(Ingredients.class);
+        configuration.addAnnotatedClass(Ingredient.class);
         configuration.addAnnotatedClass(Event.class);
         configuration.addAnnotatedClass(Employee.class);
         configuration.addAnnotatedClass(Bed.class);
         configuration.addAnnotatedClass(Section.class);
+        configuration.addAnnotatedClass(Ingredient.class);
+        configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Role.class);
+        configuration.addAnnotatedClass(IngredientType.class);
     }
 
     public static void init(Mode mode) {

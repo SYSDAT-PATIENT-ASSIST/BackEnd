@@ -120,7 +120,7 @@ public class AuthController {
                     .setParameter(1, empDetails.email)
                     .getSingleResult();
 
-            if (empDetails.checkAgainstBCryptPw(emp.password)) {
+            if (!empDetails.checkAgainstBCryptPw(emp.password)) {
                 throw new UnauthorizedResponse("Invalid password");
             }
 
