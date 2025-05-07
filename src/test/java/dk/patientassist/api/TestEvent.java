@@ -238,7 +238,6 @@ public class TestEvent {
     }
 
     /* HELPER METHODS */
-
     static String get(String endpoint, int expStatus) {
         return RestAssured.given().port(port)
                 .header("Authorization", "Bearer " + jwt)
@@ -249,10 +248,8 @@ public class TestEvent {
 
     static void register(EmployeeDTO empDetails, String pw) {
         try {
-            String empJson = jsonMapper.writeValueAsString(empDetails);
-            empJson = empJson.substring(0, empJson.indexOf('{') + 1)
-                    + String.format("\"password\": \"%s\",", pw) + empJson.substring(empJson.indexOf('{') + 1);
-            jwt = RestAssured.given().port(port).contentType("application/json").body(empJson)
+            jwt = RestAssured.given().port(port).contentType("application/json")
+                    .body(empDetails.makeRegistrationForm(pw))
                     .when().post("/api/auth/register")
                     .then().statusCode(201)
                     .and().extract().path("token");
@@ -263,10 +260,7 @@ public class TestEvent {
 
     static void login(EmployeeDTO empDetails, String pw) {
         try {
-            String empJson = jsonMapper.writeValueAsString(empDetails);
-            empJson = empJson.substring(0, empJson.indexOf('{') + 1)
-                    + String.format("\"password\": \"%s\",", pw) + empJson.substring(empJson.indexOf('{') + 1);
-            jwt = RestAssured.given().port(port).contentType("application/json").body(empJson)
+            jwt = RestAssured.given().port(port).contentType("application/json").body(empDetails.makeLoginForm(pw))
                     .when().post("/api/auth/login")
                     .then().statusCode(200)
                     .and().extract().path("token");

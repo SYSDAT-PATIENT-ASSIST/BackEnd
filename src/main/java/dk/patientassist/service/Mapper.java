@@ -19,7 +19,7 @@ public class Mapper {
         dto.middleName = ent.middleName;
         dto.lastName = ent.lastName;
         dto.email = ent.email;
-        dto.sections = ent.sections.stream().map(s -> s.id).toArray(Long[]::new);
+        dto.sections = ent.sections != null ? ent.sections.stream().map(s -> s.id).toArray(Long[]::new) : new Long[0];
         return dto;
     }
 
@@ -29,7 +29,7 @@ public class Mapper {
         ent.middleName = dto.middleName;
         ent.lastName = dto.lastName;
         ent.email = dto.email;
-        ent.roles = new HashSet<Role>(Arrays.stream(dto.roles).toList());
+        ent.roles = (dto.roles != null) ? new HashSet<Role>(Arrays.stream(dto.roles).toList()) : new HashSet<>();
         ent.sections = new HashSet<>();
         return ent;
     }
