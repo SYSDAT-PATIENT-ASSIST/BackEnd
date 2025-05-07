@@ -24,8 +24,7 @@ public class OrderDAO {
         return instance;
     }
 
-
-    //createOrder only for test
+    // createOrder only for test
     public OrderDTO createOrder(OrderDTO orderDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
@@ -41,7 +40,6 @@ public class OrderDAO {
         }
     }
 
-
     public OrderDTO getOrder(Integer orderId) {
         try (EntityManager em = emf.createEntityManager()) {
             Order order = em.find(Order.class, orderId);
@@ -53,12 +51,11 @@ public class OrderDAO {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Order order = em.find(Order.class, orderId);
-            order.setStatus(OrderStatus.CANCELLED);
+            order.setStatus(OrderStatus.ANNULLERET);
             em.merge(order);
             em.getTransaction().commit();
             return new OrderDTO(order);
         }
     }
-
 
 }

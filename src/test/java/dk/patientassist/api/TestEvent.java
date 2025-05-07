@@ -70,8 +70,8 @@ public class TestEvent {
         jav = MasterController.start(Mode.TEST, port);
 
         empData = new EmployeeData();
-        register(empData.guest);
-        register(empData.admin);
+        register(empData.guest, "guest");
+        register(empData.admin, "admin");
     }
 
     @AfterAll
@@ -247,6 +247,20 @@ public class TestEvent {
                 .and().extract().body().asString();
     }
 
+    static void register(EmployeeDTO empDetails, String pw) {
+        try {
+            String empJson = jsonMapper.writeValueAsString(empDetails);
+            empJson = empJson.substring(0, empJson.indexOf('{') + 1)
+                    + String.format("\"password\": \"%s\",", pw) + empJson.substring(empJson.indexOf('{') + 1);
+            jwt = RestAssured.given().port(port).contentType("application/json").body(empJson)
+                    .when().post("/api/auth/register")
+                    .then().statusCode(201)
+                    .and().extract().path("token");
+        } catch (Exception e) {
+            Assertions.fail("registration error");
+        }
+    }
+
     static void login(EmployeeDTO empDetails, String pw) {
         try {
             String empJson = jsonMapper.writeValueAsString(empDetails);
@@ -258,18 +272,6 @@ public class TestEvent {
                     .and().extract().path("token");
         } catch (Exception e) {
             Assertions.fail("login error");
-        }
-    }
-
-    static void register(EmployeeDTO empDetails) {
-        try {
-            String empJson = jsonMapper.writeValueAsString(empDetails);
-            jwt = RestAssured.given().port(port).contentType("application/json").body(empJson)
-                    .when().post("/api/auth/register")
-                    .then().statusCode(201)
-                    .and().extract().path("token");
-        } catch (Exception e) {
-            Assertions.fail("registration error");
         }
     }
 
