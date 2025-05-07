@@ -6,8 +6,6 @@ import lombok.EqualsAndHashCode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.Type;
-
 /**
  * Patient Assist
  */

@@ -30,6 +30,7 @@ public class EventController {
             path("/events", () -> {
                 get("/", EventController::readAll, Role.GUEST);
                 get("/{eventId}", EventController::read, Role.GUEST);
+                get("/meal-order-deadline/{date}", EventController::read, Role.GUEST);
                 put("/", EventController::create, Role.ADMIN);
                 patch("/{eventId}", EventController::update, Role.ADMIN);
                 delete("/{eventId}", EventController::remove, Role.ADMIN);
