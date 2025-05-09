@@ -9,88 +9,93 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Step definitions for managing dish menu as a Head Chef.
+ * Includes login, CRUD operations, and validation scenarios.
+ */
 public class DishMenuHeadChefStepDefinitions {
 
     private static String jwtToken;
     private Response response;
-    private Map<String, Object> dishPayload = new HashMap<>();
+    private final Map<String, Object> dishPayload = new HashMap<>();
     private final String BASE_URL = "http://localhost:7070/api/dishes";
 
+    /**
+     * Logs in as a head chef. Registers user if necessary and assigns HEAD_CHEF role.
+     */
     @Given("I am logged in as head chef")
     public void iAmLoggedInAsHeadChef() {
         String BASE_AUTH_URL = "http://localhost:7070/auth";
 
-        // Step 1: Register the user (if already exists, it will likely return 409, which is OK for tests)
         RestAssured.given()
                 .contentType("application/json")
                 .body("""
-                {
-                    "username": "chef",
-                    "password": "test123"
-                }
-            """)
+                    {
+                        "username": "chef",
+                        "password": "test123"
+                    }
+                """)
                 .post(BASE_AUTH_URL + "/register/");
 
-        // Step 2: Login
         Response loginResponse = RestAssured.given()
                 .contentType("application/json")
                 .body("""
-                {
-                    "username": "chef",
-                    "password": "test123"
-                }
-            """)
+                    {
+                        "username": "chef",
+                        "password": "test123"
+                    }
+                """)
                 .post(BASE_AUTH_URL + "/login/");
 
         Assert.assertEquals("Login failed", 200, loginResponse.getStatusCode());
-        String token = loginResponse.jsonPath().getString("token");
-        Assert.assertNotNull("Token was null", token);
+        jwtToken = loginResponse.jsonPath().getString("token");
+        Assert.assertNotNull("Token was null", jwtToken);
 
-        // Step 3: Assign "head_chef" role
         RestAssured.given()
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + jwtToken)
                 .contentType("application/json")
                 .body("""
-                {
-                    "role": "head_chef"
-                }
-            """)
+                    {
+                        "role": "head_chef"
+                    }
+                """)
                 .post(BASE_AUTH_URL + "/user/addrole/");
-
-        // Step 4: Use token for all further requests
-        RestAssured.requestSpecification = RestAssured
-                .given()
-                .header("Authorization", "Bearer " + token)
-                .contentType("application/json");
-
-        System.out.println("I am logged in as head chef");
     }
-
-
 
     @And("I am on the {string} page")
     public void iAmOnThePage(String page) {
         System.out.println("I am on the " + page + " page");
     }
 
+    /**
+     * Handles button actions like save (Gem) and delete (Fjern).
+     */
     @When("I click the {string} button")
     public void iClickTheButton(String buttonText) {
-        if (buttonText.equalsIgnoreCase("Gem")) {
-            response = RestAssured
-                    .given()
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .contentType("application/json")
-                    .body(dishPayload)
-                    .post(BASE_URL + "/new");
-        } else if (buttonText.equalsIgnoreCase("Fjern")) {
-            int dishId = (int) dishPayload.get("id");
-            response = RestAssured
-                    .given()
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .delete(BASE_URL + "/" + dishId);
+        switch (buttonText.toLowerCase()) {
+            case "tilføj" -> dishPayload.clear(); // start a new dish
+            case "rediger" -> System.out.println("Editing existing dish"); // no-op for backend
+            case "gem" -> {
+                response = RestAssured
+                        .given()
+                        .contentType("application/json")
+                        .body(dishPayload)
+                        .post(BASE_URL + "/new");
+            }
+            case "fjern" -> {
+                int dishId = (int) dishPayload.get("id");
+                response = RestAssured
+                        .given()
+                        .delete(BASE_URL + "/" + dishId);
+            }
+            default -> throw new IllegalArgumentException("Unknown button: " + buttonText);
         }
     }
 
+
+    /**
+     * Populates fields in the payload.
+     */
     @And("I enter {string} in the {string} field")
     public void iEnterInTheField(String value, String fieldName) {
         switch (fieldName.toLowerCase()) {
@@ -121,8 +126,7 @@ public class DishMenuHeadChefStepDefinitions {
 
     @And("the dish {string} should be added to the menu")
     public void theDishShouldBeAddedToTheMenu(String dishName) {
-        String name = response.jsonPath().getString("name");
-        Assert.assertEquals(dishName, name);
+        Assert.assertEquals(dishName, response.jsonPath().getString("name"));
     }
 
     @And("I should see the message {string}")
@@ -150,35 +154,21 @@ public class DishMenuHeadChefStepDefinitions {
 
     @Given("the dish {string} exists in the menu")
     public void theDishExistsInTheMenu(String dishName) {
-        response = RestAssured
-                .given()
-                .header("Authorization", "Bearer " + jwtToken)
-                .get(BASE_URL);
-
-        List<String> names = response.jsonPath().getList("name");
-        Assert.assertNotNull(names);
-        Assert.assertTrue(names.contains(dishName));
+        response = RestAssured.given().header("Authorization", "Bearer " + jwtToken).get(BASE_URL);
+        Assert.assertTrue(response.jsonPath().getList("name").contains(dishName));
     }
 
     @When("I click on {string}")
     public void iClickOn(String dishName) {
-        response = RestAssured
-                .given()
-                .header("Authorization", "Bearer " + jwtToken)
-                .get(BASE_URL);
-
+        response = RestAssured.given().header("Authorization", "Bearer " + jwtToken).get(BASE_URL);
         var dishes = response.jsonPath().getList("", Map.class);
-        var match = dishes.stream()
-                .filter(d -> d.get("name").equals(dishName))
-                .findFirst()
-                .orElseThrow();
-
+        var match = dishes.stream().filter(d -> d.get("name").equals(dishName)).findFirst().orElseThrow();
         dishPayload.put("id", match.get("id"));
     }
 
     @And("I confirm the removal in the dialog")
     public void iConfirmTheRemovalInTheDialog() {
-        // No-op for backend tests
+        // No-op for backend automation
     }
 
     @Then("the dish {string} should be removed from the menu")
@@ -188,14 +178,8 @@ public class DishMenuHeadChefStepDefinitions {
 
     @And("{string} should no longer be visible in the menu list")
     public void shouldNoLongerBeVisibleInTheMenuList(String dishName) {
-        response = RestAssured
-                .given()
-                .header("Authorization", "Bearer " + jwtToken)
-                .get(BASE_URL);
-
-        List<String> names = response.jsonPath().getList("name");
-        Assert.assertNotNull(names);
-        Assert.assertFalse(names.contains(dishName));
+        response = RestAssured.given().header("Authorization", "Bearer " + jwtToken).get(BASE_URL);
+        Assert.assertFalse(response.jsonPath().getList("name").contains(dishName));
     }
 
     @And("I change the {string} to {string}")
@@ -209,8 +193,7 @@ public class DishMenuHeadChefStepDefinitions {
             default -> field.toLowerCase();
         };
 
-        response = RestAssured
-                .given()
+        response = RestAssured.given()
                 .header("Authorization", "Bearer " + jwtToken)
                 .contentType("text/plain")
                 .body(newValue)
