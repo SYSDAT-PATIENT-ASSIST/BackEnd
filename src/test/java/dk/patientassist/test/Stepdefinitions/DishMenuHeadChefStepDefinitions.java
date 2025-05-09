@@ -20,34 +20,44 @@ public class DishMenuHeadChefStepDefinitions {
     public void iAmLoggedInAsHeadChef() {
         String BASE_AUTH_URL = "http://localhost:7070/auth";
 
-        // Register the user (you may want to skip this if user already exists)
+        // Step 1: Register the user (if already exists, it will likely return 409, which is OK for tests)
         RestAssured.given()
                 .contentType("application/json")
                 .body("""
-                    {
-                        "username": "chef",
-                        "password": "test123"
-                    }
-                  """)
+                {
+                    "username": "chef",
+                    "password": "test123"
+                }
+            """)
                 .post(BASE_AUTH_URL + "/register/");
 
-        // Login and store token
+        // Step 2: Login
         Response loginResponse = RestAssured.given()
                 .contentType("application/json")
                 .body("""
-                    {
-                        "username": "chef",
-                        "password": "test123"
-                    }
-                  """)
+                {
+                    "username": "chef",
+                    "password": "test123"
+                }
+            """)
                 .post(BASE_AUTH_URL + "/login/");
 
         Assert.assertEquals("Login failed", 200, loginResponse.getStatusCode());
-
         String token = loginResponse.jsonPath().getString("token");
         Assert.assertNotNull("Token was null", token);
 
-        // Set default auth header for all future requests
+        // Step 3: Assign "head_chef" role
+        RestAssured.given()
+                .header("Authorization", "Bearer " + token)
+                .contentType("application/json")
+                .body("""
+                {
+                    "role": "head_chef"
+                }
+            """)
+                .post(BASE_AUTH_URL + "/user/addrole/");
+
+        // Step 4: Use token for all further requests
         RestAssured.requestSpecification = RestAssured
                 .given()
                 .header("Authorization", "Bearer " + token)
@@ -55,6 +65,7 @@ public class DishMenuHeadChefStepDefinitions {
 
         System.out.println("I am logged in as head chef");
     }
+
 
 
     @And("I am on the {string} page")
