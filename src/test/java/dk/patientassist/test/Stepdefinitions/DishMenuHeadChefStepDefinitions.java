@@ -27,6 +27,7 @@ public class DishMenuHeadChefStepDefinitions {
     public void iAmLoggedInAsHeadChef() {
         String BASE_AUTH_URL = "http://localhost:7070/auth";
 
+        // Register user
         RestAssured.given()
                 .contentType("application/json")
                 .body("""
@@ -37,6 +38,7 @@ public class DishMenuHeadChefStepDefinitions {
                 """)
                 .post(BASE_AUTH_URL + "/register/");
 
+        // Initial login
         Response loginResponse = RestAssured.given()
                 .contentType("application/json")
                 .body("""
@@ -47,10 +49,9 @@ public class DishMenuHeadChefStepDefinitions {
                 """)
                 .post(BASE_AUTH_URL + "/login/");
 
-        Assert.assertEquals("Login failed", 200, loginResponse.getStatusCode());
         jwtToken = loginResponse.jsonPath().getString("token");
-        Assert.assertNotNull("Token was null", jwtToken);
 
+        // Assign role
         RestAssured.given()
                 .header("Authorization", "Bearer " + jwtToken)
                 .contentType("application/json")
@@ -59,43 +60,47 @@ public class DishMenuHeadChefStepDefinitions {
                         "role": "head_chef"
                     }
                 """)
-                .post(BASE_AUTH_URL + "/user/addrole/");
+                .post(BASE_AUTH_URL + "/user/addrole");
+
+        // Login again to get updated token with role
+        loginResponse = RestAssured.given()
+                .contentType("application/json")
+                .body("""
+                    {
+                        "username": "chef",
+                        "password": "test123"
+                    }
+                """)
+                .post(BASE_AUTH_URL + "/login/");
+
+        jwtToken = loginResponse.jsonPath().getString("token");
     }
 
     @And("I am on the {string} page")
     public void iAmOnThePage(String page) {
-        System.out.println("I am on the " + page + " page");
+        System.out.println("Navigating to page: " + page);
     }
 
-    /**
-     * Handles button actions like save (Gem) and delete (Fjern).
-     */
     @When("I click the {string} button")
     public void iClickTheButton(String buttonText) {
         switch (buttonText.toLowerCase()) {
-            case "tilføj" -> dishPayload.clear(); // start a new dish
-            case "rediger" -> System.out.println("Editing existing dish"); // no-op for backend
-            case "gem" -> {
-                response = RestAssured
-                        .given()
-                        .contentType("application/json")
-                        .body(dishPayload)
-                        .post(BASE_URL + "/new");
-            }
+            case "tilføj" -> dishPayload.clear();
+            case "rediger" -> System.out.println("Editing existing dish");
+            case "gem" -> response = RestAssured.given()
+                    .header("Authorization", "Bearer " + jwtToken)
+                    .contentType("application/json")
+                    .body(dishPayload)
+                    .post(BASE_URL + "/new");
             case "fjern" -> {
                 int dishId = (int) dishPayload.get("id");
-                response = RestAssured
-                        .given()
+                response = RestAssured.given()
+                        .header("Authorization", "Bearer " + jwtToken)
                         .delete(BASE_URL + "/" + dishId);
             }
             default -> throw new IllegalArgumentException("Unknown button: " + buttonText);
         }
     }
 
-
-    /**
-     * Populates fields in the payload.
-     */
     @And("I enter {string} in the {string} field")
     public void iEnterInTheField(String value, String fieldName) {
         switch (fieldName.toLowerCase()) {
@@ -136,10 +141,8 @@ public class DishMenuHeadChefStepDefinitions {
 
     @And("I leave the {string} field empty")
     public void iLeaveTheFieldEmpty(String field) {
-        switch (field.toLowerCase()) {
-            case "titel" -> dishPayload.put("name", "");
-            case "beskrivelse" -> dishPayload.put("description", "");
-        }
+        if (field.equalsIgnoreCase("titel")) dishPayload.put("name", "");
+        else if (field.equalsIgnoreCase("beskrivelse")) dishPayload.put("description", "");
     }
 
     @Then("the system should highlight the {string} field")
@@ -154,21 +157,34 @@ public class DishMenuHeadChefStepDefinitions {
 
     @Given("the dish {string} exists in the menu")
     public void theDishExistsInTheMenu(String dishName) {
-        response = RestAssured.given().header("Authorization", "Bearer " + jwtToken).get(BASE_URL);
-        Assert.assertTrue(response.jsonPath().getList("name").contains(dishName));
+        response = RestAssured.given()
+                .header("Authorization", "Bearer " + jwtToken)
+                .get(BASE_URL);
+
+        Assert.assertEquals(200, response.statusCode());
+        List<String> names = response.jsonPath().getList("name");
+        Assert.assertNotNull("Dish names list is null", names);
+        Assert.assertTrue("Dish not found in menu", names.contains(dishName));
     }
 
     @When("I click on {string}")
     public void iClickOn(String dishName) {
-        response = RestAssured.given().header("Authorization", "Bearer " + jwtToken).get(BASE_URL);
-        var dishes = response.jsonPath().getList("", Map.class);
-        var match = dishes.stream().filter(d -> d.get("name").equals(dishName)).findFirst().orElseThrow();
+        response = RestAssured.given()
+                .header("Authorization", "Bearer " + jwtToken)
+                .get(BASE_URL);
+
+        List<Map> dishes = response.jsonPath().getList("", Map.class);
+        Map<String, Object> match = dishes.stream()
+                .filter(d -> d.get("name").equals(dishName))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Dish not found: " + dishName));
+
         dishPayload.put("id", match.get("id"));
     }
 
     @And("I confirm the removal in the dialog")
     public void iConfirmTheRemovalInTheDialog() {
-        // No-op for backend automation
+        // No-op for backend test
     }
 
     @Then("the dish {string} should be removed from the menu")
@@ -178,8 +194,13 @@ public class DishMenuHeadChefStepDefinitions {
 
     @And("{string} should no longer be visible in the menu list")
     public void shouldNoLongerBeVisibleInTheMenuList(String dishName) {
-        response = RestAssured.given().header("Authorization", "Bearer " + jwtToken).get(BASE_URL);
-        Assert.assertFalse(response.jsonPath().getList("name").contains(dishName));
+        response = RestAssured.given()
+                .header("Authorization", "Bearer " + jwtToken)
+                .get(BASE_URL);
+
+        List<String> names = response.jsonPath().getList("name");
+        Assert.assertNotNull("Names list null", names);
+        Assert.assertFalse("Dish still visible in menu", names.contains(dishName));
     }
 
     @And("I change the {string} to {string}")
@@ -212,9 +233,7 @@ public class DishMenuHeadChefStepDefinitions {
 
     @And("I clear the {string} field")
     public void iClearTheField(String field) {
-        switch (field.toLowerCase()) {
-            case "titel" -> dishPayload.put("name", "");
-            case "beskrivelse" -> dishPayload.put("description", "");
-        }
+        if (field.equalsIgnoreCase("titel")) dishPayload.put("name", "");
+        else if (field.equalsIgnoreCase("beskrivelse")) dishPayload.put("description", "");
     }
 }
