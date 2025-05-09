@@ -14,6 +14,7 @@ public class DishRoutes {
         return () -> {
             path("/api/dishes", () -> {
                 // --- GET ---
+                get(controller::getAllDishes, Role.ANYONE);
                 get("/all", controller::getAllDishes, Role.ANYONE);
                 get("/{id}", controller::getDishById, Role.ANYONE);
                 get("/filter", controller::getFilteredDishes, Role.ANYONE);

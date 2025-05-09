@@ -16,7 +16,7 @@ import static io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME;
  */
 @Suite
 @SelectClasspathResource("features")
-@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "dk.patientassist.test.steps")
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "dk.patientassist.test.Stepdefinitions")
 public class RunCucumberTest {
     // No implementation required. Cucumber + JUnit 5 handles discovery.
 }
