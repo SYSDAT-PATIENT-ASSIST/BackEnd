@@ -1,5 +1,7 @@
 package dk.patientassist.test.Stepdefinitions;
 
+import dk.patientassist.persistence.enums.Allergens;
+import dk.patientassist.persistence.enums.DishStatus;
 import io.cucumber.java.en.*;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -8,6 +10,8 @@ import org.junit.Assert;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Step definitions for managing dish menu as a Head Chef.
@@ -20,14 +24,10 @@ public class DishMenuHeadChefStepDefinitions {
     private final Map<String, Object> dishPayload = new HashMap<>();
     private final String BASE_URL = "http://localhost:7070/api/dishes";
 
-    /**
-     * Logs in as a head chef. Registers user if necessary and assigns HEAD_CHEF role.
-     */
     @Given("I am logged in as head chef")
     public void iAmLoggedInAsHeadChef() {
         String BASE_AUTH_URL = "http://localhost:7070/auth";
 
-        // Register user
         RestAssured.given()
                 .contentType("application/json")
                 .body("""
@@ -38,7 +38,6 @@ public class DishMenuHeadChefStepDefinitions {
                 """)
                 .post(BASE_AUTH_URL + "/register/");
 
-        // Initial login
         Response loginResponse = RestAssured.given()
                 .contentType("application/json")
                 .body("""
@@ -51,18 +50,16 @@ public class DishMenuHeadChefStepDefinitions {
 
         jwtToken = loginResponse.jsonPath().getString("token");
 
-        // Assign role
         RestAssured.given()
                 .header("Authorization", "Bearer " + jwtToken)
                 .contentType("application/json")
                 .body("""
                     {
-                        "role": "head_chef"
+                        "role": "HEAD_CHEF"
                     }
                 """)
                 .post(BASE_AUTH_URL + "/user/addrole");
 
-        // Login again to get updated token with role
         loginResponse = RestAssured.given()
                 .contentType("application/json")
                 .body("""
@@ -118,10 +115,11 @@ public class DishMenuHeadChefStepDefinitions {
                 recipe.put("ingredients", List.of(Map.of("name", "test ingredient")));
                 dishPayload.put("recipe", recipe);
             }
+            case "status" -> dishPayload.put("status", DishStatus.fromString(value).toValue());
         }
         dishPayload.putIfAbsent("carbohydrates", 0.0);
         dishPayload.putIfAbsent("fat", 0.0);
-        dishPayload.putIfAbsent("allergens", List.of("GLUTEN"));
+        dishPayload.putIfAbsent("allergens", Set.of(Allergens.GLUTEN.name().toLowerCase()));
     }
 
     @Then("the system should validate the input")
@@ -211,13 +209,18 @@ public class DishMenuHeadChefStepDefinitions {
             case "beskrivelse" -> "description";
             case "tilgængelig fra" -> "available_from";
             case "tilgængelig til" -> "available_until";
+            case "status" -> "status";
             default -> field.toLowerCase();
         };
+
+        String valueToSend = field.equalsIgnoreCase("status")
+                ? DishStatus.fromString(newValue).toValue()
+                : newValue;
 
         response = RestAssured.given()
                 .header("Authorization", "Bearer " + jwtToken)
                 .contentType("text/plain")
-                .body(newValue)
+                .body(valueToSend)
                 .patch(BASE_URL + "/" + id + "/" + endpointField);
     }
 
