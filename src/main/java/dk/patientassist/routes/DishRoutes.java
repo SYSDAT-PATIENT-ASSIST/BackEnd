@@ -3,41 +3,40 @@ package dk.patientassist.routes;
 import dk.patientassist.control.DishController;
 import dk.patientassist.security.enums.Role;
 import io.javalin.apibuilder.EndpointGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
 /**
- * Defines all RESTful endpoints related to dish management.
- * These include endpoints for retrieving, creating, updating, and deleting dishes.
- * Routes are secured based on user roles using Javalin's role-based access control.
+ * Defines REST endpoints for managing dishes, including create, read, update, delete operations.
+ * Access to routes is restricted by user roles using Javalin's role-based system.
  */
 public class DishRoutes {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DishRoutes.class);
     private static final DishController controller = new DishController();
 
-    /**
-     * Returns an {@link EndpointGroup} containing all dish-related routes.
-     *
-     * @return the configured endpoint group for dish routes
-     */
     public static EndpointGroup getDishRoutes() {
         return () -> path("/api/dishes", () -> {
 
-            // --- GET endpoints (public access) ---
-            get(controller::getAllDishes, Role.ANYONE);
+            LOGGER.info("Registering Dish API routes");
+
+            // --- Public GET endpoints ---
+            get(controller::getAllDishes, Role.ANYONE); // fallback to /api/dishes
             get("/all", controller::getAllDishes, Role.ANYONE);
             get("/{id}", controller::getDishById, Role.ANYONE);
             get("/filter", controller::getFilteredDishes, Role.ANYONE);
             get("/available", controller::getAvailableDishes, Role.ANYONE);
             get("/most-ordered", controller::getMostOrderedDishes, Role.ANYONE);
 
-            // --- POST endpoints (for creating dishes) ---
+            // --- Create dish (requires kitchen staff or head chef) ---
             post("/new", controller::createDishWithRecipeAndIngredients, Role.KØKKENPERSONALE, Role.HOVEDKOK);
 
-            // --- DELETE endpoint (only HEAD_CHEF or ADMIN can delete) ---
+            // --- Delete dish (restricted to head chef or admin) ---
             delete("/{id}", controller::deleteExistingDish, Role.HOVEDKOK, Role.ADMIN);
 
-            // --- PATCH endpoints for updating dish fields ---
+            // --- PATCH endpoints for updating individual fields ---
             patch("/{id}/name", controller::updateDishName, Role.KØKKENPERSONALE, Role.HOVEDKOK);
             patch("/{id}/description", controller::updateDishDescription, Role.KØKKENPERSONALE, Role.HOVEDKOK);
             patch("/{id}/kcal", controller::updateDishKcal, Role.KØKKENPERSONALE, Role.HOVEDKOK);
@@ -49,6 +48,8 @@ public class DishRoutes {
             patch("/{id}/available_from", controller::updateDishAvailableFrom, Role.HOVEDKOK);
             patch("/{id}/available_until", controller::updateDishAvailableUntil, Role.HOVEDKOK);
             patch("/{id}/recipe-and-allergens", controller::updateDishRecipeAndAllergens, Role.KØKKENPERSONALE, Role.HOVEDKOK);
+
+            LOGGER.info("Dish API routes registered successfully");
         });
     }
 }
