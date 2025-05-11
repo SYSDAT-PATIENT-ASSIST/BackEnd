@@ -1,0 +1,180 @@
+### Login to get JWT token
+POST http://localhost:7070/auth/login
+Content-Type: application/json
+
+{
+  "username": "chef",
+  "password": "1234"
+}
+
+
+# =======================
+# GET ENDPOINTS (ANYONE)
+# =======================
+
+### Get all dishes (default path)
+GET {{url}}/dishes
+Accept: application/json
+
+### Get all dishes (/all path)
+GET {{url}}/dishes/all
+Accept: application/json
+
+### Get a dish by ID
+GET {{url}}/dishes/1
+Accept: application/json
+
+### Filter dishes (e.g. by status)
+GET {{url}}/dishes/filter?status=TILGÆNGELIG
+Accept: application/json
+
+### Get available dishes
+GET {{url}}/dishes/available
+Accept: application/json
+
+### Get most ordered dishes
+GET {{url}}/dishes/most-ordered
+Accept: application/json
+
+# =======================
+# POST ENDPOINT (CREATE)
+# =======================
+
+### Create a new dish (KITCHEN_STAFF or HEAD_CHEF)
+POST {{url}}/dishes/new
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "name": "Test Ret",
+  "description": "Test beskrivelse",
+  "kcal": 480,
+  "protein": 30,
+  "carbohydrates": 40,
+  "fat": 20,
+  "status": "TILGÆNGELIG",
+  "allergens": ["GLUTEN", "SELLERI"],
+  "availableFrom": "2025-05-10",
+  "availableUntil": "2025-06-10",
+  "recipe": {
+    "title": "Ny Ret",
+    "instructions": "Step 1: ..., Step 2: ...",
+    "ingredients": ["Kylling", "Ris", "Karry"]
+  }
+}
+
+# =======================
+# DELETE ENDPOINT
+# =======================
+
+### Delete a dish (HEAD_CHEF or ADMIN)
+DELETE {{url}}/dishes/1
+Authorization: Bearer {{jwt_token}}
+
+# =======================
+# PATCH ENDPOINTS (UPDATE)
+# =======================
+
+### Update name
+PATCH {{url}}/dishes/1/name
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "name": "Opdateret Navn"
+}
+
+### Update description
+PATCH {{url}}/dishes/1/description
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "description": "Opdateret beskrivelse"
+}
+
+### Update kcal
+PATCH {{url}}/dishes/1/kcal
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "kcal": 500
+}
+
+### Update protein
+PATCH {{url}}/dishes/1/protein
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "protein": 35
+}
+
+### Update carbohydrates
+PATCH {{url}}/dishes/1/carbohydrates
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "carbohydrates": 50
+}
+
+### Update fat
+PATCH {{url}}/dishes/1/fat
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "fat": 18
+}
+
+### Update status
+PATCH {{url}}/dishes/1/status
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "status": "IKKE_TILGÆNGELIG"
+}
+
+### Update allergens
+PATCH {{url}}/dishes/1/allergens
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "allergens": ["SKALDYR", "ÆG"]
+}
+
+### Update available_from
+PATCH {{url}}/dishes/1/available_from
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "availableFrom": "2025-06-01"
+}
+
+### Update available_until
+PATCH {{url}}/dishes/1/available_until
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "availableUntil": "2025-07-01"
+}
+
+### Update recipe and allergens
+PATCH {{url}}/dishes/1/recipe-and-allergens
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "recipe": {
+    "title": "Opdateret opskrift",
+    "instructions": "Nye instruktioner her...",
+    "ingredients": ["Løg", "Tomat", "Smør"]
+  },
+  "allergens": ["LAKTOSE"]
+}
