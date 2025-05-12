@@ -26,7 +26,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
         this.emf = emf;
     }
 
-    public static DishDAO getInstance(EntityManagerFactory emf) {
+    /** Thread-safe singleton */
+    public static synchronized DishDAO getInstance(EntityManagerFactory emf) {
         if (instance == null) {
             instance = new DishDAO(emf);
         }
@@ -38,7 +39,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     }
 
     private EntityManager getEntityManager() {
-        return em != null ? em : emf.createEntityManager();
+        return (em != null) ? em : emf.createEntityManager();
     }
 
     private boolean shouldClose(EntityManager em) {
@@ -49,12 +50,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public Optional<DishDTO> get(Integer id) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Fetching dish with ID={}", id);
             Dish dish = em.find(Dish.class, id);
             return Optional.ofNullable(dish).map(DishDTO::new);
-        } catch (Exception e) {
-            LOGGER.error("Failed to fetch dish with ID={}", id, e);
-            throw new RuntimeException(e);
         } finally {
             if (shouldClose(em)) em.close();
         }
@@ -64,13 +61,10 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public List<DishDTO> getAll() {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Fetching all dishes");
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d", DishDTO.class);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Failed to fetch all dishes", e);
-            throw new RuntimeException(e);
+            TypedQuery<Dish> q = em.createQuery("SELECT d FROM Dish d", Dish.class);
+            return q.getResultList().stream()
+                    .map(DishDTO::new)
+                    .collect(Collectors.toList());
         } finally {
             if (shouldClose(em)) em.close();
         }
@@ -80,15 +74,12 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public DishDTO create(DishDTO dto) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Creating dish: {}", dto.getName());
-            Dish dish = new Dish(dto);
             em.getTransaction().begin();
+            Dish dish = new Dish(dto);
             em.persist(dish);
-            em.flush();
             em.getTransaction().commit();
             return new DishDTO(dish);
         } catch (Exception e) {
-            LOGGER.error("Error creating dish", e);
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -100,11 +91,10 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public DishDTO update(Integer id, DishDTO dto) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Updating dish with ID={}", id);
+            em.getTransaction().begin();
             Dish dish = em.find(Dish.class, id);
             if (dish == null) return null;
 
-            em.getTransaction().begin();
             dish.setName(dto.getName());
             dish.setDescription(dto.getDescription());
             dish.setAvailableFrom(dto.getAvailableFrom());
@@ -115,11 +105,11 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             dish.setCarbohydrates(dto.getCarbohydrates());
             dish.setFat(dto.getFat());
             dish.setAllergens(dto.getAllergens());
+
             em.merge(dish);
             em.getTransaction().commit();
             return new DishDTO(dish);
         } catch (Exception e) {
-            LOGGER.error("Error updating dish with ID={}", id, e);
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -131,16 +121,13 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public boolean delete(Integer id) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Deleting dish with ID={}", id);
+            em.getTransaction().begin();
             Dish dish = em.find(Dish.class, id);
             if (dish == null) return false;
-
-            em.getTransaction().begin();
             em.remove(dish);
             em.getTransaction().commit();
             return true;
         } catch (Exception e) {
-            LOGGER.error("Error deleting dish with ID={}", id, e);
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -151,14 +138,11 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public List<DishDTO> getDishesByStatus(DishStatus status) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Fetching dishes with status={}", status);
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE d.status = :status", DishDTO.class);
-            query.setParameter("status", status);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Error in getDishesByStatus", e);
-            throw new RuntimeException(e);
+            TypedQuery<DishDTO> q = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE d.status = :status",
+                    DishDTO.class);
+            q.setParameter("status", status);
+            return q.getResultList();
         } finally {
             if (shouldClose(em)) em.close();
         }
@@ -167,14 +151,11 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public List<DishDTO> getDishesByAllergen(Allergens allergen) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Fetching dishes with allergen={}", allergen);
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE :allergen MEMBER OF d.allergens", DishDTO.class);
-            query.setParameter("allergen", allergen);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Error in getDishesByAllergen", e);
-            throw new RuntimeException(e);
+            TypedQuery<DishDTO> q = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d WHERE :allergen MEMBER OF d.allergens",
+                    DishDTO.class);
+            q.setParameter("allergen", allergen);
+            return q.getResultList();
         } finally {
             if (shouldClose(em)) em.close();
         }
@@ -183,16 +164,13 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public List<DishDTO> getDishesByStatusAndAllergen(DishStatus status, Allergens allergen) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Fetching dishes with status={} and allergen={}", status, allergen);
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d " +
-                            "WHERE d.status = :status AND :allergen MEMBER OF d.allergens", DishDTO.class);
-            query.setParameter("status", status);
-            query.setParameter("allergen", allergen);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Error in getDishesByStatusAndAllergen", e);
-            throw new RuntimeException(e);
+            TypedQuery<DishDTO> q = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) "
+                            + "FROM Dish d WHERE d.status = :status AND :allergen MEMBER OF d.allergens",
+                    DishDTO.class);
+            q.setParameter("status", status);
+            q.setParameter("allergen", allergen);
+            return q.getResultList();
         } finally {
             if (shouldClose(em)) em.close();
         }
@@ -201,59 +179,120 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public Optional<DishDTO> updateDishField(Integer id, String field, Object value) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Updating field '{}' on dish with ID={}", field, id);
+            em.getTransaction().begin();
             Dish dish = em.find(Dish.class, id);
             if (dish == null) return Optional.empty();
 
-            em.getTransaction().begin();
-            // Switch logic unchanged
+            switch (field) {
+                case "name"            -> dish.setName((String) value);
+                case "description"     -> dish.setDescription((String) value);
+                case "kcal"            -> dish.setKcal((Double) value);
+                case "protein"         -> dish.setProtein((Double) value);
+                case "carbohydrates"   -> dish.setCarbohydrates((Double) value);
+                case "fat"             -> dish.setFat((Double) value);
+                case "status"          -> dish.setStatus((DishStatus) value);
+                case "allergens"       -> dish.setAllergens((Set<Allergens>) value);  // only via dedicated endpoint
+                case "availableFrom"   -> dish.setAvailableFrom((LocalDate) value);
+                case "availableUntil"  -> dish.setAvailableUntil((LocalDate) value);
+                default -> throw new IllegalArgumentException("Cannot patch field: " + field);
+            }
+
             em.merge(dish);
             em.getTransaction().commit();
             return Optional.of(new DishDTO(dish));
         } catch (Exception e) {
-            LOGGER.error("Error in updateDishField", e);
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
             if (shouldClose(em)) em.close();
         }
     }
 
-    public DishDTO createWithRecipeAndIngredients(DishDTO dto) {
+    /** Single-transaction update of both availability dates */
+    public DishDTO updateAvailability(int id, LocalDate from, LocalDate until) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Creating dish with recipe and ingredients: {}", dto.getName());
             em.getTransaction().begin();
-
-            Dish dish = new Dish(dto);
-            em.persist(dish);
-            em.flush();
+            Dish dish = em.find(Dish.class, id);
+            if (dish == null) {
+                em.getTransaction().rollback();
+                return null;
+            }
+            dish.setAvailableFrom(from);
+            dish.setAvailableUntil(until);
+            em.merge(dish);
             em.getTransaction().commit();
             return new DishDTO(dish);
         } catch (Exception e) {
-            LOGGER.error("Error in createWithRecipeAndIngredients", e);
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
             if (shouldClose(em)) em.close();
         }
     }
 
+    /** Nested‐create: dish + recipe + ingredients */
+    public DishDTO createWithRecipeAndIngredients(DishDTO dto) {
+        EntityManager em = getEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            // Dish
+            Dish dish = new Dish(dto);
+            em.persist(dish);
+
+            // Recipe
+            Recipe recipe = new Recipe();
+            recipe.setTitle(dto.getRecipe().getTitle());
+            recipe.setInstructions(dto.getRecipe().getInstructions());
+            recipe.setDish(dish);
+            dish.setRecipe(recipe);
+            em.persist(recipe);
+
+            // Ingredients
+            for (var ingrDTO : dto.getRecipe().getIngredients()) {
+                String name = ingrDTO.getName();
+                IngredientType type = em.createQuery(
+                                "SELECT t FROM IngredientType t WHERE t.name = :n", IngredientType.class)
+                        .setParameter("n", name)
+                        .getResultStream()
+                        .findFirst()
+                        .orElseGet(() -> {
+                            IngredientType t = new IngredientType(name);
+                            em.persist(t);
+                            return t;
+                        });
+                Ingredient ingr = new Ingredient(type, recipe);
+                recipe.getIngredients().add(ingr);
+                em.persist(ingr);
+            }
+
+            em.getTransaction().commit();
+            return new DishDTO(dish);
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            if (shouldClose(em)) em.close();
+        }
+    }
+
+    /** Update both allergens & recipe/ingredients */
     public DishDTO updateDishRecipeAndAllergens(int dishId, Set<Allergens> allergens, RecipeDTO recipeDTO) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Updating recipe and allergens for dish ID={}", dishId);
             em.getTransaction().begin();
 
-            // Fetch dish from database
             Dish dish = em.find(Dish.class, dishId);
             if (dish == null) {
-                LOGGER.warn("Dish with ID={} not found", dishId);
+                em.getTransaction().rollback();
                 return null;
             }
 
-            // Update allergens
+            // Allergens
             dish.setAllergens(allergens);
 
-            // Create or update recipe
+            // Recipe
             Recipe recipe = dish.getRecipe();
             if (recipe == null) {
                 recipe = new Recipe();
@@ -261,47 +300,42 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
                 dish.setRecipe(recipe);
                 em.persist(recipe);
             }
-
             recipe.setTitle(recipeDTO.getTitle());
             recipe.setInstructions(recipeDTO.getInstructions());
 
-            // Clear and update ingredients
+            // Clear and re‐add ingredients
             recipe.getIngredients().clear();
             if (recipeDTO.getIngredients() != null) {
-                final Recipe finalRecipe = recipe; // make it explicitly final
-                Set<Ingredient> newIngredients = recipeDTO.getIngredients().stream()
-                        .map(i -> new Ingredient(new IngredientType(i.getName()), finalRecipe))
-                        .collect(Collectors.toSet());
-
-                recipe.setIngredients(newIngredients);
-                newIngredients.forEach(em::persist);
+                for (var ingrDTO : recipeDTO.getIngredients()) {
+                    IngredientType type = new IngredientType(ingrDTO.getName());
+                    Ingredient ingr = new Ingredient(type, recipe);
+                    recipe.getIngredients().add(ingr);
+                    em.persist(type);
+                    em.persist(ingr);
+                }
             }
 
             em.merge(dish);
             em.getTransaction().commit();
-            LOGGER.info("Successfully updated dish with ID={}", dishId);
             return new DishDTO(dish);
-
         } catch (Exception e) {
-            LOGGER.error("Error in updateDishRecipeAndAllergens", e);
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
             if (shouldClose(em)) em.close();
         }
     }
 
-
     public List<DishDTO> getMostOrderedDishes(int limit) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Fetching top {} most ordered dishes", limit);
-            TypedQuery<Dish> query = em.createQuery(
-                    "SELECT d FROM Dish d LEFT JOIN d.orders o GROUP BY d ORDER BY COUNT(o) DESC", Dish.class);
-            query.setMaxResults(limit);
-            return query.getResultList().stream().map(DishDTO::new).collect(Collectors.toList());
-        } catch (Exception e) {
-            LOGGER.error("Error in getMostOrderedDishes", e);
-            throw new RuntimeException(e);
+            TypedQuery<Dish> q = em.createQuery(
+                    "SELECT d FROM Dish d LEFT JOIN d.orders o GROUP BY d ORDER BY COUNT(o) DESC",
+                    Dish.class);
+            q.setMaxResults(limit);
+            return q.getResultList().stream()
+                    .map(DishDTO::new)
+                    .collect(Collectors.toList());
         } finally {
             if (shouldClose(em)) em.close();
         }
@@ -310,16 +344,14 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public List<DishDTO> getCurrentlyAvailableDishes() {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Fetching currently available dishes");
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
-                            "FROM Dish d WHERE d.status = :status AND :today BETWEEN d.availableFrom AND d.availableUntil", DishDTO.class);
-            query.setParameter("status", DishStatus.TILGÆNGELIG);
-            query.setParameter("today", LocalDate.now());
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Error in getCurrentlyAvailableDishes", e);
-            throw new RuntimeException(e);
+            TypedQuery<DishDTO> q = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) "
+                            + "FROM Dish d WHERE d.status = :status "
+                            + "AND :today BETWEEN d.availableFrom AND d.availableUntil",
+                    DishDTO.class);
+            q.setParameter("status", DishStatus.TILGÆNGELIG);
+            q.setParameter("today", LocalDate.now());
+            return q.getResultList();
         } finally {
             if (shouldClose(em)) em.close();
         }
@@ -328,18 +360,16 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public List<DishDTO> getAvailableDishesByAllergen(Allergens allergen) {
         EntityManager em = getEntityManager();
         try {
-            LOGGER.info("Fetching available dishes with allergen={}", allergen);
-            TypedQuery<DishDTO> query = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) FROM Dish d " +
-                            "WHERE d.status = :status AND :today BETWEEN d.availableFrom AND d.availableUntil " +
-                            "AND :allergen MEMBER OF d.allergens", DishDTO.class);
-            query.setParameter("status", DishStatus.TILGÆNGELIG);
-            query.setParameter("today", LocalDate.now());
-            query.setParameter("allergen", allergen);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOGGER.error("Error in getAvailableDishesByAllergen", e);
-            throw new RuntimeException(e);
+            TypedQuery<DishDTO> q = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) "
+                            + "FROM Dish d WHERE d.status = :status "
+                            + "AND :today BETWEEN d.availableFrom AND d.availableUntil "
+                            + "AND :allergen MEMBER OF d.allergens",
+                    DishDTO.class);
+            q.setParameter("status", DishStatus.TILGÆNGELIG);
+            q.setParameter("today", LocalDate.now());
+            q.setParameter("allergen", allergen);
+            return q.getResultList();
         } finally {
             if (shouldClose(em)) em.close();
         }

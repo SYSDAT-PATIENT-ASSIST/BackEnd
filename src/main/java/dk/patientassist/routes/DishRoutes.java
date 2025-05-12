@@ -23,8 +23,7 @@ public class DishRoutes {
             LOGGER.info("Registering Dish API routes");
 
             // --- Public GET endpoints ---
-            get(controller::getAllDishes, Role.ANYONE); // fallback to /api/dishes
-            get("/all", controller::getAllDishes, Role.ANYONE);
+            get("/all", controller::getAllDishes, Role.ADMIN, Role.ANYONE);
             get("/{id}", controller::getDishById, Role.ANYONE);
             get("/filter", controller::getFilteredDishes, Role.ANYONE);
             get("/available", controller::getAvailableDishes, Role.ANYONE);

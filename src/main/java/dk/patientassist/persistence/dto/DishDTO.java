@@ -18,72 +18,56 @@ import java.util.Set;
 @NoArgsConstructor
 public class DishDTO {
 
-    /**
-     * Unique identifier for the dish.
-     */
+    /** Unique identifier for the dish. */
     private Integer id;
 
-    /**
-     * Name of the dish.
-     */
+    /** Name of the dish. */
     private String name;
 
-    /**
-     * Description of the dish.
-     */
+    /** Description of the dish. */
     private String description;
 
-    /**
-     * Start date for dish availability.
-     */
+    /** Start date for dish availability. */
     private LocalDate availableFrom;
 
-    /**
-     * End date for dish availability.
-     */
+    /** End date for dish availability. */
     private LocalDate availableUntil;
 
-    /**
-     * Current status of the dish.
-     */
+    /** Current status of the dish. */
     private DishStatus status;
 
-    /**
-     * Energy content (kcal).
-     */
+    /** Energy content (kcal). */
     private double kcal;
 
-    /**
-     * Protein content (g).
-     */
+    /** Protein content (g). */
     private double protein;
 
-    /**
-     * Carbohydrate content (g).
-     */
+    /** Carbohydrate content (g). */
     private double carbohydrates;
 
-    /**
-     * Fat content (g).
-     */
+    /** Fat content (g). */
     private double fat;
 
-    /**
-     * Set of allergens associated with the dish.
-     */
+    /** Set of allergens associated with the dish. */
     private Set<Allergens> allergens;
 
-    /**
-     * Single recipe associated with the dish.
-     */
+    /** Single recipe associated with the dish. */
     private RecipeDTO recipe;
 
     /**
-     * Full-args constructor.
+     * Full-args constructor (without ID).
      */
-    public DishDTO(String name, String description, LocalDate availableFrom, LocalDate availableUntil,
-                   DishStatus status, double kcal, double protein, double carbohydrates, double fat,
-                   Set<Allergens> allergens, RecipeDTO recipe) {
+    public DishDTO(String name,
+                   String description,
+                   LocalDate availableFrom,
+                   LocalDate availableUntil,
+                   DishStatus status,
+                   double kcal,
+                   double protein,
+                   double carbohydrates,
+                   double fat,
+                   Set<Allergens> allergens,
+                   RecipeDTO recipe) {
         this.name = name;
         this.description = description;
         this.availableFrom = availableFrom;
@@ -111,8 +95,7 @@ public class DishDTO {
         this.protein = dish.getProtein();
         this.carbohydrates = dish.getCarbohydrates();
         this.fat = dish.getFat();
-        this.allergens = dish.getAllergensSet();
-
+        this.allergens = dish.getAllergens();
         if (dish.getRecipe() != null) {
             this.recipe = new RecipeDTO(dish.getRecipe());
         }

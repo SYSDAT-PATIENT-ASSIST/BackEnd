@@ -1,27 +1,37 @@
-### Get all dishes
-GET {{url}}/api/dishes
+# Get all dishes
+GET {{url}}api/dishes/all
 Accept: application/json
 
-### Get dish by ID
-GET {{url}}/api/dishes/1
+###
+
+# Get dish by ID
+GET {{url}}api/dishes/1
 Accept: application/json
 
-### Filtered dishes
-GET {{url}}/api/dishes/filter?keyword=flæsk
+###
+
+# Filtered (by status & allergen)
+GET {{url}}api/dishes/filter?status=TILGÆNGELIG&allergen=GLUTEN
 Accept: application/json
 
-### Get available dishes
-GET {{url}}/api/dishes/available
+###
+
+# Currently available
+GET {{url}}api/dishes/available
 Accept: application/json
 
-### Get most ordered dishes
-GET {{url}}/api/dishes/most-ordered
-Accept: application/json
+###
 
-### Create new dish
-POST {{url}}/api/dishes/new
+#Most ordered (top 5)
+GET {{url}}api/dishes/most-ordered
+Accept: application/json
+###
+
+
+# Create a new dish
+POST {{url}}api/dishes/new
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{jwt_token}}
 
 {
   "name": "Stegt flæsk",
@@ -30,40 +40,53 @@ Authorization: Bearer {{token}}
   "protein": 25,
   "carbohydrates": 20,
   "fat": 30,
-  "allergens": ["mælk"],
+  "allergens": ["LAKTOSE"],
   "availableFrom": "2025-05-11",
   "availableUntil": "2025-05-20",
-  "recipe": "Stegt flæsk, kartofler, persillesovs"
+  "recipe": {
+    "title": "Stegt flæsk med persillesovs",
+    "instructions": "Steg flæsk, kog kartofler, lav sovs",
+    "ingredients": [
+      { "name": "Flæsk" },
+      { "name": "Kartofler" },
+      { "name": "Mælk" },
+      { "name": "Persille" }
+    ]
+  }
 }
 
-### Delete dish
-DELETE {{url}}/api/dishes/1
-Authorization: Bearer {{token}}
+###
 
-### Update dish name
-PATCH {{url}}/api/dishes/1/name
+# Delete a dish
+DELETE {{url}}api/dishes/1
+Authorization: Bearer {{jwt_token}}
+
+
+###
+
+# Patch a single field (e.g. name)
+PATCH {{url}}api/dishes/1/name
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{jwt_token}}
+
+Flæskesteg med sovs
+
+###
+
+# Patch recipe and allergens
+PATCH {{url}}api/dishes/1/recipe-and-allergens
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
 
 {
-  "name": "Flæskesteg med sovs"
-}
-
-### Update kcal
-PATCH {{url}}/api/dishes/1/kcal
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "kcal": 600
-}
-
-### Update recipe and allergens
-PATCH {{url}}/api/dishes/1/recipe-and-allergens
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "recipe": "Rugbrød, rejer, citron",
-  "allergens": ["skaldyr"]
+  "recipe": {
+    "title": "Rugbrød med rejer",
+    "instructions": "Læg rejer på rugbrød, pres citron over",
+    "ingredients": [
+      { "name": "Rugbrød" },
+      { "name": "Rejer" },
+      { "name": "Citron" }
+    ]
+  },
+  "allergens": ["SKALDYR", "CITRON"]
 }
