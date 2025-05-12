@@ -14,7 +14,12 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalField;
 import java.util.List;
+import java.util.Map;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
@@ -30,7 +35,7 @@ public class EventController {
             path("/events", () -> {
                 get("/", EventController::readAll, Role.GUEST);
                 get("/{eventId}", EventController::read, Role.GUEST);
-                get("/meal-order-deadline/{date}", EventController::read, Role.GUEST);
+                get("/meal-order-deadline/{date}", EventController::mealdeadline, Role.GUEST);
                 put("/", EventController::create, Role.ADMIN);
                 patch("/{eventId}", EventController::update, Role.ADMIN);
                 delete("/{eventId}", EventController::remove, Role.ADMIN);
@@ -130,4 +135,17 @@ public class EventController {
             throw new BadRequestResponse("could not find event to delete");
         }
     }
+
+    private static void mealdeadline(@NotNull Context ctx) {
+        try {
+            String dateParam = ctx.pathParam("date");
+            LocalDate date = LocalDate.parse(dateParam, DateTimeFormatter.ISO_LOCAL_DATE);
+            Map<String, LocalDateTime> deadline = Map.of("time", date.atTime(17, 00, 00, 00));
+            ctx.json(deadline);
+            ctx.status(200);
+        } catch (Exception e) {
+            throw new BadRequestResponse("Bad Request");
+        }
+    }
+
 }
