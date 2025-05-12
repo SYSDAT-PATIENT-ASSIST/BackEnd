@@ -1,85 +1,177 @@
 package dk.patientassist.test.persistence.dao;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.persistence.dao.DishDAO;
+import dk.patientassist.persistence.dto.DishDTO;
+import dk.patientassist.persistence.dto.RecipeDTO;
+import dk.patientassist.persistence.dto.IngredientDTO;
+import dk.patientassist.persistence.enums.Allergens;
+import dk.patientassist.persistence.enums.DishStatus;
+import org.junit.jupiter.api.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Integration tests for DishDAO.
+ * <p>
+ * Exercises CRUD operations, filtering, patching, availability updates,
+ * and nested recipe/ingredient functionality.
+ */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DishDAOTest {
+    private DishDAO dao;
 
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
-
-    @Test
-    void getInstance() {
+    @BeforeAll
+    void init() {
+        // Initialize Hibernate in TEST mode (Testcontainers)
+        HibernateConfig.Init(HibernateConfig.Mode.TEST);
+        dao = DishDAO.getInstance(HibernateConfig.getEntityManagerFactory());
     }
 
     @Test
-    void setEntityManager() {
+    void testCreateAndGetById() {
+        DishDTO dto = basicDish("TestDish");
+        DishDTO created = dao.create(dto);
+        assertNotNull(created.getId(), "Created dish ID should not be null");
+
+        Optional<DishDTO> fetched = dao.get(created.getId());
+        assertTrue(fetched.isPresent(), "Fetched dish should be present");
+        assertEquals("TestDish", fetched.get().getName(), "Fetched dish name should match");
     }
 
     @Test
-    void get() {
+    void testGetAll() {
+        DishDTO d1 = dao.create(basicDish("Dish1"));
+        DishDTO d2 = dao.create(basicDish("Dish2"));
+
+        List<DishDTO> list = dao.getAll();
+        assertTrue(list.stream().anyMatch(d -> d.getName().equals("Dish1")), "Should contain Dish1");
+        assertTrue(list.stream().anyMatch(d -> d.getName().equals("Dish2")), "Should contain Dish2");
     }
 
     @Test
-    void getAll() {
+    void testUpdate() {
+        DishDTO original = dao.create(basicDish("ToUpdate"));
+        DishDTO updatedDto = basicDish("UpdatedName");
+        updatedDto.setKcal(999);
+
+        DishDTO result = dao.update(original.getId(), updatedDto);
+        assertEquals("UpdatedName", result.getName(), "Name should be updated");
+        assertEquals(999, result.getKcal(), "Kcal should be updated");
     }
 
     @Test
-    void create() {
+    void testDelete() {
+        DishDTO dto = dao.create(basicDish("ToDelete"));
+        assertTrue(dao.delete(dto.getId()), "Delete should return true");
+        assertFalse(dao.get(dto.getId()).isPresent(), "Dish should no longer exist");
     }
 
     @Test
-    void update() {
+    void testQueriesByStatusAndAllergen() {
+        DishDTO dto = basicDish("FilterDish");
+        dto.setStatus(DishStatus.TILGÆNGELIG);
+        dto.setAllergens(Set.of(Allergens.GLUTEN));
+        DishDTO created = dao.create(dto);
+
+        List<DishDTO> byStatus = dao.getDishesByStatus(DishStatus.TILGÆNGELIG);
+        assertTrue(byStatus.stream().anyMatch(d -> d.getId().equals(created.getId())));
+
+        List<DishDTO> byAllergen = dao.getDishesByAllergen(Allergens.GLUTEN);
+        assertTrue(byAllergen.stream().anyMatch(d -> d.getId().equals(created.getId())));
+
+        List<DishDTO> combined = dao.getDishesByStatusAndAllergen(DishStatus.TILGÆNGELIG, Allergens.GLUTEN);
+        assertTrue(combined.stream().anyMatch(d -> d.getId().equals(created.getId())));
     }
 
     @Test
-    void delete() {
+    void testUpdateDishField() {
+        DishDTO dto = dao.create(basicDish("PatchDish"));
+        Optional<DishDTO> patched = dao.updateDishField(dto.getId(), "name", "Patched");
+        assertTrue(patched.isPresent());
+        assertEquals("Patched", patched.get().getName());
     }
 
     @Test
-    void getDishesByStatus() {
+    void testUpdateAvailability() {
+        DishDTO dto = dao.create(basicDish("AvailDish"));
+        LocalDate from = LocalDate.now().plusDays(2);
+        LocalDate until = from.plusDays(3);
+        DishDTO updated = dao.updateAvailability(dto.getId(), from, until);
+        assertEquals(from, updated.getAvailableFrom());
+        assertEquals(until, updated.getAvailableUntil());
     }
 
     @Test
-    void getDishesByAllergen() {
+    void testCreateWithRecipeAndIngredients() {
+        RecipeDTO recipe = new RecipeDTO();
+        recipe.setTitle("R");
+        recipe.setInstructions("I");
+        IngredientDTO ing = new IngredientDTO();
+        ing.setName("Tomato");
+        recipe.setIngredients(List.of(ing));
+
+        DishDTO dto = basicDish("Full");
+        dto.setRecipe(recipe);
+        DishDTO created = dao.createWithRecipeAndIngredients(dto);
+
+        assertNotNull(created.getRecipe());
+        assertEquals("R", created.getRecipe().getTitle());
+        assertFalse(created.getRecipe().getIngredients().isEmpty());
     }
 
     @Test
-    void getDishesByStatusAndAllergen() {
+    void testUpdateDishRecipeAndAllergens() {
+        RecipeDTO recipe = new RecipeDTO();
+        recipe.setTitle("R");
+        recipe.setInstructions("I");
+        IngredientDTO ing = new IngredientDTO();
+        ing.setName("Tomato");
+        recipe.setIngredients(List.of(ing));
+
+        DishDTO dto = basicDish("FullUp");
+        dto.setRecipe(recipe);
+        dto.setAllergens(Set.of(Allergens.SESAM));
+        DishDTO created = dao.createWithRecipeAndIngredients(dto);
+
+        recipe.setTitle("R2");
+        Set<Allergens> newAll = Set.of(Allergens.GLUTEN);
+        DishDTO updated = dao.updateDishRecipeAndAllergens(created.getId(), newAll, recipe);
+
+        assertEquals("R2", updated.getRecipe().getTitle());
+        assertTrue(updated.getAllergens().contains(Allergens.GLUTEN));
     }
 
     @Test
-    void updateDishField() {
+    void testMiscQueries() {
+        dao.create(basicDish("O1"));
+        dao.create(basicDish("O2"));
+
+        dao.getMostOrderedDishes(5);
+        dao.getCurrentlyAvailableDishes();
+        dao.getAvailableDishesByAllergen(Allergens.LAKTOSE);
     }
 
-    @Test
-    void updateAvailability() {
-    }
-
-    @Test
-    void createWithRecipeAndIngredients() {
-    }
-
-    @Test
-    void updateDishRecipeAndAllergens() {
-    }
-
-    @Test
-    void getMostOrderedDishes() {
-    }
-
-    @Test
-    void getCurrentlyAvailableDishes() {
-    }
-
-    @Test
-    void getAvailableDishesByAllergen() {
+    /**
+     * Helper to create a basic DishDTO with required fields.
+     */
+    private DishDTO basicDish(String name) {
+        DishDTO dto = new DishDTO();
+        dto.setName(name);
+        dto.setDescription("D");
+        dto.setStatus(DishStatus.TILGÆNGELIG);
+        dto.setAvailableFrom(LocalDate.now().minusDays(1));
+        dto.setAvailableUntil(LocalDate.now().plusDays(1));
+        dto.setKcal(100);
+        dto.setProtein(10);
+        dto.setCarbohydrates(20);
+        dto.setFat(5);
+        dto.setAllergens(Set.of());
+        return dto;
     }
 }
