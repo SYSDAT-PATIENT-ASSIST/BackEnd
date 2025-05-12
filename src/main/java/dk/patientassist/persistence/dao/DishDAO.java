@@ -162,7 +162,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             dish.setProtein(dto.getProtein());
             dish.setCarbohydrates(dto.getCarbohydrates());
             dish.setFat(dto.getFat());
-            dish.setAllergens(dto.getAllergens());
+            dish.setAllergens(dto.getAllergens() != null ? new HashSet<>(dto.getAllergens()) : new HashSet<>());
 
             em.merge(dish);
             em.getTransaction().commit();
@@ -176,6 +176,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             if (shouldClose(em)) em.close();
         }
     }
+
 
     /**
      * Delete a dish by ID.
@@ -421,6 +422,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
     public DishDTO updateDishRecipeAndAllergens(int dishId, Set<Allergens> allergens, RecipeDTO recipeDTO) {
         LOGGER.info("Updating recipe & allergens for Dish id={}", dishId);
         EntityManager em = getEntityManager();
+
         try {
             em.getTransaction().begin();
 
@@ -431,7 +433,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
                 return null;
             }
 
-            dish.setAllergens(allergens);
+            // Safely copy allergens to avoid immutable collection issues
+            dish.setAllergens(allergens != null ? new HashSet<>(allergens) : new HashSet<>());
 
             Recipe recipe = dish.getRecipe();
             if (recipe == null) {
@@ -440,17 +443,30 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
                 dish.setRecipe(recipe);
                 em.persist(recipe);
             }
+
             recipe.setTitle(recipeDTO.getTitle());
             recipe.setInstructions(recipeDTO.getInstructions());
 
+            // Clear and rebuild ingredients
             recipe.getIngredients().clear();
+
             if (recipeDTO.getIngredients() != null) {
                 for (var ingrDTO : recipeDTO.getIngredients()) {
-                    IngredientType type = new IngredientType(ingrDTO.getName());
-                    em.persist(type);
-                    Ingredient ingr = new Ingredient(type, recipe);
-                    recipe.getIngredients().add(ingr);
-                    em.persist(ingr);
+                    String name = ingrDTO.getName();
+                    IngredientType type = em.createQuery(
+                                    "SELECT t FROM IngredientType t WHERE t.name = :name", IngredientType.class)
+                            .setParameter("name", name)
+                            .getResultStream()
+                            .findFirst()
+                            .orElseGet(() -> {
+                                IngredientType newType = new IngredientType(name);
+                                em.persist(newType);
+                                return newType;
+                            });
+
+                    Ingredient ingredient = new Ingredient(type, recipe);
+                    recipe.getIngredients().add(ingredient);
+                    em.persist(ingredient);
                 }
             }
 
@@ -458,6 +474,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             em.getTransaction().commit();
             LOGGER.debug("Updated nested recipe & allergens for Dish id={}", dishId);
             return new DishDTO(dish);
+
         } catch (Exception e) {
             LOGGER.error("Error updating nested data for Dish id={}: {}", dishId, e.getMessage(), e);
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
@@ -466,6 +483,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             if (shouldClose(em)) em.close();
         }
     }
+
 
     /**
      * Return the top-N most ordered dishes.
@@ -501,14 +519,15 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
         LOGGER.info("Querying currently available Dishes");
         EntityManager em = getEntityManager();
         try {
-            TypedQuery<DishDTO> q = em.createQuery(
-                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) "
-                            + "FROM Dish d WHERE d.status = :status "
-                            + "AND :today BETWEEN d.availableFrom AND d.availableUntil",
-                    DishDTO.class);
+            TypedQuery<Dish> q = em.createQuery(
+                    "SELECT d FROM Dish d WHERE d.status = :status AND :today BETWEEN d.availableFrom AND d.availableUntil",
+                    Dish.class);
             q.setParameter("status", DishStatus.TILGÆNGELIG);
             q.setParameter("today", LocalDate.now());
-            return q.getResultList();
+
+            return q.getResultList().stream()
+                    .map(DishDTO::new)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             LOGGER.error("Error querying available Dishes: {}", e.getMessage(), e);
             throw e;
@@ -516,6 +535,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             if (shouldClose(em)) em.close();
         }
     }
+
 
     /**
      * Get currently available dishes filtered by allergen.

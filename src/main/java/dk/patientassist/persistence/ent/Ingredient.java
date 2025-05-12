@@ -7,13 +7,7 @@ import lombok.Setter;
 
 /**
  * Represents the usage of a specific {@link IngredientType} within a {@link Recipe}.
- * <p>
- * This entity models the many-to-one relationship between ingredients and their types,
- * and the many-to-one relationship between ingredients and recipes.
- * </p>
- * <p>
- * Note: This does not store quantities or units, but can be extended in the future to support that.
- * </p>
+ * Models the many-to-one relationship between ingredients and both recipes and ingredient types.
  */
 @Getter
 @Setter
@@ -33,14 +27,14 @@ public class Ingredient {
      * Reference to the actual ingredient type (e.g., "Salt", "Gulerod").
      * Multiple Ingredient entries may share the same type.
      */
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "ingredient_type_id", nullable = false)
     private IngredientType type;
 
     /**
      * The recipe this ingredient is associated with.
      */
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
 
