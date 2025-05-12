@@ -23,7 +23,7 @@ public class App {
             MasterController.start(Mode.DEV, 9999);
 
             /* TEST DATA */
-            EventPopulator.populate(50);
+            EventPopulator.populate(250);
 
         } catch (Exception e) {
 
