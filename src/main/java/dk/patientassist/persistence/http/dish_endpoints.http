@@ -1,35 +1,44 @@
-# Get all dishes
-GET {{url}}api/dishes/all
+# List all dishes (or filter by status/allergen)
+GET {{url}}/api/dishes
+Accept: application/json
+
+###
+# Example: filter by status & allergen
+GET {{url}}/api/dishes?status=TILGÆNGELIG&allergen=GLUTEN
 Accept: application/json
 
 ###
 
 # Get dish by ID
-GET {{url}}api/dishes/1
+GET {{url}}/api/dishes/1
 Accept: application/json
 
 ###
 
-# Filtered (by status & allergen)
-GET {{url}}api/dishes/filter?status=TILGÆNGELIG&allergen=GLUTEN
+# Get currently available dishes
+GET {{url}}/api/dishes/available
+Accept: application/json
+
+###
+# Example: filter available by allergen
+GET {{url}}/api/dishes/available?allergen=LAKTOSE
 Accept: application/json
 
 ###
 
-# Currently available
-GET {{url}}api/dishes/available
+# Get popular (most-ordered) dishes (default top 5)
+GET {{url}}/api/dishes/popular
+Accept: application/json
+
+###
+# Example: top 10
+GET {{url}}/api/dishes/popular?limit=10
 Accept: application/json
 
 ###
 
-#Most ordered (top 5)
-GET {{url}}api/dishes/most-ordered
-Accept: application/json
-###
-
-
-# Create a new dish
-POST {{url}}api/dishes/new
+# Create a new dish (nested recipe & ingredients)
+POST {{url}}/api/dishes/full
 Content-Type: application/json
 Authorization: Bearer {{jwt_token}}
 
@@ -57,28 +66,43 @@ Authorization: Bearer {{jwt_token}}
 
 ###
 
-# Delete a dish
-DELETE {{url}}api/dishes/1
-Authorization: Bearer {{jwt_token}}
-
-
-###
-
-# Patch a single field (e.g. name)
-PATCH {{url}}api/dishes/1/name
+# Partially update a single field (e.g. name)
+PATCH {{url}}/api/dishes/1/name
 Content-Type: application/json
 Authorization: Bearer {{jwt_token}}
 
-Flæskesteg med sovs
+"Flæskesteg med sovs"
 
 ###
 
-# Patch recipe and allergens
-PATCH {{url}}api/dishes/1/recipe-and-allergens
+# Replace allergen set
+PUT {{url}}/api/dishes/1/allergens
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+["SKALDYR", "CITRON"]
+
+###
+
+# Update availability window
+PUT {{url}}/api/dishes/1/availability
 Content-Type: application/json
 Authorization: Bearer {{jwt_token}}
 
 {
+  "availableFrom": "2025-05-15",
+  "availableUntil": "2025-05-25"
+}
+
+###
+
+# Update recipe & allergens
+PUT {{url}}/api/dishes/1/recipe
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "allergens": ["SKALDYR", "CITRON"],
   "recipe": {
     "title": "Rugbrød med rejer",
     "instructions": "Læg rejer på rugbrød, pres citron over",
@@ -87,6 +111,11 @@ Authorization: Bearer {{jwt_token}}
       { "name": "Rejer" },
       { "name": "Citron" }
     ]
-  },
-  "allergens": ["SKALDYR", "CITRON"]
+  }
 }
+
+###
+
+# Delete a dish
+DELETE {{url}}/api/dishes/1
+Authorization: Bearer {{jwt_token}}
