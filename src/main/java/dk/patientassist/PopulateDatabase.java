@@ -1,6 +1,10 @@
 package dk.patientassist;
 
 import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.persistence.dao.DishDAO;
+import dk.patientassist.persistence.dto.DishDTO;
+import dk.patientassist.persistence.dto.IngredientDTO;
+import dk.patientassist.persistence.dto.RecipeDTO;
 import dk.patientassist.persistence.ent.*;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
@@ -37,6 +41,7 @@ public class PopulateDatabase {
 
     public static void main(String[] args) {
         populateDatabase();
+        System.out.println("Database populated with test data.");
     }
 
     public static void populateDatabase() {

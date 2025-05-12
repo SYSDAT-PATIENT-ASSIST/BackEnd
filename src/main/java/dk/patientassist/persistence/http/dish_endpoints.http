@@ -1,3 +1,7 @@
+# Health check
+GET {{url}}/api/health
+Accept: application/json
+
 # List all dishes (or filter by status/allergen)
 GET {{url}}/api/dishes
 Accept: application/json
@@ -8,13 +12,11 @@ GET {{url}}/api/dishes?status=TILGÆNGELIG&allergen=GLUTEN
 Accept: application/json
 
 ###
-
 # Get dish by ID
 GET {{url}}/api/dishes/1
 Accept: application/json
 
 ###
-
 # Get currently available dishes
 GET {{url}}/api/dishes/available
 Accept: application/json
@@ -25,7 +27,6 @@ GET {{url}}/api/dishes/available?allergen=LAKTOSE
 Accept: application/json
 
 ###
-
 # Get popular (most-ordered) dishes (default top 5)
 GET {{url}}/api/dishes/popular
 Accept: application/json
@@ -36,7 +37,25 @@ GET {{url}}/api/dishes/popular?limit=10
 Accept: application/json
 
 ###
+# Create a new dish (basic - no recipe)
+POST {{url}}/api/dishes
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
 
+{
+  "name": "Pasta Bolognese",
+  "description": "Klassisk italiensk ret",
+  "kcal": 600,
+  "protein": 30,
+  "carbohydrates": 50,
+  "fat": 20,
+  "allergens": ["GLUTEN"],
+  "availableFrom": "2025-05-12",
+  "availableUntil": "2025-05-18",
+  "status": "TILGÆNGELIG"
+}
+
+###
 # Create a new dish (nested recipe & ingredients)
 POST {{url}}/api/dishes/full
 Content-Type: application/json
@@ -65,7 +84,6 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ###
-
 # Partially update a single field (e.g. name)
 PATCH {{url}}/api/dishes/1/name
 Content-Type: application/json
@@ -74,7 +92,46 @@ Authorization: Bearer {{jwt_token}}
 "Flæskesteg med sovs"
 
 ###
+# PATCH: update availableFrom
+PATCH {{url}}/api/dishes/1/availableFrom
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
 
+"2025-05-20"
+
+###
+# PATCH: update availableUntil
+PATCH {{url}}/api/dishes/1/availableUntil
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+"2025-05-30"
+
+###
+# PATCH: update kcal
+PATCH {{url}}/api/dishes/1/kcal
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+450
+
+###
+# PATCH: update protein
+PATCH {{url}}/api/dishes/1/protein
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+35
+
+###
+# PATCH: update fat
+PATCH {{url}}/api/dishes/1/fat
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+25
+
+###
 # Replace allergen set
 PUT {{url}}/api/dishes/1/allergens
 Content-Type: application/json
@@ -83,7 +140,6 @@ Authorization: Bearer {{jwt_token}}
 ["SKALDYR", "CITRON"]
 
 ###
-
 # Update availability window
 PUT {{url}}/api/dishes/1/availability
 Content-Type: application/json
@@ -95,7 +151,6 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ###
-
 # Update recipe & allergens
 PUT {{url}}/api/dishes/1/recipe
 Content-Type: application/json
@@ -115,7 +170,6 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ###
-
 # Delete a dish
 DELETE {{url}}/api/dishes/1
 Authorization: Bearer {{jwt_token}}

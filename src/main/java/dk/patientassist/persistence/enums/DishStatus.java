@@ -19,10 +19,13 @@ public enum DishStatus {
     @JsonCreator
     public static DishStatus fromString(String key) {
         if (key == null) return null;
-        try {
-            return DishStatus.valueOf(key.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Ugyldig dish status: " + key);
+        key = key.trim().toLowerCase(); // Normalize input
+        for (DishStatus status : values()) {
+            if (status.toValue().equals(key)) {
+                return status;
+            }
         }
+        throw new IllegalArgumentException("Ugyldig dish status: " + key);
     }
+
 }

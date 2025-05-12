@@ -35,6 +35,9 @@ public class ApplicationConfig {
         app.exception(ApiException.class, ApplicationConfig::handleApiException);
         app.exception(Exception.class, ApplicationConfig::handleGeneralException);
 
+        app.get("/api/health", ctx -> ctx.result("OK"));
+
+
         app.start(port);
         return app;
     }

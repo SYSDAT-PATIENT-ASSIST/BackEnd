@@ -97,9 +97,16 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
         EntityManager em = getEntityManager();
         try {
             TypedQuery<Dish> q = em.createQuery("SELECT d FROM Dish d", Dish.class);
-            return q.getResultList().stream()
-                    .map(DishDTO::new)
-                    .collect(Collectors.toList());
+            List<Dish> dishes = q.getResultList();
+            List<DishDTO> dtoList = new ArrayList<>();
+            for (Dish dish : dishes) {
+                try {
+                    dtoList.add(new DishDTO(dish));
+                } catch (Exception ex) {
+                    LOGGER.error("Failed to convert Dish ID {}: {}", dish.getId(), ex.getMessage(), ex);
+                }
+            }
+            return dtoList;
         } catch (Exception e) {
             LOGGER.error("Error retrieving all Dishes: {}", e.getMessage(), e);
             throw e;
@@ -107,6 +114,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             if (shouldClose(em)) em.close();
         }
     }
+
 
     /**
      * Create a new dish.

@@ -38,10 +38,12 @@ public enum Allergens {
     @JsonCreator
     public static Allergens fromString(String key) {
         if (key == null) return null;
-        try {
-            return Allergens.valueOf(key.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Ugyldig allergen: " + key);
+        key = key.trim().toLowerCase();
+        for (Allergens allergen : values()) {
+            if (allergen.toValue().equals(key)) {
+                return allergen;
+            }
         }
+        throw new IllegalArgumentException("Ugyldig allergen: " + key);
     }
 }
