@@ -1,4 +1,4 @@
-package dk.patientassist.test.persistence.controller;
+package dk.patientassist.test.controller;
 
 import dk.patientassist.control.DishController;
 import dk.patientassist.persistence.dao.DishDAO;
@@ -27,6 +27,27 @@ class DishControllerTest {
         dishDAO = mock(DishDAO.class);
         controller = new DishController(dishDAO);
         ctx = mock(Context.class);
+
+        // Return ctx on status so chaining works
+        when(ctx.status(anyInt())).thenAnswer(invocation -> {
+            int status = invocation.getArgument(0);
+            System.out.println("[ctx.status] → " + status);
+            return ctx;
+        });
+
+        // Log any .json calls
+        doAnswer(invocation -> {
+            Object body = invocation.getArgument(0);
+            System.out.println("[ctx.json] → " + body);
+            return null;
+        }).when(ctx).json(any());
+
+        // Log any .result calls
+        doAnswer(invocation -> {
+            Object text = invocation.getArgument(0);
+            System.out.println("[ctx.result] → " + text);
+            return null;
+        }).when(ctx).result(anyString());
     }
 
     @Test
