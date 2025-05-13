@@ -96,7 +96,7 @@ Accept: application/json
 
 ###
 
-### Get currently available dishes
+### Get available dishes
 GET {{url}}/api/dishes/available
 Accept: application/json
 
@@ -152,7 +152,7 @@ PATCH {{url}}/api/dishes/1/kcal
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
-450
+600
 
 ###
 
@@ -161,7 +161,7 @@ PATCH {{url}}/api/dishes/1/protein
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
-35
+22
 
 ###
 
@@ -170,7 +170,7 @@ PATCH {{url}}/api/dishes/1/fat
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
-25
+11
 
 ###
 
@@ -179,7 +179,7 @@ PUT {{url}}/api/dishes/1/allergens
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
-["SKALDYR", "CITRON"]
+["SKALDYR", "SULFITTER"]
 
 ###
 
@@ -189,8 +189,8 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "availableFrom": "2025-05-15",
-  "availableUntil": "2025-05-25"
+  "availableFrom": "2025-05-25",
+  "availableUntil": "2028-05-25"
 }
 
 ###
@@ -201,7 +201,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "allergens": ["SKALDYR", "CITRON"],
+  "allergens": ["SKALDYR", "SULFITTER", "NØDDER"],
   "recipe": {
     "title": "Rugbrød med rejer",
     "instructions": "Læg rejer på rugbrød, pres citron over",
@@ -216,5 +216,5 @@ Authorization: Bearer {{token}}
 ###
 
 ### DELETE dish
-DELETE {{url}}/api/dishes/1
+DELETE {{url}}/api/dishes/7
 Authorization: Bearer {{token}}

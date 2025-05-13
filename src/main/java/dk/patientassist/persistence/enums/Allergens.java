@@ -30,6 +30,8 @@ public enum Allergens {
         return name().toLowerCase();
     }
 
+
+
     /**
      * Deserialize enum from case-insensitive string.
      * @param key input string

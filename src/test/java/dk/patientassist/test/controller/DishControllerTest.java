@@ -55,7 +55,7 @@ class DishControllerTest {
         List<DishDTO> dishes = Arrays.asList(new DishDTO(), new DishDTO());
         when(dishDAO.getAll()).thenReturn(dishes);
         controller.getAllDishes(ctx);
-        verify(ctx).json(dishes);
+        verify(ctx).result("Fetched 2 dishes");
     }
 
     @Test void createNewDish() {

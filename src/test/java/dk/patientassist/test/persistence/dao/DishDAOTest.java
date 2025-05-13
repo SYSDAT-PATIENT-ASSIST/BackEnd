@@ -5,8 +5,10 @@ import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.dto.RecipeDTO;
 import dk.patientassist.persistence.dto.IngredientDTO;
+import dk.patientassist.persistence.ent.IngredientType;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
@@ -32,6 +34,21 @@ class DishDAOTest {
         HibernateConfig.Init(HibernateConfig.Mode.TEST);
         dao = DishDAO.getInstance(HibernateConfig.getEntityManagerFactory());
     }
+
+    private void ensureIngredientTypeExists(EntityManager em, String name) {
+        em.getTransaction().begin();
+        boolean exists = em.createQuery(
+                        "SELECT COUNT(t) FROM IngredientType t WHERE t.name = :name", Long.class)
+                .setParameter("name", name)
+                .getSingleResult() > 0;
+
+        if (!exists) {
+            em.persist(new IngredientType(name));
+        }
+
+        em.getTransaction().commit();
+    }
+
 
     @Test
     void testCreateAndGetById() {
@@ -109,11 +126,16 @@ class DishDAOTest {
 
     @Test
     void testCreateWithRecipeAndIngredients() {
+        EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager();
+        ensureIngredientTypeExists(em, "Tomato");  // Ensure case-sensitive match
+
         RecipeDTO recipe = new RecipeDTO();
         recipe.setTitle("R");
         recipe.setInstructions("I");
+
         IngredientDTO ing = new IngredientDTO();
-        ing.setName("Tomato");
+        ing.setName("Tomato");  // Must match DB exactly
+
         recipe.setIngredients(List.of(ing));
 
         DishDTO dto = basicDish("Full");
@@ -127,17 +149,24 @@ class DishDAOTest {
 
     @Test
     void testUpdateDishRecipeAndAllergens() {
+        EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager();
+        ensureIngredientTypeExists(em, "Tomato");
+
         RecipeDTO recipe = new RecipeDTO();
         recipe.setTitle("R");
         recipe.setInstructions("I");
+
         IngredientDTO ing = new IngredientDTO();
         ing.setName("Tomato");
+
         recipe.setIngredients(List.of(ing));
 
         DishDTO dto = basicDish("FullUp");
         dto.setRecipe(recipe);
         dto.setAllergens(Set.of(Allergens.SESAM));
         DishDTO created = dao.createWithRecipeAndIngredients(dto);
+
+        ensureIngredientTypeExists(em, "Citron");
 
         recipe.setTitle("R2");
         Set<Allergens> newAll = Set.of(Allergens.GLUTEN);
@@ -146,6 +175,7 @@ class DishDAOTest {
         assertEquals("R2", updated.getRecipe().getTitle());
         assertTrue(updated.getAllergens().contains(Allergens.GLUTEN));
     }
+
 
     @Test
     void testMiscQueries() {

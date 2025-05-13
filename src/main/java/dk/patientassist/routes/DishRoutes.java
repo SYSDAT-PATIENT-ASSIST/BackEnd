@@ -43,8 +43,8 @@ public class DishRoutes {
                         Role.KØKKENPERSONALE, Role.HOVEDKOK);                              // nested with recipe + ingredients
 
                 // --- Partial Updates (PATCH) ---
-                patch("/{id}/availableFrom",   CONTROLLER::updateDishAvailableFrom,   Role.HOVEDKOK);
-                patch("/{id}/availableUntil",  CONTROLLER::updateDishAvailableUntil,  Role.HOVEDKOK);
+                patch("/{id}/availableFrom",   CONTROLLER::updateDishAvailableFrom,   Role.KØKKENPERSONALE, Role.HOVEDKOK);
+                patch("/{id}/availableUntil",  CONTROLLER::updateDishAvailableUntil,  Role.KØKKENPERSONALE, Role.HOVEDKOK);
                 patch("/{id}/carbohydrates",   CONTROLLER::updateDishCarbohydrates,   Role.KØKKENPERSONALE, Role.HOVEDKOK);
                 patch("/{id}/description",     CONTROLLER::updateDishDescription,     Role.KØKKENPERSONALE, Role.HOVEDKOK);
                 patch("/{id}/fat",             CONTROLLER::updateDishFat,             Role.KØKKENPERSONALE, Role.HOVEDKOK);
@@ -55,7 +55,7 @@ public class DishRoutes {
 
                 // --- Full-field Updates (PUT) ---
                 put("/{id}/allergens",   CONTROLLER::updateDishAllergens,           Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                put("/{id}/availability",CONTROLLER::updateDishAvailability,        Role.HOVEDKOK);
+                put("/{id}/availability",CONTROLLER::updateDishAvailability,        Role.KØKKENPERSONALE, Role.HOVEDKOK);
                 put("/{id}/recipe",      CONTROLLER::updateDishRecipeAndAllergens,  Role.KØKKENPERSONALE, Role.HOVEDKOK);
 
                 // --- Deletion ---
