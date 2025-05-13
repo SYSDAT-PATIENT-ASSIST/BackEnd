@@ -38,28 +38,28 @@ public class DishRoutes {
                 get("/popular", CONTROLLER::getMostOrderedDishes, Role.ANYONE);             // most ordered
 
                 // --- Creation ---
-                post("/", CONTROLLER::createNewDish, Role.KØKKENPERSONALE, Role.HOVEDKOK);  // simple creation
+                post("/", CONTROLLER::createNewDish, Role.KITCHEN_STAFF, Role.HEAD_CHEF);  // simple creation
                 post("/full", CONTROLLER::createDishWithRecipeAndIngredients,
-                        Role.KØKKENPERSONALE, Role.HOVEDKOK);                              // nested with recipe + ingredients
+                        Role.KITCHEN_STAFF, Role.HEAD_CHEF);                              // nested with recipe + ingredients
 
                 // --- Partial Updates (PATCH) ---
-                patch("/{id}/availableFrom",   CONTROLLER::updateDishAvailableFrom,   Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                patch("/{id}/availableUntil",  CONTROLLER::updateDishAvailableUntil,  Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                patch("/{id}/carbohydrates",   CONTROLLER::updateDishCarbohydrates,   Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                patch("/{id}/description",     CONTROLLER::updateDishDescription,     Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                patch("/{id}/fat",             CONTROLLER::updateDishFat,             Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                patch("/{id}/kcal",            CONTROLLER::updateDishKcal,            Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                patch("/{id}/name",            CONTROLLER::updateDishName,            Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                patch("/{id}/protein",         CONTROLLER::updateDishProtein,         Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                patch("/{id}/status",          CONTROLLER::updateDishStatus,          Role.KØKKENPERSONALE, Role.HOVEDKOK);
+                patch("/{id}/availableFrom",   CONTROLLER::updateDishAvailableFrom,   Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/availableUntil",  CONTROLLER::updateDishAvailableUntil,  Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/carbohydrates",   CONTROLLER::updateDishCarbohydrates,   Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/description",     CONTROLLER::updateDishDescription,     Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/fat",             CONTROLLER::updateDishFat,             Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/kcal",            CONTROLLER::updateDishKcal,            Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/name",            CONTROLLER::updateDishName,            Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/protein",         CONTROLLER::updateDishProtein,         Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/status",          CONTROLLER::updateDishStatus,          Role.KITCHEN_STAFF, Role.HEAD_CHEF);
 
                 // --- Full-field Updates (PUT) ---
-                put("/{id}/allergens",   CONTROLLER::updateDishAllergens,           Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                put("/{id}/availability",CONTROLLER::updateDishAvailability,        Role.KØKKENPERSONALE, Role.HOVEDKOK);
-                put("/{id}/recipe",      CONTROLLER::updateDishRecipeAndAllergens,  Role.KØKKENPERSONALE, Role.HOVEDKOK);
+                put("/{id}/allergens",   CONTROLLER::updateDishAllergens,           Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                put("/{id}/availability",CONTROLLER::updateDishAvailability,        Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                put("/{id}/recipe",      CONTROLLER::updateDishRecipeAndAllergens,  Role.KITCHEN_STAFF, Role.HEAD_CHEF);
 
                 // --- Deletion ---
-                delete("/{id}", CONTROLLER::deleteExistingDish, Role.HOVEDKOK, Role.ADMIN);
+                delete("/{id}", CONTROLLER::deleteExistingDish, Role.HEAD_CHEF, Role.ADMIN);
             });
 
             LOGGER.info("Dish API routes registered successfully");

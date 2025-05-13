@@ -570,4 +570,5 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             if (shouldClose(em)) em.close();
         }
     }
+
 }

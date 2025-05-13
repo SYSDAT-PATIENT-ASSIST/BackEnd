@@ -4,10 +4,10 @@ import io.javalin.security.RouteRole;
 
 public enum Role implements RouteRole {
     ANYONE,
-    KOK,
-    HOVEDKOK,
-    KØKKENPERSONALE,
-    LÆGE,
-    SYGEPLEJERSKE,
+    CHEF,
+    HEAD_CHEF,
+    KITCHEN_STAFF,
+    DOCTOR,
+    NURSE,
     ADMIN;
 }

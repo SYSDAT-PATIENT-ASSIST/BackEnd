@@ -7,7 +7,6 @@ import dk.patientassist.security.enums.Role;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.UnauthorizedResponse;
-import io.javalin.security.RouteRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -46,7 +45,7 @@ class AccessControllerTest {
 
     @Test
     void accessHandler_missingAuth_throws() throws Exception {
-        when(ctx.routeRoles()).thenReturn(Set.of(Role.HOVEDKOK));
+        when(ctx.routeRoles()).thenReturn(Set.of(Role.HEAD_CHEF));
         Handler fakeAuth = mock(Handler.class);
         when(mockSecController.authenticate()).thenReturn(fakeAuth);
 
@@ -82,8 +81,8 @@ class AccessControllerTest {
         assertDoesNotThrow(() -> accessController.requireRole(ctx, Role.ADMIN));
 
         UnauthorizedResponse ex = assertThrows(UnauthorizedResponse.class,
-                () -> accessController.requireRole(ctx, Role.LÆGE));
-        assertTrue(ex.getMessage().contains("Required role: LÆGE"));
+                () -> accessController.requireRole(ctx, Role.DOCTOR));
+        assertTrue(ex.getMessage().contains("Required role: DOCTOR"));
     }
 
     @Test
@@ -91,10 +90,10 @@ class AccessControllerTest {
         UserDTO user = new UserDTO("u", Set.of("KOK"));
         when(ctx.attribute("user")).thenReturn(user);
 
-        assertDoesNotThrow(() -> accessController.requireOneOfRoles(ctx, Role.KOK, Role.ADMIN));
+        assertDoesNotThrow(() -> accessController.requireOneOfRoles(ctx, Role.CHEF, Role.ADMIN));
 
         UnauthorizedResponse ex = assertThrows(UnauthorizedResponse.class,
-                () -> accessController.requireOneOfRoles(ctx, Role.ADMIN, Role.LÆGE));
+                () -> accessController.requireOneOfRoles(ctx, Role.ADMIN, Role.DOCTOR));
         assertTrue(ex.getMessage().contains("Required one of"));
     }
 }

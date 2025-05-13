@@ -50,11 +50,11 @@ public class PopulateDatabase {
             em.getTransaction().begin();
 
             // --- Users with roles ---
-            createUser("læge", "1234", "LÆGE", em);
-            createUser("sygeplejerske", "1234", "SYGEPLEJERSKE", em);
-            createUser("kok", "1234", "KOK", em);
-            createUser("hovedkok", "1234", "HOVEDKOK", em);
-            createUser("køkken", "1234", "KØKKENPERSONALE", em);
+            createUser("læge", "1234", "DOCTOR", em);
+            createUser("sygeplejerske", "1234", "NURSE", em);
+            createUser("kok", "1234", "CHEF", em);
+            createUser("hovedkok", "1234", "HEAD_CHEF", em);
+            createUser("køkkenpersonale", "1234", "KITCHEN_STAFF", em);
 
             // --- Ingredient Types ---
             Map<String, IngredientType> ingredientTypeMap = new HashMap<>();

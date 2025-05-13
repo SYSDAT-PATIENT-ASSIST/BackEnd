@@ -1,4 +1,4 @@
-@user = kikko
+@user = testing
 @pw = 1234
 
 ### 1) Health check (no authentication)
@@ -9,8 +9,8 @@ Accept: application/json
 GET {{url}}/auth/test
 Accept: application/json
 
-### 3) Register as HOVEDKOK (captures token automatically)
-POST {{url}}/auth/register?role=HOVEDKOK
+### 3) Register as HEAD_CHEF (captures token automatically)
+POST {{url}}/auth/register?role=HEAD_CHEF
 Content-Type: application/json
 
 {
@@ -34,13 +34,24 @@ Content-Type: application/json
 
 ###
 
-### 7) Add HOVEDKOK role
+### 7) Add ADMIN role
 POST {{url}}/protected/user/addrole
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "role": "HOVEDKOK"
+  "role": "ADMIN"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+### 7) Add HEAD_CHEF role
+POST {{url}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "HEAD_CHEF"
 }
 
 > {% client.global.set("token", response.body.token) %}

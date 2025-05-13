@@ -34,7 +34,7 @@ public class PopulateIngredientType {
             "Rugbrød", "Pasta", "Lasagneplader", "Ris", "Bulgur", "Couscous", "Quinoa",
 
             // Kød og fisk
-            "Kylling", "Oksekød", "Svinekød", "Fisk", "Torsk", "Laks", "Rejer", "Skinke", "Kødboller",
+            "Kylling", "Oksekød", "Svinekød", "Flæsk", "Fisk", "Torsk", "Laks", "Rejer", "Skinke", "Kødboller",
 
             // Bælgfrugter & planteproteiner
             "Røde linser", "Grønne linser", "Kikærter", "Tofu", "Edamame", "Sorte bønner",

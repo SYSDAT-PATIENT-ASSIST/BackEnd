@@ -8,11 +8,7 @@ import io.javalin.security.RouteRole;
  * Enum representing user roles in the system.
  */
 public enum Role implements RouteRole {
-    LÆGE,
-    SYGEPLEJERSKE,
-    KOK,
-    HOVEDKOK,
-    KØKKENPERSONALE;
+    ANYONE, KITCHEN_STAFF, HEAD_CHEF, ADMIN;
 
     @JsonValue
     public String toValue() {
