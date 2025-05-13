@@ -9,10 +9,11 @@ import io.javalin.security.RouteRole;
 import java.util.Arrays;
 import java.util.Set;
 
+
 /**
- * Enforces authentication and authorization on all routes.
+ * Enforces authentication and authorization on all routes using beforeMatched().
  */
-public class AccessController implements IAccessController {
+public class AccessController {
 
     private final ISecurityController securityController;
 
@@ -31,18 +32,17 @@ public class AccessController implements IAccessController {
     }
 
     /**
-     * Javalin AccessManager: called on every request.
+     * This is called on every matched route to enforce access control.
      */
-    @Override
     public void accessHandler(Context ctx) {
         Set<RouteRole> roles = ctx.routeRoles();
 
-        // 1) Public routes: no roles or ANYONE
+        // 1) Allow public routes (ANYONE or empty)
         if (roles.isEmpty() || roles.contains(Role.ANYONE)) {
             return;
         }
 
-        // 2) Authenticate (throws 401 if missing/invalid)
+        // 2) Authenticate user
         try {
             securityController.authenticate().handle(ctx);
         } catch (UnauthorizedResponse e) {
@@ -51,12 +51,11 @@ public class AccessController implements IAccessController {
             throw new UnauthorizedResponse("Invalid or missing token");
         }
 
-        // 3) Authorize
+        // 3) Authorize user
         UserDTO user = ctx.attribute("user");
         boolean allowed = securityController.authorize(user, roles);
 
         if (!allowed) {
-            // user is guaranteed non-null here
             throw new UnauthorizedResponse(
                     "Unauthorized. You have roles: " + user.getRoles() +
                             ". Required: " + roles
@@ -64,28 +63,18 @@ public class AccessController implements IAccessController {
         }
     }
 
-    /**
-     * Returns true if the current user has the specified role.
-     */
+    // --- Optional helpers ---
 
     public boolean hasRole(Context ctx, Role role) {
         UserDTO user = ctx.attribute("user");
         return user != null && user.getRoles().contains(role.toString());
     }
 
-    /**
-     * Throws if the current user does not have the required role.
-     */
-
     public void requireRole(Context ctx, Role role) {
         if (!hasRole(ctx, role)) {
             throw new UnauthorizedResponse("Access denied. Required role: " + role);
         }
     }
-
-    /**
-     * Throws if the current user does not have at least one of the required roles.
-     */
 
     public void requireOneOfRoles(Context ctx, Role... roles) {
         UserDTO user = ctx.attribute("user");
@@ -97,8 +86,6 @@ public class AccessController implements IAccessController {
                 return;
             }
         }
-        throw new UnauthorizedResponse(
-                "Access denied. Required one of: " + Arrays.toString(roles)
-        );
+        throw new UnauthorizedResponse("Access denied. Required one of: " + Arrays.toString(roles));
     }
 }

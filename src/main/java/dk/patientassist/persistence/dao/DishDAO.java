@@ -115,7 +115,6 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
         }
     }
 
-
     /**
      * Create a new dish.
      *
@@ -296,6 +295,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
      * @param value new value
      * @return Optional of updated DishDTO
      */
+    @SuppressWarnings("unchecked")
     public Optional<DishDTO> updateDishField(Integer id, String field, Object value) {
         LOGGER.info("Patching field='{}' on Dish id={}", field, id);
         EntityManager em = getEntityManager();
@@ -393,15 +393,13 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             for (var ingrDTO : dto.getRecipe().getIngredients()) {
                 String name = ingrDTO.getName();
                 IngredientType type = em.createQuery(
-                                "SELECT t FROM IngredientType t WHERE t.name = :n", IngredientType.class)
-                        .setParameter("n", name)
+                                "SELECT t FROM IngredientType t WHERE t.name = :name", IngredientType.class)
+                        .setParameter("name", name)
                         .getResultStream()
                         .findFirst()
-                        .orElseGet(() -> {
-                            IngredientType t = new IngredientType(name);
-                            em.persist(t);
-                            return t;
-                        });
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "IngredientType '" + name + "' not found. Use exact casing and spelling."));
+
                 Ingredient ingr = new Ingredient(type, recipe);
                 recipe.getIngredients().add(ingr);
                 em.persist(ingr);

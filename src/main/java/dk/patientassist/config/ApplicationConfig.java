@@ -19,6 +19,7 @@ public class ApplicationConfig {
 
     public static void configuration(JavalinConfig cfg) {
         cfg.showJavalinBanner = false;
+
         cfg.bundledPlugins.enableRouteOverview("/routes", Role.ANYONE);
         cfg.router.apiBuilder(SecurityRoutes.getSecurityRoutes());
         cfg.router.apiBuilder(SecurityRoutes.getSecuredRoutes());
@@ -37,10 +38,11 @@ public class ApplicationConfig {
 
         app.get("/api/health", ctx -> ctx.result("OK"));
 
-
         app.start(port);
         return app;
     }
+
+
 
     private static void handleApiException(ApiException e, Context ctx) {
         ctx.status(e.getCode())

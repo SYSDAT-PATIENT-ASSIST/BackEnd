@@ -1,65 +1,56 @@
-# Health check
-GET {{url}}/api/health
+@user = kikko
+@pw = 1234
+
+### 1) Health check (no authentication)
+GET {{url}}/auth/healthcheck
 Accept: application/json
 
-# List all dishes (or filter by status/allergen)
-GET {{url}}/api/dishes
+### 2) Open endpoint test (no authentication)
+GET {{url}}/auth/test
 Accept: application/json
 
-###
-# Example: filter by status & allergen
-GET {{url}}/api/dishes?status=TILGÆNGELIG&allergen=GLUTEN
-Accept: application/json
-
-###
-# Get dish by ID
-GET {{url}}/api/dishes/1
-Accept: application/json
-
-###
-# Get currently available dishes
-GET {{url}}/api/dishes/available
-Accept: application/json
-
-###
-# Example: filter available by allergen
-GET {{url}}/api/dishes/available?allergen=LAKTOSE
-Accept: application/json
-
-###
-# Get popular (most-ordered) dishes (default top 5)
-GET {{url}}/api/dishes/popular
-Accept: application/json
-
-###
-# Example: top 10
-GET {{url}}/api/dishes/popular?limit=10
-Accept: application/json
-
-###
-# Create a new dish (basic - no recipe)
-POST {{url}}/api/dishes
+### 3) Register as HOVEDKOK (captures token automatically)
+POST {{url}}/auth/register?role=HOVEDKOK
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
 
 {
-  "name": "Pasta Bolognese",
-  "description": "Klassisk italiensk ret",
-  "kcal": 600,
-  "protein": 30,
-  "carbohydrates": 50,
-  "fat": 20,
-  "allergens": ["GLUTEN"],
-  "availableFrom": "2025-05-12",
-  "availableUntil": "2025-05-18",
-  "status": "TILGÆNGELIG"
+  "username": "{{user}}",
+  "password": "{{pw}}"
 }
+> {% client.global.set("token", response.body.token) %}
 
 ###
-# Create a new dish (nested recipe & ingredients)
+
+### 4) Login to refresh token
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{user}}",
+  "password": "{{pw}}"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+###
+
+### 7) Add HOVEDKOK role
+POST {{url}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "HOVEDKOK"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+###
+
+### Create dish with recipe + ingredients
 POST {{url}}/api/dishes/full
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 {
   "name": "Stegt flæsk",
@@ -68,6 +59,7 @@ Authorization: Bearer {{jwt_token}}
   "protein": 25,
   "carbohydrates": 20,
   "fat": 30,
+  "status": "TILGÆNGELIG",
   "allergens": ["LAKTOSE"],
   "availableFrom": "2025-05-11",
   "availableUntil": "2025-05-20",
@@ -83,67 +75,118 @@ Authorization: Bearer {{jwt_token}}
   }
 }
 
+
 ###
-# Partially update a single field (e.g. name)
+
+### List all dishes
+GET {{url}}/api/dishes
+Accept: application/json
+
+###
+
+### Filter by status + allergen
+GET {{url}}/api/dishes?status=TILGÆNGELIG&allergen=GLUTEN
+Accept: application/json
+
+###
+
+### Get dish by ID
+GET {{url}}/api/dishes/1
+Accept: application/json
+
+###
+
+### Get currently available dishes
+GET {{url}}/api/dishes/available
+Accept: application/json
+
+###
+
+### Filter available by allergen
+GET {{url}}/api/dishes/available?allergen=LAKTOSE
+Accept: application/json
+
+###
+
+### Get most popular dishes
+GET {{url}}/api/dishes/popular
+Accept: application/json
+
+###
+
+### Top 10 popular dishes
+GET {{url}}/api/dishes/popular?limit=10
+Accept: application/json
+
+###
+
+### PATCH: name
 PATCH {{url}}/api/dishes/1/name
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 "Flæskesteg med sovs"
 
 ###
-# PATCH: update availableFrom
+
+### PATCH: availableFrom
 PATCH {{url}}/api/dishes/1/availableFrom
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 "2025-05-20"
 
 ###
-# PATCH: update availableUntil
+
+### PATCH: availableUntil
 PATCH {{url}}/api/dishes/1/availableUntil
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 "2025-05-30"
 
 ###
-# PATCH: update kcal
+
+### PATCH: kcal
 PATCH {{url}}/api/dishes/1/kcal
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 450
 
 ###
-# PATCH: update protein
+
+### PATCH: protein
 PATCH {{url}}/api/dishes/1/protein
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 35
 
 ###
-# PATCH: update fat
+
+### PATCH: fat
 PATCH {{url}}/api/dishes/1/fat
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 25
 
 ###
-# Replace allergen set
+
+### PUT: replace allergens
 PUT {{url}}/api/dishes/1/allergens
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 ["SKALDYR", "CITRON"]
 
 ###
-# Update availability window
+
+### PUT: update availability window
 PUT {{url}}/api/dishes/1/availability
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 {
   "availableFrom": "2025-05-15",
@@ -151,10 +194,11 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ###
-# Update recipe & allergens
+
+### PUT: update recipe & allergens
 PUT {{url}}/api/dishes/1/recipe
 Content-Type: application/json
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}
 
 {
   "allergens": ["SKALDYR", "CITRON"],
@@ -170,6 +214,7 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ###
-# Delete a dish
+
+### DELETE dish
 DELETE {{url}}/api/dishes/1
-Authorization: Bearer {{jwt_token}}
+Authorization: Bearer {{token}}

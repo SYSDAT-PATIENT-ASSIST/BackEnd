@@ -2,11 +2,12 @@ package dk.patientassist.persistence.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.javalin.security.RouteRole;
 
 /**
  * Enum representing user roles in the system.
  */
-public enum Role {
+public enum Role implements RouteRole {
     LÆGE,
     SYGEPLEJERSKE,
     KOK,

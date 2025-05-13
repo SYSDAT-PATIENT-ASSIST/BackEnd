@@ -20,25 +20,30 @@ public class DishController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DishController.class);
     private final DishDAO dishDAO;
 
+
     private static final Set<String> PATCHABLE_FIELDS = Set.of(
             "name", "description", "kcal", "protein", "carbohydrates",
             "fat", "status", "availableFrom", "availableUntil"
     );
 
+    public DishController(DishDAO dao) {
+        this.dishDAO = dao;
+    }
+
     public DishController() {
         this(DishDAO.getInstance(HibernateConfig.getEntityManagerFactory()));
     }
 
-    public DishController(DishDAO dishDAO) {
-        LOGGER.debug("DishController instantiated with custom DAO");
-        this.dishDAO = dishDAO;
-    }
-
     public void getAllDishes(Context ctx) {
-        LOGGER.info("GET /dishes - retrieving all dishes");
-        List<DishDTO> dishes = dishDAO.getAll();
-        LOGGER.debug("Found {} dishes", dishes.size());
-        ctx.json(dishes);
+        try {
+            List<DishDTO> dishes = dishDAO.getAll();
+            dishes.forEach(d -> System.out.println("Dish: " + d.getName()));
+            ctx.result("Fetched " + dishes.size() + " dishes");
+
+        } catch (Exception e) {
+            LOGGER.error("Error in getAllDishes: {}", e.getMessage(), e);
+            ctx.status(500).result("Internal server error");
+        }
     }
 
     public void createNewDish(Context ctx) {
@@ -103,24 +108,29 @@ public class DishController {
 
         DishStatus status = null;
         Allergens allergen = null;
+
         try {
             if (statusParam != null) status = DishStatus.fromString(statusParam);
             if (allergenParam != null) allergen = Allergens.fromString(allergenParam);
         } catch (IllegalArgumentException e) {
             LOGGER.warn("Invalid filter parameters: status='{}', allergen='{}'", statusParam, allergenParam);
-            ctx.status(400);
-            ctx.result("Invalid status or allergen");
+            ctx.status(400).result("Invalid status or allergen");
             return;
         }
 
-        List<DishDTO> results;
-        if (status != null && allergen != null) results = dishDAO.getDishesByStatusAndAllergen(status, allergen);
-        else if (status != null) results = dishDAO.getDishesByStatus(status);
-        else if (allergen != null) results = dishDAO.getDishesByAllergen(allergen);
-        else results = dishDAO.getAll();
+        try {
+            List<DishDTO> results;
+            if (status != null && allergen != null) results = dishDAO.getDishesByStatusAndAllergen(status, allergen);
+            else if (status != null) results = dishDAO.getDishesByStatus(status);
+            else if (allergen != null) results = dishDAO.getDishesByAllergen(allergen);
+            else results = dishDAO.getAll();
 
-        LOGGER.debug("Filtered dishes count: {}", results.size());
-        ctx.json(results);
+            LOGGER.debug("Filtered dishes count: {}", results.size());
+            ctx.json(results);
+        } catch (Exception e) {
+            LOGGER.error("EXCEPTION in getFilteredDishes", e); // prints full stack trace
+            ctx.status(500).result("Server error: " + e.getMessage());
+        }
     }
 
     private void handlePatch(Context ctx, String field) {
@@ -330,4 +340,5 @@ public class DishController {
             ctx.status(500).result("Failed to fetch available dishes");
         }
     }
+
 }
