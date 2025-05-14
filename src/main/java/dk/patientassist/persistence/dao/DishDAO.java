@@ -297,6 +297,22 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             return query.getResultList();
         }
     }
+    
+    // Retrieves dishes that are currently available and sold out for patient menu
+    public List<DishDTO> getAllAvailable() {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<DishDTO> query = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
+                            "FROM Dish d " +
+                            "WHERE (d.status = :status1 OR d.status = :status2) " +
+                            "AND :today BETWEEN d.availableFrom AND d.availableUntil",
+                    DishDTO.class);
+            query.setParameter("status1", DishStatus.TILGÆNGELIG);
+            query.setParameter("status2", DishStatus.UDSOLGT);
+            query.setParameter("today", LocalDate.now());
+            return query.getResultList();
+        }
+    }
 
     /**
      * Retrieves available dishes filtered by a specific allergen.

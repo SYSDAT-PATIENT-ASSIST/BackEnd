@@ -1,7 +1,8 @@
 package dk.patientassist.stepdefinitions;
 import dk.patientassist.control.DishController;
 import dk.patientassist.control.OrderController;
-import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
 import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dao.OrderDAO;
 import dk.patientassist.persistence.dto.DishDTO;
@@ -30,14 +31,14 @@ public class menuStepDefinitions{
     private OrderDTO orderDTO;
 
     public menuStepDefinitions(){
-        HibernateConfig.Init(HibernateConfig.Mode.TEST);
+        HibernateConfig.init(Mode.TEST);
 
         dishController = new DishController();
         orderController = new OrderController();
         dishDAO = DishDAO.getInstance(HibernateConfig.getEntityManagerFactory());
         orderDAO = OrderDAO.getInstance(HibernateConfig.getEntityManagerFactory());
-        dishDTO = new DishDTO("Kylling i karry", "godt med karry", LocalDate.ofYearDay(2025,24), LocalDate.now(), DishStatus.AVAILABLE); //id, name, description, available_from, available_until, status
-        orderDTO = new OrderDTO(201, LocalDateTime.now(), "Ingen allergier", dishDTO, OrderStatus.PENDING); //id, bed_id, order_time, note, dish, status
+        dishDTO = new DishDTO("Kylling i karry", "godt med karry", LocalDate.now(), LocalDate.now(), DishStatus.TILGÆNGELIG); //id, name, description, available_from, available_until, status
+        orderDTO = new OrderDTO(201, LocalDateTime.now(), "Ingen allergier", dishDTO, OrderStatus.VENTER); //id, bed_id, order_time, note, dish, status
     }
 
 
@@ -58,7 +59,7 @@ public class menuStepDefinitions{
 
     @And("the patient clicks the {string} button")
     public void thePatientClicksTheButton(String button){
-        DishDTO savedDish = dishDAO.createDish(dishDTO);
+        DishDTO savedDish = dishDAO.create(dishDTO);
         orderDTO.setDish(savedDish);
         OrderDTO savedOrder = orderController.createOrder(orderDTO);
         this.orderId = savedOrder.getId();
@@ -72,7 +73,7 @@ public class menuStepDefinitions{
     @Given("the patient has placed an order")
     public void thePatientHasPlacedAnOrder(){
 
-        DishDTO savedDish = dishDAO.createDish(dishDTO);
+        DishDTO savedDish = dishDAO.create(dishDTO);
         orderDTO.setDish(savedDish);
         OrderDTO savedOrder = orderDAO.createOrder(orderDTO);
         this.orderId = savedOrder.getId();
@@ -96,7 +97,7 @@ public class menuStepDefinitions{
     @Then("the order will be cancelled")
     public void theOrderWillBeCancelled(){
         OrderDTO order = orderController.getOrder(1);
-        Assert.assertEquals(OrderStatus.CANCELLED, order.getStatus());
+        Assert.assertEquals(OrderStatus.ANNULLERET, order.getStatus());
     }
 
     @And("the system will be updated.")

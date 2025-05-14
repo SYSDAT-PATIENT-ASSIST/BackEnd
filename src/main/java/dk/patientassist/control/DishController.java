@@ -6,6 +6,7 @@ import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -301,6 +302,23 @@ public class DishController {
 
         ctx.json(dishDAO.getMostOrderedDishes(limit));
     }
+
+    // Retrieves dishes that are currently available and sold out for patient menu
+    public void getAllAvailable(Context ctx){
+        try {
+            List<DishDTO> dishDTOS = dishDAO.getAllAvailable();
+            ctx.res().setStatus(200);
+            ctx.json(dishDTOS, DishDTO.class);
+        } catch (Exception e) {
+            throw new NotFoundResponse("No content found for this request");
+        }
+    }
+
+    //used for cucumber / menuStepDefinitions
+    public List<DishDTO> getAllAvailable(){
+        return dishDAO.getAllAvailable();
+    }
+
 
     /**
      * Returns dishes that are currently available based on today's date.

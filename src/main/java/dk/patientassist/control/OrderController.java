@@ -1,15 +1,13 @@
 package dk.patientassist.control;
-import dk.patientassist.persistence.HibernateConfig;
-import dk.patientassist.persistence.dao.DishDAO;
+import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.dao.OrderDAO;
 import dk.patientassist.persistence.dto.OrderDTO;
-import dk.patientassist.persistence.ent.Order;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 import jakarta.persistence.EntityManagerFactory;
 
-public class OrderController{
+public class OrderController {
 
     private final OrderDAO dao;
 
@@ -35,7 +33,7 @@ public class OrderController{
         return dao.createOrder(dto);
     }
 
-    public void getOrder(Context ctx){
+    public void getOrder(Context ctx) {
         int orderId = ctx.pathParamAsClass("id", Integer.class).get();
         try {
             OrderDTO orderDTO = dao.getOrder(orderId);
@@ -47,11 +45,11 @@ public class OrderController{
     }
 
     //used for cucumber / menuStepDefinitions
-    public OrderDTO getOrder(Integer orderId){
+    public OrderDTO getOrder(Integer orderId) {
         return dao.getOrder(orderId);
     }
 
-    public void cancelOrder(Context ctx){
+    public void cancelOrder(Context ctx) {
         int orderId = ctx.pathParamAsClass("id", Integer.class).get();
         try {
             OrderDTO orderDTO = dao.cancelOrder(orderId);
@@ -63,7 +61,7 @@ public class OrderController{
     }
 
     //used for cucumber / menuStepDefinitions
-    public OrderDTO cancelOrder(Integer orderId){
+    public OrderDTO cancelOrder(Integer orderId) {
         return dao.cancelOrder(orderId);
     }
 
