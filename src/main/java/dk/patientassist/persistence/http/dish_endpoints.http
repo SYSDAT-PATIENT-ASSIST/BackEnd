@@ -1,4 +1,4 @@
-@user = testing
+@user = lille
 @pw = 1234
 
 ### 1) Health check (no authentication)
@@ -64,8 +64,8 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Stegt flæsk",
-  "description": "Klassisk dansk ret med persillesovs",
+  "name": "Kyllinge sandwch",
+  "description": "hjemmelavet lækre sandwiches",
   "kcal": 500,
   "protein": 25,
   "carbohydrates": 20,
@@ -226,6 +226,6 @@ Authorization: Bearer {{token}}
 
 ###
 
-### DELETE dish
-DELETE {{url}}/api/dishes/7
+
+DELETE http://localhost:7070/api/dishes/1
 Authorization: Bearer {{token}}

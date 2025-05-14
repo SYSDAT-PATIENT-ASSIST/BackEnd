@@ -37,6 +37,12 @@ public class AccessController {
     public void accessHandler(Context ctx) {
         Set<RouteRole> roles = ctx.routeRoles();
 
+        System.out.println("=== AccessHandler Debug ===");
+        System.out.println("Method: " + ctx.method());
+        System.out.println("Authorization header: " + ctx.header("Authorization"));
+        System.out.println("Route Roles: " + roles);
+
+
         // 1) Allow public routes (ANYONE or empty)
         if (roles.isEmpty() || roles.contains(Role.ANYONE)) {
             return;
@@ -46,7 +52,8 @@ public class AccessController {
         try {
             securityController.authenticate().handle(ctx);
         } catch (UnauthorizedResponse e) {
-            throw new UnauthorizedResponse(e.getMessage());
+            System.out.println("Authentication failed: " + e.getMessage());
+            throw e;
         } catch (Exception e) {
             throw new UnauthorizedResponse("Invalid or missing token");
         }

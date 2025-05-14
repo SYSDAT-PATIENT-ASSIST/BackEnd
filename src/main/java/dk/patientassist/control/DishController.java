@@ -96,8 +96,7 @@ public class DishController {
             }
         } catch (Exception e) {
             LOGGER.error("Error deleting dish id={}: {}", id, e.getMessage(), e);
-            ctx.status(500);
-            ctx.result("Failed to delete dish");
+            ctx.status(500).result("Failed to delete dish: " + e.getMessage());
         }
     }
 
@@ -142,7 +141,8 @@ public class DishController {
             return;
         }
         int id = Integer.parseInt(ctx.pathParam("id"));
-        String raw = ctx.body();
+        String raw = ctx.bodyAsClass(String.class);
+
         try {
             Object val = parsePatchValue(field, raw);
             Optional<DishDTO> upd = dishDAO.updateDishField(id, field, val);

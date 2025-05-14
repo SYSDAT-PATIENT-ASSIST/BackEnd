@@ -198,14 +198,25 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
         try {
             em.getTransaction().begin();
             Dish dish = em.find(Dish.class, id);
+
             if (dish == null) {
                 LOGGER.warn("Dish id={} not found for deletion", id);
                 return false;
             }
+
+            // MANUALLY detach orders from dish
+            if (dish.getOrders() != null) {
+                for (Order order : dish.getOrders()) {
+                    order.setDish(null);
+                    em.merge(order);
+                }
+            }
+
             em.remove(dish);
             em.getTransaction().commit();
-            LOGGER.debug("Deleted Dish id={}", id);
+            LOGGER.info("Dish id={} deleted successfully", id);
             return true;
+
         } catch (Exception e) {
             LOGGER.error("Error deleting Dish id={}: {}", id, e.getMessage(), e);
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
@@ -214,6 +225,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             if (shouldClose(em)) em.close();
         }
     }
+
+
 
     /**
      * Find dishes matching a status.
