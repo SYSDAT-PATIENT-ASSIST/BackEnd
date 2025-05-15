@@ -53,7 +53,6 @@ public class SecurityController implements ISecurityController {
             try {
                 UserDTO user = ctx.bodyAsClass(UserDTO.class);
 
-                // Tjek for manglende username eller password
                 if (user.getUsername() == null || user.getUsername().isEmpty() ||
                         user.getPassword() == null || user.getPassword().isEmpty()) {
                     ctx.status(400);
