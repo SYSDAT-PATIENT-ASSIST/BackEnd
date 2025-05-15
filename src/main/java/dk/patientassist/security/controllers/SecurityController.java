@@ -52,6 +52,15 @@ public class SecurityController implements ISecurityController {
             ObjectNode returnObject = objectMapper.createObjectNode(); // for sending json messages back to the client
             try {
                 UserDTO user = ctx.bodyAsClass(UserDTO.class);
+
+                // Tjek for manglende username eller password
+                if (user.getUsername() == null || user.getUsername().isEmpty() ||
+                        user.getPassword() == null || user.getPassword().isEmpty()) {
+                    ctx.status(400);
+                    ctx.json(returnObject.put("error", "Username and password must be provided"));
+                    return;
+                }
+
                 UserDTO verifiedUser = securityDAO.getVerifiedUser(user.getUsername(), user.getPassword());
                 String token = createToken(verifiedUser);
 
@@ -66,6 +75,7 @@ public class SecurityController implements ISecurityController {
             }
         };
     }
+
 
     @Override
     public Handler register() {
