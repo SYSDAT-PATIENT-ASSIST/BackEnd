@@ -48,11 +48,20 @@ POST {{url}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@example.com",
+  "email": "admin@test.dk",
   "password": "admin"
 }
 
-# > {% client.global.set("auth_token", response.body.token); %}
+###
+# @name LOGIN SUCCESS CREATED
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin2@example.com",
+  "password": "admin"
+}
 
 ###
 # @name LOGIN SUCCESS PRIVILEGE

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dk.patientassist.control.AccessController;
 import dk.patientassist.control.AuthController;
 import dk.patientassist.control.EventController;
+import dk.patientassist.routes.DishRoutes;
 import dk.patientassist.routes.TestEndpoints;
 import dk.patientassist.utilities.Utils;
 import io.javalin.Javalin;
@@ -50,6 +51,7 @@ public class RouterConfig {
             /* API */
             config.router.apiBuilder(AuthController.getEndpoints());
             config.router.apiBuilder(EventController.getEndpoints());
+            config.router.apiBuilder(DishRoutes.getDishRoutes());
         });
         /* SECURITY */
         jav.beforeMatched(AccessController::check);

@@ -2,7 +2,11 @@ package dk.patientassist.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.utilities.Utils;
+import jakarta.persistence.Column;
 import lombok.EqualsAndHashCode;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -12,6 +16,7 @@ import org.mindrot.jbcrypt.BCrypt;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class EmployeeDTO {
     String password; // we don't ever want to read this ideally, before encryption
+    @Column(unique = true)
     @EqualsAndHashCode.Include
     @JsonProperty(required = true)
     public String email; // email == identity
@@ -33,5 +38,16 @@ public class EmployeeDTO {
 
     public String hashPw() {
         return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    public String makeRegistrationForm(String pw) throws JsonProcessingException { // for testing
+        String empJson = Utils.getObjectMapperCompact().writeValueAsString(this);
+        empJson = "{" + String.format("\"password\": \"%s\", ", pw) + empJson.substring(empJson.indexOf('{') + 1);
+        return empJson;
+    }
+
+    public String makeLoginForm(String pw) throws JsonProcessingException { // for testing
+        String empJson = String.format("{\"password\": \"%s\", \"email\": \"%s\"}", pw, email);
+        return empJson;
     }
 }

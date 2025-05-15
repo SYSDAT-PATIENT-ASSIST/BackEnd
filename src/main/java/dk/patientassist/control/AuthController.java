@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +64,9 @@ public class AuthController {
             Employee emp = Mapper.EmployeeDTOToEnt(empDetails);
             emp.password = empDetails.hashPw();
 
+            logger.info("register:::::::::::::::");
+            logger.info(new String(ctx.bodyAsBytes()));
+
             em.getTransaction().begin();
 
             List<Employee> empsWithSameEmail = em.createQuery("FROM Employee WHERE email ilike ?1", Employee.class)
@@ -71,12 +75,15 @@ public class AuthController {
                 throw new EntityExistsException("");
             }
 
-            Section sect = null;
-            for (var secId : empDetails.sections) {
-                if ((sect = em.find(Section.class, secId)) != null) {
-                    emp.sections.add(sect);
-                } else {
-                    logger.info("unable to find section {} in user's ({}) list of sections", secId, empDetails.email);
+            if (empDetails.sections != null) {
+                Section sect = null;
+                for (var secId : empDetails.sections) {
+                    if ((sect = em.find(Section.class, secId)) != null) {
+                        emp.sections.add(sect);
+                    } else {
+                        logger.info("unable to find section {} in user's ({}) list of sections", secId,
+                                empDetails.email);
+                    }
                 }
             }
 
@@ -91,8 +98,9 @@ public class AuthController {
                     .withSubject("Patient Assist Login Credentials")
                     .withClaim("name", emp.getFullName())
                     .withClaim("email", emp.email)
-                    .withClaim("roles", emp.getRolesAsStringList())
-                    .withClaim("sectionIds", emp.sections.stream().map(s -> s.id).toList())
+                    .withClaim("roles", emp.roles != null ? emp.getRolesAsStringList() : new ArrayList<>())
+                    .withClaim("sectionIds",
+                            emp.sections != null ? emp.sections.stream().map(s -> s.id).toList() : new ArrayList<>())
                     .sign(Algorithm.HMAC256(jwtKey));
 
             ObjectNode jsonResponse = Utils.getObjectMapperCompact().createObjectNode()
@@ -106,6 +114,7 @@ public class AuthController {
             logger.info(e.getMessage());
             throw new UnauthorizedResponse("Registration failed: user already exists with that email");
         } catch (Exception e) {
+            e.printStackTrace();
             logger.info(e.getMessage());
             throw new UnauthorizedResponse("Registration failed");
         }
@@ -115,12 +124,15 @@ public class AuthController {
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             EmployeeDTO empDetails = ctx.bodyAsClass(EmployeeDTO.class);
 
+            logger.info("login:::::::::::::::");
+            logger.info(new String(ctx.bodyAsBytes()));
+
             em.getTransaction().begin();
             Employee emp = em.createQuery("FROM Employee WHERE email ILIKE ?1", Employee.class)
                     .setParameter(1, empDetails.email)
                     .getSingleResult();
 
-            if (empDetails.checkAgainstBCryptPw(emp.password)) {
+            if (!empDetails.checkAgainstBCryptPw(emp.password)) {
                 throw new UnauthorizedResponse("Invalid password");
             }
 
@@ -132,8 +144,9 @@ public class AuthController {
                     .withSubject("Patient Assist Login Credentials")
                     .withClaim("name", emp.getFullName())
                     .withClaim("email", emp.email)
-                    .withClaim("roles", emp.getRolesAsStringList())
-                    .withClaim("sectionIds", emp.sections.stream().map(s -> s.id).toList())
+                    .withClaim("roles", emp.roles != null ? emp.getRolesAsStringList() : new ArrayList<>())
+                    .withClaim("sectionIds",
+                            emp.sections != null ? emp.sections.stream().map(s -> s.id).toList() : new ArrayList<>())
                     .sign(Algorithm.HMAC256(jwtKey));
 
             ObjectNode jsonResponse = Utils.getObjectMapperCompact().createObjectNode()
@@ -147,6 +160,7 @@ public class AuthController {
             logger.info("Login failed: {}", e.getMessage());
             throw new UnauthorizedResponse("Login failed: no user with that email");
         } catch (Exception e) {
+            e.printStackTrace();
             logger.info("Login failed: {}", e.getMessage());
             throw new UnauthorizedResponse("Login failed");
         }

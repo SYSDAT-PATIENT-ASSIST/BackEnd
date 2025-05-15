@@ -21,7 +21,7 @@ class DishDAOTest {
     static void setUpAll() {
         HibernateConfig.init(Mode.TEST);
         emf = HibernateConfig.getEntityManagerFactory();
-        dishDAO = new DishDAO(emf);
+        dishDAO = DishDAO.getInstance(emf);
     }
 
     @BeforeEach
@@ -34,7 +34,7 @@ class DishDAOTest {
 
     @Test
     void getAllAvailable() {
-        List<DishDTO> dishes = dishDAO.getAllAvailable();
+        List<DishDTO> dishes = dishDAO.getAll();
         Assert.assertEquals(0, dishes.size());
     }
 }

@@ -94,22 +94,22 @@ public class TestAuth {
     @Test
     void testRegistration() {
         try {
-            register(testData.guest);
+            register(testData.guest, "guest");
             login(testData.guest, "guest");
             get("auth/guest", 200);
-            register(testData.admin);
+            register(testData.admin, "admin");
             login(testData.admin, "admin");
             get("auth/admin_only", 200);
-            register(testData.chef);
+            register(testData.chef, "chef");
             login(testData.chef, "chef");
             get("auth/chef_only", 200);
-            register(testData.headchef);
+            register(testData.headchef, "headchef");
             login(testData.headchef, "headchef");
             get("auth/headchef_only", 200);
-            register(testData.nurse);
+            register(testData.nurse, "nurse");
             login(testData.nurse, "nurse");
             get("auth/nurse_only", 200);
-            register(testData.doctor);
+            register(testData.doctor, "doctor");
             login(testData.doctor, "doctor");
             get("auth/doctor_only", 200);
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class TestAuth {
         emp.roles = roles;
         emp.setPassword("test");
 
-        register(emp);
+        register(emp, "test");
         login(emp, "test");
         get("auth/doctor_only", 200);
 
@@ -168,10 +168,10 @@ public class TestAuth {
                 .and().extract().body().asString();
     }
 
-    static void register(EmployeeDTO empDetails) {
+    static void register(EmployeeDTO empDetails, String pw) {
         try {
-            String empJson = jsonMapper.writeValueAsString(empDetails);
-            jwt = RestAssured.given().port(port).contentType("application/json").body(empJson)
+            jwt = RestAssured.given().port(port).contentType("application/json")
+                    .body(empDetails.makeRegistrationForm(pw))
                     .when().post("/api/auth/register")
                     .then().statusCode(201)
                     .and().extract().path("token");
@@ -182,10 +182,7 @@ public class TestAuth {
 
     static void login(EmployeeDTO empDetails, String pw) {
         try {
-            String empJson = jsonMapper.writeValueAsString(empDetails);
-            empJson = empJson.substring(0, empJson.indexOf('{') + 1)
-                    + String.format("\"password\": \"%s\",", pw) + empJson.substring(empJson.indexOf('{') + 1);
-            jwt = RestAssured.given().port(port).contentType("application/json").body(empJson)
+            jwt = RestAssured.given().port(port).contentType("application/json").body(empDetails.makeLoginForm(pw))
                     .when().post("/api/auth/login")
                     .then().statusCode(200)
                     .and().extract().path("token");

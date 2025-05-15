@@ -19,7 +19,7 @@ import java.util.Set;
  * Patient Assist
  */
 @Entity
-@Table(name = "employee", uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
+@Table(name = "employee", uniqueConstraints = @UniqueConstraint(columnNames = { "email" }))
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

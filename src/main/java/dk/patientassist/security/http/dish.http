@@ -1,0 +1,37 @@
+### Create new dish
+POST http://localhost:7070/api/dishes
+Content-Type: application/json
+
+{
+  "name": "Frikadeller",
+  "description": "Danske frikadeller med kartofler",
+  "available_from": "2025-05-01",
+  "available_until": "2025-06-01",
+  "status": "AVAILABLE",
+  "kcal": 520,
+  "protein": 25,
+  "carbohydrates": 40,
+  "fat": 30,
+  "allergens": "GLUTEN"
+}
+
+### Get all dishes (with optional filter)
+GET http://localhost:7070/api/dishes/filter?status=AVAILABLE&allergen=GLUTEN
+
+### Get single dish by ID
+GET http://localhost:7070/api/dishes/1
+
+### Update dish name (PATCH)
+PATCH http://localhost:7070/api/dishes/1/name
+Content-Type: text/plain
+
+Frikadeller Deluxe
+
+### Update dish kcal (PATCH)
+PATCH http://localhost:7070/api/dishes/1/kcal
+Content-Type: text/plain
+
+600
+
+### Delete dish
+DELETE http://localhost:7070/api/dishes/1
