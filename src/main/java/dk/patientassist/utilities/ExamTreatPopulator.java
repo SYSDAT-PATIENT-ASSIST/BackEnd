@@ -6,7 +6,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import dk.patientassist.config.HibernateConfig;
@@ -28,33 +27,21 @@ public class ExamTreatPopulator {
         ExamTreatCategoryDTO[] ETCats = Utils.getObjectMapperCompact().readValue(fileAsStr,
                 ExamTreatCategoryDTO[].class);
 
-        int totalCount = 0;
-        for (var ETCat : ETCats) {
-            for (var ETType : ETCat.examTreatTypes) {
-                totalCount += ETType.examTreats.length;
-            }
-        }
-
-        System.out.println("ExamTreatPopulator.load(): " + totalCount + " articles");
-
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             em.getTransaction().begin();
 
             List<ExamTreatCategory> categories = new ArrayList<>();
             for (var etc : ETCats) {
-                System.out.println("convert " + etc.name);
                 categories.add(Mapper.ExamTreatCategoryDTOToEnt(etc));
             }
 
             for (var cat : categories) {
                 em.persist(cat);
-                System.out.println("persist " + cat.name);
             }
 
             em.getTransaction().commit();
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("ExamTreatPopulator.load(): " + e.getMessage());
+            System.out.println("ExamTreatPopulator.load(): Nothing to do...");
         }
     }
 }

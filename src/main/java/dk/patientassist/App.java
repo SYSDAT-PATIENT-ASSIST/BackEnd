@@ -29,6 +29,7 @@ public class App {
 
             EventPopulator.populate(250);
             EmployeePopulator.addAdmin();
+            ExamTreatPopulator.load("data/exam_treatment_data.json");
 
         } catch (Exception e) {
 
