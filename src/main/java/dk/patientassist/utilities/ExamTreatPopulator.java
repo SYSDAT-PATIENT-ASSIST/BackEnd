@@ -27,6 +27,11 @@ public class ExamTreatPopulator {
         ExamTreatCategoryDTO[] ETCats = Utils.getObjectMapperCompact().readValue(fileAsStr,
                 ExamTreatCategoryDTO[].class);
 
+        persistBatch(ETCats);
+    }
+
+    public static void persistBatch(ExamTreatCategoryDTO[] ETCats) {
+
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             em.getTransaction().begin();
 
@@ -44,4 +49,5 @@ public class ExamTreatPopulator {
             System.out.println("ExamTreatPopulator.load(): Nothing to do...");
         }
     }
+
 }

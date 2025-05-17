@@ -53,7 +53,6 @@ public class ExamTreatController {
             ctx.status(200);
             ctx.json(categories.stream().map(Mapper::ExamTreatCategoryEntToDTO).toArray(ExamTreatCategoryDTO[]::new));
         } catch (Exception e) {
-            e.printStackTrace();
             throw new BadRequestResponse("Bad Request");
         }
     }
@@ -70,7 +69,6 @@ public class ExamTreatController {
             ctx.status(200);
             ctx.json(types.stream().map(Mapper::ExamTreatTypeEntToDTO).toArray(ExamTreatTypeDTO[]::new));
         } catch (Exception e) {
-            e.printStackTrace();
             throw new BadRequestResponse("Bad Request");
         }
     }
@@ -87,7 +85,6 @@ public class ExamTreatController {
             ctx.status(200);
             ctx.json(Mapper.ExamTreatEntToDTOFull(et.get(0)));
         } catch (Exception e) {
-            e.printStackTrace();
             throw new BadRequestResponse("Bad Request");
         }
     }

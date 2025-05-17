@@ -24,9 +24,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.persistence.ent.ExamTreatCategory;
 import dk.patientassist.service.dto.ExamTreatCategoryDTO;
 import dk.patientassist.service.dto.ExamTreatDTO;
 import dk.patientassist.service.dto.ExamTreatTypeDTO;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 /**
  * WebScrape
@@ -35,8 +39,21 @@ public class WebScraper {
 
     static final Logger logger = LoggerFactory.getLogger(WebScraper.class);
 
-    public static void scrapeExamsAndTreatmentHeadless(String linksAndTitlesFilePath)
+    public static void scrapeExamsAndTreatment(String linksAndTitlesFilePath)
             throws IOException, URISyntaxException, InterruptedException {
+
+        try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
+            em.getTransaction().begin();
+            List<ExamTreatCategory> ETCatEnts = em.createQuery("select etc from ExamTreatCategory etc").getResultList();
+            if (ETCatEnts.size() > 0) {
+                logger.info("not scraping examinations and treatments data, since DB appears to contain "
+                        + ETCatEnts.size() + " categories already");
+                return;
+            }
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            return;
+        }
 
         URL urlOfFilePath = WebScraper.class.getClassLoader().getResource(linksAndTitlesFilePath);
         List<String> lines = Files.readAllLines(Paths.get(urlOfFilePath.toURI()));
@@ -44,7 +61,6 @@ public class WebScraper {
         System.out.println("WebScraper.scrapeExamsAndTreatment() : " + urlOfFilePath.toExternalForm());
 
         ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless");
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(15));
 
@@ -122,7 +138,7 @@ public class WebScraper {
                     webDriver.get(ET.srcUrl);
                     System.out.println("\tURL : " + ET.srcUrl);
 
-                    var title = webDriver.findElement(By.tagName("h1")).getText();
+                    var title = webDriver.findElement(By.tagName("title")).getAttribute("innerHTML").trim();
                     var content = "";
 
                     for (var div : webDriver.findElements(By.tagName("div"))) {
@@ -149,7 +165,7 @@ public class WebScraper {
         }
         System.out.println("=======================================================");
 
-        try (FileWriter fw = new FileWriter("src/main/resources/data/exam_treatment_data.json", false)) {
+        try (FileWriter fw = new FileWriter("src/main/resources/data/exams_and_treatments_data.json", false)) {
             fw.write(Utils.getObjectMapperPretty().writeValueAsString(ETCats));
         }
 
