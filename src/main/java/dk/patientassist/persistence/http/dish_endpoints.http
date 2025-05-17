@@ -1,0 +1,231 @@
+@user = testing
+@pw = 1234
+
+### 1) Health check (no authentication)
+GET {{url}}/auth/healthcheck
+Accept: application/json
+
+### 2) Open endpoint test (no authentication)
+GET {{url}}/auth/test
+Accept: application/json
+
+### 3) Register as HEAD_CHEF (captures token automatically)
+POST {{url}}/auth/register?role=HEAD_CHEF
+Content-Type: application/json
+
+{
+  "username": "{{user}}",
+  "password": "{{pw}}"
+}
+> {% client.global.set("token", response.body.token) %}
+
+###
+
+### 4) Login to refresh token
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{user}}",
+  "password": "{{pw}}"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+###
+
+### 7) Add ADMIN role
+POST {{url}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "ADMIN"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+### 7) Add HEAD_CHEF role
+POST {{url}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "HEAD_CHEF"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+###
+
+### Create dish with recipe + ingredients
+POST {{url}}/api/dishes/full
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Stegt flæsk",
+  "description": "Klassisk dansk ret med persillesovs",
+  "kcal": 500,
+  "protein": 25,
+  "carbohydrates": 20,
+  "fat": 30,
+  "status": "TILGÆNGELIG",
+  "allergens": ["LAKTOSE"],
+  "availableFrom": "2025-05-11",
+  "availableUntil": "2025-05-20",
+  "recipe": {
+    "title": "Stegt flæsk med persillesovs",
+    "instructions": "Steg flæsk, kog kartofler, lav sovs",
+    "ingredients": [
+      { "name": "Flæsk" },
+      { "name": "Kartofler" },
+      { "name": "Mælk" },
+      { "name": "Persille" }
+    ]
+  }
+}
+
+
+###
+
+### List all dishes
+GET {{url}}/api/dishes
+Accept: application/json
+
+###
+
+### Filter by status + allergen
+GET {{url}}/api/dishes?status=TILGÆNGELIG&allergen=GLUTEN
+Accept: application/json
+
+###
+
+### Get dish by ID
+GET {{url}}/api/dishes/1
+Accept: application/json
+
+###
+
+### Get available dishes
+GET {{url}}/api/dishes/available
+Accept: application/json
+
+###
+
+### Filter available by allergen
+GET {{url}}/api/dishes/available?allergen=LAKTOSE
+Accept: application/json
+
+###
+
+### Get most popular dishes
+GET {{url}}/api/dishes/popular
+Accept: application/json
+
+###
+
+### Top 10 popular dishes
+GET {{url}}/api/dishes/popular?limit=10
+Accept: application/json
+
+###
+
+### PATCH: name
+PATCH {{url}}/api/dishes/1/name
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+"Flæskesteg med sovs"
+
+###
+
+### PATCH: availableFrom
+PATCH {{url}}/api/dishes/1/availableFrom
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+"2025-05-20"
+
+###
+
+### PATCH: availableUntil
+PATCH {{url}}/api/dishes/1/availableUntil
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+"2025-05-30"
+
+###
+
+### PATCH: kcal
+PATCH {{url}}/api/dishes/1/kcal
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+600
+
+###
+
+### PATCH: protein
+PATCH {{url}}/api/dishes/1/protein
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+22
+
+###
+
+### PATCH: fat
+PATCH {{url}}/api/dishes/1/fat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+11
+
+###
+
+### PUT: replace allergens
+PUT {{url}}/api/dishes/1/allergens
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+["SKALDYR", "SULFITTER"]
+
+###
+
+### PUT: update availability window
+PUT {{url}}/api/dishes/1/availability
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "availableFrom": "2025-05-25",
+  "availableUntil": "2028-05-25"
+}
+
+###
+
+### PUT: update recipe & allergens
+PUT {{url}}/api/dishes/1/recipe
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "allergens": ["SKALDYR", "SULFITTER", "NØDDER"],
+  "recipe": {
+    "title": "Rugbrød med rejer",
+    "instructions": "Læg rejer på rugbrød, pres citron over",
+    "ingredients": [
+      { "name": "Rugbrød" },
+      { "name": "Rejer" },
+      { "name": "Citron" }
+    ]
+  }
+}
+
+###
+
+### DELETE dish
+DELETE {{url}}/api/dishes/7
+Authorization: Bearer {{token}}
