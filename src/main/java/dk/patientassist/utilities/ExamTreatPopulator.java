@@ -36,8 +36,16 @@ public class ExamTreatPopulator {
             em.getTransaction().begin();
 
             List<ExamTreatCategory> categories = new ArrayList<>();
+
             for (var etc : ETCats) {
-                categories.add(Mapper.ExamTreatCategoryDTOToEnt(etc));
+                List<ExamTreatCategory> shouldBeEmpty = em
+                        .createQuery("select etc from ExamTreatCategory etc where etc.name ilike ?1",
+                                ExamTreatCategory.class)
+                        .setParameter(1, etc.name)
+                        .getResultList();
+                if (shouldBeEmpty.isEmpty()) {
+                    categories.add(Mapper.ExamTreatCategoryDTOToEnt(etc));
+                }
             }
 
             for (var cat : categories) {
