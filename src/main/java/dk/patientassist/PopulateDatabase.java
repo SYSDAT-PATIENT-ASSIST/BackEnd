@@ -111,6 +111,21 @@ public class PopulateDatabase {
             em.persist(new Order(4, LocalDateTime.now(), "Uden citron", dishes.get(3), OrderStatus.BEKRÆFTET));
             em.persist(new Order(5, LocalDateTime.now(), "Ekstra ost", dishes.get(2), OrderStatus.AFSENDT));
             em.persist(new Order(6, LocalDateTime.now(), "Skal være varm", dishes.get(0), OrderStatus.VENTER));
+            em.persist(new Order(7, LocalDateTime.now(), "", dishes.get(0), OrderStatus.VENTER));
+            em.persist(new Order(8, LocalDateTime.now(), "", dishes.get(1), OrderStatus.VENTER));
+            em.persist(new Order(9, LocalDateTime.now(), "", dishes.get(2), OrderStatus.VENTER));
+            em.persist(new Order(10, LocalDateTime.now(), "", dishes.get(3), OrderStatus.VENTER));
+            em.persist(new Order(11, LocalDateTime.now(), "", dishes.get(0), OrderStatus.BEKRÆFTET));
+            em.persist(new Order(12, LocalDateTime.now(), "", dishes.get(1), OrderStatus.BEKRÆFTET));
+            em.persist(new Order(13, LocalDateTime.now(), "", dishes.get(2), OrderStatus.BEKRÆFTET));
+            em.persist(new Order(14, LocalDateTime.now(), "", dishes.get(3), OrderStatus.AFSENDT));
+            em.persist(new Order(15, LocalDateTime.now(), "", dishes.get(0), OrderStatus.AFSENDT));
+            em.persist(new Order(16, LocalDateTime.now(), "", dishes.get(1), OrderStatus.VENTER));
+            em.persist(new Order(17, LocalDateTime.now(), "", dishes.get(2), OrderStatus.VENTER));
+            em.persist(new Order(18, LocalDateTime.now(), "", dishes.get(3), OrderStatus.VENTER));
+            em.persist(new Order(19, LocalDateTime.now(), "", dishes.get(0), OrderStatus.BEKRÆFTET));
+            em.persist(new Order(20, LocalDateTime.now(), "", dishes.get(1), OrderStatus.FÆRDIG));
+
 
             em.getTransaction().commit();
             System.out.println("✅ Database populated successfully.");

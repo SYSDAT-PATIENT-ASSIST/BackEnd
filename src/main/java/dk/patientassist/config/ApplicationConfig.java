@@ -1,6 +1,7 @@
 package dk.patientassist.config;
 
 import dk.patientassist.routes.DishRoutes;
+import dk.patientassist.routes.OrderRoutes;
 import dk.patientassist.security.exceptions.ApiException;
 import dk.patientassist.security.routes.SecurityRoutes;
 import dk.patientassist.security.enums.Role;
@@ -24,6 +25,7 @@ public class ApplicationConfig {
         cfg.router.apiBuilder(SecurityRoutes.getSecurityRoutes());
         cfg.router.apiBuilder(SecurityRoutes.getSecuredRoutes());
         cfg.router.apiBuilder(DishRoutes.getDishRoutes());
+        cfg.router.apiBuilder(OrderRoutes.getOrderRoutes());
     }
 
     public static Javalin startServer(int port) {

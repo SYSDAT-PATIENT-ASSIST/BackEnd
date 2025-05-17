@@ -7,8 +7,8 @@ import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OrderDAO{
 
@@ -61,6 +61,38 @@ public class OrderDAO{
           em.getTransaction().commit();
           return new OrderDTO(order);
       }
+    }
+
+    public OrderDTO updateOrderStatus(Integer integer, OrderStatus newStatus){
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+
+            Order order = em.find(Order.class, integer);
+            order.setStatus(newStatus);
+            em.getTransaction().commit();
+            return new OrderDTO(order);
+        }
+    }
+
+    public List<OrderDTO> getAllWithDishes() {
+        try (EntityManager em = emf.createEntityManager()) {
+            List<Order> orders = em.createQuery(
+                    "SELECT o FROM Order o JOIN FETCH o.dish",
+                    Order.class
+            ).getResultList();
+
+            em.clear();
+
+            orders.forEach(order -> {
+                Dish dish = order.getDish();
+                dish.setRecipe(null);
+            });
+
+            return orders
+                    .stream()
+                    .map(OrderDTO::new)
+                    .collect(Collectors.toList());
+        }
     }
 
 
