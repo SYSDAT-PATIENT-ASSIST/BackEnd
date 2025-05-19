@@ -97,6 +97,19 @@ public class DishDTO {
         this.recipe = recipe;
     }
 
+
+    /**
+     * Constructor for creating a DTO with only the name, description, availability dates, and status.
+     */
+    public DishDTO(String name, String description, LocalDate availableFrom, LocalDate availableUntil, DishStatus status) {
+        this.name = name;
+        this.description = description;
+        this.availableFrom = availableFrom;
+        this.availableUntil = availableUntil;
+        this.status = status;
+    }
+
+
     /**
      * Constructs a DTO from a Dish entity.
      */

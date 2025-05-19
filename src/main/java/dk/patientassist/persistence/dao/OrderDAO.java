@@ -1,11 +1,11 @@
 package dk.patientassist.persistence.dao;
-
 import dk.patientassist.persistence.dto.OrderDTO;
 import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+
 
 public class OrderDAO {
 
@@ -24,7 +24,6 @@ public class OrderDAO {
         return instance;
     }
 
-    // createOrder only for test
     public OrderDTO createOrder(OrderDTO orderDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
@@ -39,7 +38,7 @@ public class OrderDAO {
             return new OrderDTO(order);
         }
     }
-
+    
     public OrderDTO getOrder(Integer orderId) {
         try (EntityManager em = emf.createEntityManager()) {
             Order order = em.find(Order.class, orderId);
@@ -48,14 +47,15 @@ public class OrderDAO {
     }
 
     public OrderDTO cancelOrder(Integer orderId) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            Order order = em.find(Order.class, orderId);
-            order.setStatus(OrderStatus.ANNULLERET);
-            em.merge(order);
-            em.getTransaction().commit();
-            return new OrderDTO(order);
-        }
+      try (EntityManager em = emf.createEntityManager()) {
+          em.getTransaction().begin();
+          Order order = em.find(Order.class, orderId);
+          order.setStatus(OrderStatus.ANNULLERET);
+          em.merge(order);
+          em.getTransaction().commit();
+          return new OrderDTO(order);
+      }
     }
+
 
 }
