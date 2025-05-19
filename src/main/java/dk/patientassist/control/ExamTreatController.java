@@ -18,7 +18,6 @@ import dk.patientassist.persistence.ent.ExamTreatType;
 import dk.patientassist.persistence.enums.Role;
 import dk.patientassist.service.Mapper;
 import dk.patientassist.service.dto.ExamTreatCategoryDTO;
-import dk.patientassist.service.dto.ExamTreatDTO;
 import dk.patientassist.service.dto.ExamTreatTypeDTO;
 import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.http.BadRequestResponse;
@@ -30,6 +29,7 @@ import jakarta.persistence.EntityManager;
  */
 public class ExamTreatController {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(ExamTreatController.class);
 
     public static EndpointGroup getEndpoints() {

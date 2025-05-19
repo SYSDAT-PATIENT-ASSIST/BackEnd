@@ -76,11 +76,6 @@ public class Mapper {
         dto.id = ent.id;
         dto.description = ent.description;
         dto.examTreatTypes = new ExamTreatTypeDTO[0];
-        // dto.examTreatTypes = (ent.examTreatTypes != null && ent.examTreatTypes.size()
-        // > 0)
-        // ? ent.examTreatTypes.stream().map(Mapper::ExamTreatTypeEntToDTO)
-        // .toArray(ExamTreatTypeDTO[]::new)
-        // : null;
         return dto;
     }
 
@@ -98,7 +93,6 @@ public class Mapper {
         ExamTreatTypeDTO dto = new ExamTreatTypeDTO(ent.name);
         dto.id = ent.id;
         dto.description = ent.description;
-        // dto.examTreats = new ExamTreatDTO[0];
         dto.examTreats = ent.examTreats != null
                 ? ent.examTreats.stream().map(Mapper::ExamTreatEntToDTO).toArray(ExamTreatDTO[]::new)
                 : null;

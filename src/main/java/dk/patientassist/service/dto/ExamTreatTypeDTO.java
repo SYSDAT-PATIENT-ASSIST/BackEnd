@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
  * ExamTreatTypeDTO
  */
 @EqualsAndHashCode
-public class ExamTreatTypeDTO {
+public class ExamTreatTypeDTO implements Comparable<ExamTreatTypeDTO> {
 
     public Integer id;
     public String name;
@@ -27,6 +27,15 @@ public class ExamTreatTypeDTO {
 
     public ExamTreatTypeDTO(String name) {
         this.name = name;
+        this.urlSafeName = URLEncoder.encode(name, StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public int compareTo(ExamTreatTypeDTO other) {
+        return name.compareTo(other.name);
+    }
+
+    public void setUrlSafeName() {
         this.urlSafeName = URLEncoder.encode(name, StandardCharsets.UTF_8);
     }
 }

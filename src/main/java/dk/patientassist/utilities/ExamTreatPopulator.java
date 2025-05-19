@@ -26,6 +26,9 @@ public class ExamTreatPopulator {
 
         ExamTreatCategoryDTO[] ETCats = Utils.getObjectMapperCompact().readValue(fileAsStr,
                 ExamTreatCategoryDTO[].class);
+        for (var ETCat : ETCats) {
+            ETCat.setUrlSafeName();
+        }
 
         persistBatch(ETCats);
     }

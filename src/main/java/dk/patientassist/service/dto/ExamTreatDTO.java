@@ -36,4 +36,8 @@ public class ExamTreatDTO {
         this.srcUrl = srcUrl;
         this.urlSafeName = URLEncoder.encode(name, StandardCharsets.UTF_8);
     }
+
+    public void setUrlSafeName() {
+        this.urlSafeName = URLEncoder.encode(name, StandardCharsets.UTF_8);
+    }
 }

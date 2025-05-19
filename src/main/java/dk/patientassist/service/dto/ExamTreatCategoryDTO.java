@@ -1,6 +1,5 @@
 package dk.patientassist.service.dto;
 
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -27,6 +26,10 @@ public class ExamTreatCategoryDTO {
 
     public ExamTreatCategoryDTO(String name) {
         this.name = name;
+        this.urlSafeName = URLEncoder.encode(name, StandardCharsets.UTF_8);
+    }
+
+    public void setUrlSafeName() {
         this.urlSafeName = URLEncoder.encode(name, StandardCharsets.UTF_8);
     }
 }
