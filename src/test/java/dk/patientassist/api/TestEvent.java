@@ -1,8 +1,19 @@
 package dk.patientassist.api;
 
+import static dk.patientassist.api.impl.HelperMethods.deleteEvent;
+import static dk.patientassist.api.impl.HelperMethods.eventCompare;
+import static dk.patientassist.api.impl.HelperMethods.get;
+import static dk.patientassist.api.impl.HelperMethods.login;
+import static dk.patientassist.api.impl.HelperMethods.logout;
+import static dk.patientassist.api.impl.HelperMethods.patchEvent;
+import static dk.patientassist.api.impl.HelperMethods.persistEvent;
+import static dk.patientassist.api.impl.HelperMethods.putEvent;
+import static dk.patientassist.api.impl.HelperMethods.register;
+import static dk.patientassist.api.impl.HelperMethods.setup;
+import static dk.patientassist.api.impl.HelperMethods.stop;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterAll;
@@ -17,16 +28,12 @@ import com.github.javafaker.Faker;
 import dk.patientassist.api.resources.EmployeeData;
 import dk.patientassist.api.resources.EventData;
 import dk.patientassist.config.HibernateConfig;
-import dk.patientassist.config.Mode;
-import dk.patientassist.control.MasterController;
 import dk.patientassist.persistence.ent.Event;
 import dk.patientassist.service.Mapper;
-import dk.patientassist.service.dto.EmployeeDTO;
 import dk.patientassist.service.dto.EventDTO;
 import dk.patientassist.utilities.MockData;
 import dk.patientassist.utilities.Utils;
 import io.javalin.Javalin;
-import io.restassured.RestAssured;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -52,23 +59,8 @@ public class TestEvent {
     static Random rng = new Random();
 
     @BeforeAll
-    static void setup() {
-        try {
-            jsonMapper = Utils.getObjectMapperCompact();
-            jwtKey = Utils.getConfigProperty("JWT_SECRET_KEY");
-            jwtIss = Utils.getConfigProperty("JWT_ISSUER");
-            jwtExp = Long.parseLong(Utils.getConfigProperty("JWT_EXPIRE_TIME"));
-            jwtHdr = Utils.getObjectMapperCompact().writeValueAsString(Map.of("typ", "JWT", "alg", "HS256"));
-        } catch (Exception e) {
-            Assertions.fail("setup failed");
-        }
-
-        HibernateConfig.init(Mode.TEST);
-        emf = HibernateConfig.getEntityManagerFactory();
-
-        port = 9999;
-        jav = MasterController.start(Mode.TEST, port);
-
+    static void init() {
+        setup();
         empData = new EmployeeData();
         register(empData.guest, "guest");
         register(empData.admin, "admin");
@@ -76,7 +68,7 @@ public class TestEvent {
 
     @AfterAll
     static void teardown() {
-        jav.stop();
+        stop();
     }
 
     @BeforeEach
@@ -235,107 +227,5 @@ public class TestEvent {
                 }
             }
         }
-    }
-
-    /* HELPER METHODS */
-    static String get(String endpoint, int expStatus) {
-        return RestAssured.given().port(port)
-                .header("Authorization", "Bearer " + jwt)
-                .when().get("/api/" + endpoint)
-                .then().assertThat().statusCode(expStatus)
-                .and().extract().body().asString();
-    }
-
-    static void register(EmployeeDTO empDetails, String pw) {
-        try {
-            jwt = RestAssured.given().port(port).contentType("application/json")
-                    .body(empDetails.makeRegistrationForm(pw))
-                    .when().post("/api/auth/register")
-                    .then().statusCode(201)
-                    .and().extract().path("token");
-        } catch (Exception e) {
-            Assertions.fail("registration error");
-        }
-    }
-
-    static void login(EmployeeDTO empDetails, String pw) {
-        try {
-            jwt = RestAssured.given().port(port).contentType("application/json").body(empDetails.makeLoginForm(pw))
-                    .when().post("/api/auth/login")
-                    .then().statusCode(200)
-                    .and().extract().path("token");
-        } catch (Exception e) {
-            Assertions.fail("login error");
-        }
-    }
-
-    static String putEvent(Event event) {
-        try {
-            String empJson = jsonMapper.writeValueAsString(Mapper.EventEntToDTO(event));
-            String res = RestAssured.given().port(port).contentType("application/json").body(empJson)
-                    .header("Authorization", "Bearer " + jwt)
-                    .when().put("/api/events")
-                    .then().statusCode(201)
-                    .and().extract().body().asString();
-            return res;
-        } catch (Exception e) {
-            Assertions.fail("registration error");
-            return null;
-        }
-    }
-
-    static String patchEvent(int id, Event event) {
-        try {
-            String empJson = jsonMapper.writeValueAsString(Mapper.EventEntToDTO(event));
-            String res = RestAssured.given().port(port).contentType("application/json").body(empJson)
-                    .header("Authorization", "Bearer " + jwt)
-                    .when().patch("/api/events/" + id)
-                    .then().statusCode(200)
-                    .and().extract().body().asString();
-            return res;
-        } catch (Exception e) {
-            Assertions.fail("registration error");
-            return null;
-        }
-    }
-
-    static String deleteEvent(int id) {
-        try {
-            String res = RestAssured.given().port(port)
-                    .header("Authorization", "Bearer " + jwt)
-                    .when().delete("/api/events/" + id)
-                    .then().statusCode(200)
-                    .and().extract().body().asString();
-            return res;
-        } catch (Exception e) {
-            Assertions.fail("registration error");
-            return null;
-        }
-    }
-
-    static void persistEvent(Event event) {
-        try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
-            em.getTransaction().begin();
-            em.persist(event);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            Assertions.fail("persisting event failed");
-        }
-    }
-
-    static void eventCompare(Event a, Event b) {
-        Assertions.assertNotNull(a, "event in test should not be null null");
-        Assertions.assertEquals(b.name, a.name,
-                "event retrieved equals event stored (name)");
-        Assertions.assertEquals(b.description, a.description,
-                "event retrieved equals event stored (description)");
-        Assertions.assertEquals(b.startTime.withNano(0), a.startTime.withNano(0),
-                "event retrieved equals event stored (startTime)");
-        Assertions.assertEquals(b.duration.withNanos(0), a.duration.withNanos(0),
-                "event retrieved equals event stored (duration)");
-    }
-
-    static void logout() {
-        jwt = "";
     }
 }
