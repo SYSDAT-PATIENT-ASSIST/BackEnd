@@ -1,16 +1,6 @@
 package dk.patientassist.api;
 
-import static dk.patientassist.api.impl.HelperMethods.deleteEvent;
-import static dk.patientassist.api.impl.HelperMethods.eventCompare;
-import static dk.patientassist.api.impl.HelperMethods.get;
-import static dk.patientassist.api.impl.HelperMethods.login;
-import static dk.patientassist.api.impl.HelperMethods.logout;
-import static dk.patientassist.api.impl.HelperMethods.patchEvent;
-import static dk.patientassist.api.impl.HelperMethods.persistEvent;
-import static dk.patientassist.api.impl.HelperMethods.putEvent;
-import static dk.patientassist.api.impl.HelperMethods.register;
-import static dk.patientassist.api.impl.HelperMethods.setup;
-import static dk.patientassist.api.impl.HelperMethods.stop;
+import static dk.patientassist.api.impl.HelperMethods.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,16 +64,7 @@ public class TestEvent {
     @BeforeEach
     void setupBeforeEach() {
         eventData = new EventData();
-        try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
-            em.getTransaction().begin();
-            List<Event> events = em.createQuery("SELECT e from Event e", Event.class).getResultList();
-            for (Event e : events) {
-                em.remove(e);
-            }
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            Assertions.fail("setup failed");
-        }
+        wipeEvents();
         logout();
     }
 
@@ -92,58 +73,26 @@ public class TestEvent {
     @Test
     void read() {
         persistEvent(eventData.simpleEvent);
-
-        EventDTO[] events = new EventDTO[0];
-        String eventResponse = get("events", 200);
-        try {
-            events = Utils.getObjectMapperCompact().readValue(eventResponse, EventDTO[].class);
-        } catch (Exception e) {
-            Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-        }
-
-        Assertions.assertEquals(events.length, 1, "expected number of events");
-        eventCompare(eventData.simpleEvent, Mapper.EventDTOToEnt(events[0]));
+        var events = getEvents();
+        Assertions.assertEquals(events.length, 1, "expected number of events differ");
+        Assertions.assertEquals(eventCompare(eventData.simpleEvent, Mapper.EventDTOToEnt(events[0])), true,
+                "expected same event in DB & from API");
     }
 
     @Test
     void create() {
         login(empData.admin, "admin");
 
-        EventDTO resDTO = null, resDTORetrieved = null;
-        String responseStr = "";
-
         for (int i = 0; i < 10; i++) {
             Event event = MockData.event();
-
-            responseStr = putEvent(event);
-            try {
-                resDTO = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO.class);
-            } catch (Exception e) {
-                Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-            }
+            var resDTO = putEvent(event);
 
             eventCompare(event, Mapper.EventDTOToEnt(resDTO));
 
-            responseStr = get("events/" + resDTO.id, 200);
-
-            try {
-                resDTORetrieved = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO.class);
-            } catch (Exception e) {
-                Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-            }
+            var resDTORetrieved = getEvent(resDTO.id);
 
             eventCompare(Mapper.EventDTOToEnt(resDTORetrieved), Mapper.EventDTOToEnt(resDTO));
         }
-
-        responseStr = putEvent(eventData.simpleEvent);
-
-        try {
-            resDTO = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO.class);
-        } catch (Exception e) {
-            Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-        }
-
-        eventCompare(eventData.simpleEvent, Mapper.EventDTOToEnt(resDTO));
     }
 
     @Test
@@ -151,15 +100,9 @@ public class TestEvent {
         login(empData.admin, "admin");
         Event event = MockData.event();
 
-        String eventPutStr = putEvent(event);
-        EventDTO eventPutDTO = null;
-        try {
-            eventPutDTO = Utils.getObjectMapperCompact().readValue(eventPutStr, EventDTO.class);
-        } catch (Exception e) {
-            Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-        }
-
-        eventCompare(event, Mapper.EventDTOToEnt(eventPutDTO));
+        var eventPutDTO = putEvent(event);
+        Assertions.assertEquals(eventCompare(event, Mapper.EventDTOToEnt(eventPutDTO)), true,
+                "expected same event in DB & from API");
 
         event.id = eventPutDTO.id;
         event.name = event.name + event.name;
@@ -167,16 +110,13 @@ public class TestEvent {
         event.startTime = event.startTime.plusSeconds(rng.nextLong(-100000, 100000));
         event.duration = event.duration.plusSeconds(rng.nextLong(-100000, 100000));
 
-        patchEvent(event.id, event);
-        String eventPatchedStr = get("events/" + event.id, 200);
-        EventDTO eventPatchedDTO = null;
-        try {
-            eventPatchedDTO = Utils.getObjectMapperCompact().readValue(eventPatchedStr, EventDTO.class);
-        } catch (Exception e) {
-            Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-        }
+        var eventPatchedDTO = patchEvent(event.id, event);
+        Assertions.assertEquals(eventCompare(event, Mapper.EventDTOToEnt(eventPatchedDTO)), true,
+                "expected same event in DB & from API");
 
-        eventCompare(event, Mapper.EventDTOToEnt(eventPatchedDTO));
+        eventPatchedDTO = getEvent(event.id);
+        Assertions.assertEquals(eventCompare(event, Mapper.EventDTOToEnt(eventPatchedDTO)), true,
+                "expected same event in DB & from API");
     }
 
     @Test
@@ -186,13 +126,8 @@ public class TestEvent {
         List<Event> events = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Event event = MockData.event();
-            String responseStr = putEvent(event);
-            try {
-                EventDTO eventDTO = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO.class);
-                event.id = eventDTO.id;
-            } catch (Exception e) {
-                Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-            }
+            var eventDTO = putEvent(event);
+            event.id = eventDTO.id;
             events.add(event);
         }
 
@@ -201,26 +136,16 @@ public class TestEvent {
             Event event = events.get(removeIdx);
             events.remove(removeIdx);
 
-            EventDTO[] eventsFetched = new EventDTO[0];
-            String responseStr = get("events", 200);
-            try {
-                eventsFetched = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO[].class);
-            } catch (Exception e) {
-                Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-            }
+            var eventsFetched = getEvents();
 
             Assertions.assertEquals(10 - i, eventsFetched.length, "fetched events size should match");
 
             deleteEvent(event.id);
 
-            responseStr = get("events", 200);
-            try {
-                eventsFetched = Utils.getObjectMapperCompact().readValue(responseStr, EventDTO[].class);
-            } catch (Exception e) {
-                Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
-            }
+            eventsFetched = getEvents();
 
             Assertions.assertEquals(10 - i - 1, eventsFetched.length, "fetched events size should match");
+
             for (var dto : eventsFetched) {
                 if (dto.id == event.id) {
                     Assertions.fail("fetched deleted event");

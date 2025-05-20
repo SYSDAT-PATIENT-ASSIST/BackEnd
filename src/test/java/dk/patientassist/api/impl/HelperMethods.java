@@ -1,12 +1,21 @@
 package dk.patientassist.api.impl;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
@@ -16,13 +25,16 @@ import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.control.MasterController;
 import dk.patientassist.persistence.ent.Event;
+import dk.patientassist.persistence.ent.ExamTreat;
 import dk.patientassist.persistence.ent.Section;
 import dk.patientassist.service.Mapper;
 import dk.patientassist.service.dto.EmployeeDTO;
+import dk.patientassist.service.dto.EventDTO;
 import dk.patientassist.service.dto.ExamTreatCategoryDTO;
 import dk.patientassist.service.dto.ExamTreatDTO;
 import dk.patientassist.service.dto.ExamTreatTypeDTO;
 import dk.patientassist.utilities.ExamTreatPopulator;
+import dk.patientassist.utilities.MockData;
 import dk.patientassist.utilities.Utils;
 import io.javalin.Javalin;
 import io.restassured.RestAssured;
@@ -73,12 +85,6 @@ public class HelperMethods {
 
         empData = new EmployeeData();
 
-        try {
-            ExamTreatPopulator.load("data/exams_and_treatments_data.json");
-        } catch (Exception e) {
-            Assertions.fail("setup failed: " + e.getMessage());
-        }
-
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Section sect0 = new Section();
@@ -93,6 +99,12 @@ public class HelperMethods {
             em.getTransaction().commit();
         } catch (Exception e) {
             Assertions.fail("setup failed");
+        }
+
+        try {
+            ExamTreatPopulator.load("data/exams_and_treatments_data.json");
+        } catch (Exception e) {
+            Assertions.fail("setup failed: " + e.getMessage());
         }
     }
 
@@ -198,30 +210,40 @@ public class HelperMethods {
         jwt = "";
     }
 
-    public static String putEvent(Event event) {
+    public static EventDTO putEvent(Event event) {
         try {
             String empJson = jsonMapper.writeValueAsString(Mapper.EventEntToDTO(event));
-            String res = RestAssured.given().port(port).contentType("application/json").body(empJson)
+            return RestAssured.given().port(port).contentType("application/json").body(empJson)
                     .header("Authorization", "Bearer " + jwt)
                     .when().put("/api/events")
                     .then().statusCode(201)
-                    .and().extract().body().asString();
-            return res;
+                    .and().extract().body().as(EventDTO.class);
         } catch (Exception e) {
             Assertions.fail("registration error");
             return null;
         }
     }
 
-    public static String patchEvent(int id, Event event) {
+    public static EventDTO getEvent(int id) {
+        try {
+            return RestAssured.given().port(port)
+                    .when().get("/api/events/" + id)
+                    .then().statusCode(200)
+                    .and().extract().body().as(EventDTO.class);
+        } catch (Exception e) {
+            Assertions.fail("registration error");
+            return null;
+        }
+    }
+
+    public static EventDTO patchEvent(int id, Event event) {
         try {
             String empJson = jsonMapper.writeValueAsString(Mapper.EventEntToDTO(event));
-            String res = RestAssured.given().port(port).contentType("application/json").body(empJson)
+            return RestAssured.given().port(port).contentType("application/json").body(empJson)
                     .header("Authorization", "Bearer " + jwt)
                     .when().patch("/api/events/" + id)
                     .then().statusCode(200)
-                    .and().extract().body().asString();
-            return res;
+                    .and().extract().body().as(EventDTO.class);
         } catch (Exception e) {
             Assertions.fail("registration error");
             return null;
@@ -252,7 +274,7 @@ public class HelperMethods {
         }
     }
 
-    public static void eventCompare(Event a, Event b) {
+    public static boolean eventCompare(Event a, Event b) {
         Assertions.assertNotNull(a, "event in test should not be null null");
         Assertions.assertEquals(b.name, a.name,
                 "event retrieved equals event stored (name)");
@@ -262,5 +284,29 @@ public class HelperMethods {
                 "event retrieved equals event stored (startTime)");
         Assertions.assertEquals(b.duration.withNanos(0), a.duration.withNanos(0),
                 "event retrieved equals event stored (duration)");
+        return true;
     }
+
+    public static void wipeEvents() {
+        try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
+            em.getTransaction().begin();
+            List<Event> events = em.createQuery("SELECT e from Event e", Event.class).getResultList();
+            for (Event e : events) {
+                em.remove(e);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            Assertions.fail("setup failed");
+        }
+    }
+
+    public static EventDTO[] getEvents() {
+        try {
+            return Utils.getObjectMapperCompact().readValue(get("events", 200), EventDTO[].class);
+        } catch (Exception e) {
+            Assertions.fail(String.format("reading events failed: %s", e.getMessage()));
+        }
+        return new EventDTO[0];
+    }
+
 }
