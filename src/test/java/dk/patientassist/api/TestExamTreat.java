@@ -46,40 +46,27 @@ public class TestExamTreat {
 
     @Test
     void readCategories() {
-        try {
-            var ETCatsInResponse = fetchExamTreatCategories();
-            matchCategories(ETCatsInResponse, ETCatsOnDisk);
-        } catch (Exception e) {
-            Assertions.fail("Examinations and treatment data on disk does not match api response: " + e.getMessage());
-        }
+        var ETCatsInResponse = fetchExamTreatCategories();
+        matchCategories(ETCatsInResponse, ETCatsOnDisk);
     }
 
     @Test
     void readSubCategory() {
-        try {
-            for (var ETCatOnDisk : ETCatsOnDisk) {
-                var ETTypesInResponse = fetchExamTreatSubcategories(ETCatOnDisk.urlSafeName);
-                matchSubCategories(ETCatOnDisk.examTreatTypes, ETTypesInResponse);
-            }
-        } catch (Exception e) {
-            Assertions.fail("something went wrong: " + e.getMessage());
+        for (var ETCatOnDisk : ETCatsOnDisk) {
+            var ETTypesInResponse = fetchExamTreatSubcategories(ETCatOnDisk.urlSafeName);
+            matchSubCategories(ETCatOnDisk.examTreatTypes, ETTypesInResponse);
         }
     }
 
     @Test
     void readArticle() {
-        try {
-            for (var ETCatOnDisk : ETCatsOnDisk) {
-                for (var ETSubCatOnDisk : ETCatOnDisk.examTreatTypes) {
-                    for (var ETArticleOnDisk : ETSubCatOnDisk.examTreats) {
-                        var ETArticleInResponse = fetchExamTreatArticles(ETArticleOnDisk.urlSafeName);
-                        matchArticles(ETArticleInResponse, ETArticleOnDisk);
-                    }
+        for (var ETCatOnDisk : ETCatsOnDisk) {
+            for (var ETSubCatOnDisk : ETCatOnDisk.examTreatTypes) {
+                for (var ETArticleOnDisk : ETSubCatOnDisk.examTreats) {
+                    var ETArticleInResponse = fetchExamTreatArticles(ETArticleOnDisk.urlSafeName);
+                    matchArticles(ETArticleInResponse, ETArticleOnDisk);
                 }
             }
-
-        } catch (Exception e) {
-            Assertions.fail("articles on disk should match API response");
         }
     }
 
