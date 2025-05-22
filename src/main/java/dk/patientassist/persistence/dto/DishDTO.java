@@ -124,7 +124,7 @@ public class DishDTO {
         this.protein = dish.getProtein();
         this.carbohydrates = dish.getCarbohydrates();
         this.fat = dish.getFat();
-        this.allergens = dish.getAllergensSet();
+        this.allergens = dish.getAllergensSet() != null ? Set.copyOf(dish.getAllergensSet()) : null;
 
         if (dish.getRecipe() != null) {
             this.recipe = new RecipeDTO(dish.getRecipe());

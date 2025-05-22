@@ -28,6 +28,7 @@ public class App {
             /* TEST DATA */
             EmployeePopulator.addAdmin();
             EventPopulator.populate(150);
+//            PopulateDatabase.populateDatabase();
 
             EmployeeDTO guest = new EmployeeDTO();
             guest.email = "guest@email.dk";

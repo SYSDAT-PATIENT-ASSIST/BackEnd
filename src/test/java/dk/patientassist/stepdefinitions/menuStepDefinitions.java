@@ -19,6 +19,7 @@ import org.junit.Assert;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 public class menuStepDefinitions{
@@ -49,7 +50,7 @@ public class menuStepDefinitions{
 
     @And("the patient has opened the Menu on the iPad")
     public void thePatientHasOpenedTheMenuOnTheIPad(){
-        dishController.getAllAvailable();
+        List<DishDTO> dishes = dishController.getAllAvailableToPatient();
     }
 
     @When("the patient selects a dish from the Menu")

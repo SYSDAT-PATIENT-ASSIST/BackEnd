@@ -314,8 +314,15 @@ public class DishController {
         }
     }
 
+//    public void getAllAvailable(Context ctx){
+//        System.out.println("🔍 getAllAvailable() blev kaldt");
+//        List<DishDTO> dishDTOS = dishDAO.getAllAvailable();
+//        ctx.status(200).json(dishDTOS);
+//    }
+
+
     //used for cucumber / menuStepDefinitions
-    public List<DishDTO> getAllAvailable(){
+    public List<DishDTO> getAllAvailableToPatient(){
         return dishDAO.getAllAvailable();
     }
 
