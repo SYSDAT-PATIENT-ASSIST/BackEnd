@@ -38,7 +38,8 @@ public class AccessController {
     }
 
     public static void check(@NotNull Context ctx) {
-        if (ctx.routeRoles().isEmpty() || ctx.routeRoles().contains(Role.GUEST)) {
+        if (ctx.routeRoles().isEmpty() || ctx.routeRoles().contains(Role.GUEST)
+                || ctx.routeRoles().contains(dk.patientassist.persistence.enums.Role.GUEST)) {
             return;
         }
 
