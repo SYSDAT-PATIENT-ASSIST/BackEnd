@@ -41,6 +41,9 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(User.class);
         configuration.addAnnotatedClass(Role.class);
         configuration.addAnnotatedClass(IngredientType.class);
+        configuration.addAnnotatedClass(ExamTreat.class);
+        configuration.addAnnotatedClass(ExamTreatType.class);
+        configuration.addAnnotatedClass(ExamTreatCategory.class);
     }
 
     public static void init(Mode mode) {
