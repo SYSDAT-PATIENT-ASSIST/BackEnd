@@ -9,6 +9,7 @@ import dk.patientassist.control.AuthController;
 import dk.patientassist.control.EventController;
 import dk.patientassist.control.ExamTreatController;
 import dk.patientassist.routes.DishRoutes;
+import dk.patientassist.routes.OrderFoodRoutes;
 import dk.patientassist.routes.TestEndpoints;
 import dk.patientassist.utilities.Utils;
 import io.javalin.Javalin;
@@ -54,6 +55,7 @@ public class RouterConfig {
             config.router.apiBuilder(EventController.getEndpoints());
             config.router.apiBuilder(DishRoutes.getDishRoutes());
             config.router.apiBuilder(ExamTreatController.getEndpoints());
+            config.router.apiBuilder(OrderFoodRoutes.getOrderFoodRoutes());
         });
         /* SECURITY */
         jav.beforeMatched(AccessController::check);

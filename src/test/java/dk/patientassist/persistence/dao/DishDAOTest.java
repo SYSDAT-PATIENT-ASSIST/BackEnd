@@ -34,7 +34,7 @@ class DishDAOTest {
 
     @Test
     void getAllAvailable() {
-        List<DishDTO> dishes = dishDAO.getAll();
+        List<DishDTO> dishes = dishDAO.getAllAvailable();
         Assert.assertEquals(0, dishes.size());
     }
 }

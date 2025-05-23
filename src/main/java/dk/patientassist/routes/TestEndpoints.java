@@ -1,6 +1,6 @@
 package dk.patientassist.routes;
 
-import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.security.enums.Role;
 import io.javalin.apibuilder.EndpointGroup;
 
 import java.util.HashMap;
@@ -39,13 +39,13 @@ public class TestEndpoints {
                     m.put("message", "hello from chef_only");
                     ctx.json(m);
                     ctx.status(200);
-                }, Role.ADMIN, Role.HEADCHEF, Role.CHEF);
+                }, Role.ADMIN, Role.HEAD_CHEF, Role.CHEF);
                 get("/headchef_only", ctx -> {
                     Map<String, String> m = new HashMap<>();
                     m.put("message", "hello from headchef_only");
                     ctx.json(m);
                     ctx.status(200);
-                }, Role.ADMIN, Role.HEADCHEF);
+                }, Role.ADMIN, Role.HEAD_CHEF);
                 get("/nurse_only", ctx -> {
                     Map<String, String> m = new HashMap<>();
                     m.put("message", "hello from nurse_only");

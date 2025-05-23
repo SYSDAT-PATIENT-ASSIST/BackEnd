@@ -3,10 +3,12 @@ package dk.patientassist.persistence.dto;
 import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.OrderStatus;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 @Getter
 @Setter
 public class OrderDTO {
