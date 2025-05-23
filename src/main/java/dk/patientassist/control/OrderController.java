@@ -1,12 +1,15 @@
 package dk.patientassist.control;
 import dk.patientassist.persistence.HibernateConfig;
-import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dao.OrderDAO;
 import dk.patientassist.persistence.dto.OrderDTO;
 import dk.patientassist.persistence.ent.Order;
+import dk.patientassist.persistence.enums.OrderStatus;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 import jakarta.persistence.EntityManagerFactory;
+
+import java.util.List;
+import java.util.Map;
 
 public class OrderController{
 
@@ -49,5 +52,26 @@ public class OrderController{
         return dao.cancelOrder(orderId);
     }
 
+    public void updateOrder(Context ctx) {
+        int id = ctx.pathParamAsClass("id", Integer.class).get();
 
+        Map<String, String> requestBody = ctx.bodyAsClass(Map.class);
+        String statusValue = requestBody.get("status");
+        OrderStatus status = OrderStatus.fromString(statusValue);
+
+        OrderDTO updatedOrder = dao.updateOrderStatus(id, status);
+
+        ctx.json(updatedOrder);
+    }
+
+    public void getAllOrdersWithDishes(Context ctx){
+        try {
+            List<OrderDTO> orderDTOS = dao.getAllWithDishes();
+            // response
+            ctx.res().setStatus(200);
+            ctx.json(orderDTOS);
+        } catch (Exception e) {
+            throw new NotFoundResponse("No content found for this request");
+        }
+    }
 }
