@@ -49,9 +49,9 @@ public class Recipe {
     /**
      * Dish associated with this recipe.
      */
-    @OneToOne
-    @JoinColumn(name = "dish_id") // FK managed on this side
+    @OneToOne(mappedBy = "recipe")
     private Dish dish;
+
 
     /**
      * Full constructor excluding dish reference (set separately if needed).

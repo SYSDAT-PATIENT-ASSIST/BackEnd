@@ -56,11 +56,12 @@ public class ApplicationConfig {
     }
 
     private static void cors(Context ctx) {
-        ctx.header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+        ctx.header("Access-Control-Allow-Origin", "http://localhost:5173")
+                .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
                 .header("Access-Control-Allow-Headers", "Content-Type,Authorization")
                 .header("Access-Control-Allow-Credentials", "true");
     }
+
 
     private static void corsOptions(Context ctx) {
         cors(ctx);

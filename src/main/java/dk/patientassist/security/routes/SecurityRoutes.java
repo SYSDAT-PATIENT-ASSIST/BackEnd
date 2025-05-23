@@ -50,7 +50,7 @@ public class SecurityRoutes {
             path("/protected", () -> {
                 get("/user_demo",
                         ctx -> ctx.json(jsonMapper.createObjectNode().put("msg","Hello from USER Protected")),
-                        Role.ADMIN
+                        Role.ADMIN, Role.KITCHEN_STAFF, Role.HEAD_CHEF
                 );
                 get("/admin_demo",
                         ctx -> ctx.json(jsonMapper.createObjectNode().put("msg","Hello from ADMIN Protected")),
@@ -58,7 +58,7 @@ public class SecurityRoutes {
                 );
                 post("/user/addrole",
                         securityController.addRole(),
-                        Role.ADMIN
+                        Role.ADMIN, Role.KITCHEN_STAFF, Role.HEAD_CHEF
                 );
             });
         };

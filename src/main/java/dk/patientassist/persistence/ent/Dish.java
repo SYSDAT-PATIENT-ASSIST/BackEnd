@@ -99,14 +99,15 @@ public class Dish {
     /**
      * One recipe associated with this dish.
      */
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
+
 
     /**
      * Orders that include this dish.
      */
-    @OneToMany(mappedBy = "dish")
+    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders;
 
     /**

@@ -1,16 +1,16 @@
 # In IntelliJ’s HTTP client toolbar, choose the “dev” environment
-@user = kikko
+@user = lille
 @pw   = 1234
 
-### 1) Healthcheck (no authentication)
+### Healthcheck (no authentication)
 GET {{host}}/auth/healthcheck
 Accept: application/json
 
-### 2) Open test endpoint (no authentication)
+### Open test endpoint (no authentication)
 GET {{host}}/auth/test
 Accept: application/json
 
-### 3) Register as ADMIN (capture token)
+### Register as ADMIN (capture token)
 POST {{host}}/auth/register?role=ADMIN
 Content-Type: application/json
 
@@ -21,7 +21,19 @@ Content-Type: application/json
 
 > {% client.global.set("token", response.body.token) %}
 
-### 4) Login to refresh token
+### add HEAD_CHEF role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "HEAD_CHEF"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+
+### Login to refresh token
 POST {{host}}/auth/login
 Content-Type: application/json
 
@@ -32,59 +44,50 @@ Content-Type: application/json
 
 > {% client.global.set("token", response.body.token) %}
 
-### 5) Access ADMIN-protected endpoint
+### Access ADMIN-protected endpoint
 GET {{host}}/protected/admin_demo
 Authorization: Bearer {{token}}
 Accept: application/json
 
-### 6) Access USER-protected endpoint
+### Access USER-protected endpoint
 GET {{host}}/protected/user_demo
 Authorization: Bearer {{token}}
 Accept: application/json
 
-### 7) Add HOVEDKOK role
+### Add HEAD_CHEF role
 POST {{host}}/protected/user/addrole
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "role": "HOVEDKOK"
+  "role": "HEAD_CHEF"
 }
 
-### 8) Add KOK role
+### Add KITCHEN_STAFF role
 POST {{host}}/protected/user/addrole
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "role": "KOK"
+  "role": "KITCHEN_STAFF"
 }
 
-### 9) Add KØKKENPERSONALE role
+### Add DOCTOR role
 POST {{host}}/protected/user/addrole
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "role": "KØKKENPERSONALE"
+  "role": "DOCTOR"
 }
 
-### 10) Add LÆGE role
+### 11) Add NURSE role
 POST {{host}}/protected/user/addrole
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "role": "LÆGE"
-}
-
-### 11) Add SYGEPLEJERSKE role
-POST {{host}}/protected/user/addrole
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "role": "SYGEPLEJERSKE"
+  "role": "NURSE"
 }
 
 ### 12) Verify ADMIN endpoint still works
@@ -92,7 +95,8 @@ GET {{host}}/protected/admin_demo
 Authorization: Bearer {{token}}
 Accept: application/json
 
-### 13) (Optional) Verify USER endpoint still works
+### 13) Verify USER endpoint still works
 GET {{host}}/protected/user_demo
 Authorization: Bearer {{token}}
 Accept: application/json
+
