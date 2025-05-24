@@ -7,6 +7,8 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.Serial;
 import java.io.Serializable;
+
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +30,7 @@ public class User implements Serializable {
     @Basic(optional = false)
     @Column(name = "username", length = 25)
     private String username;
+
     @Basic(optional = false)
     @Column(name = "password")
     private String password;

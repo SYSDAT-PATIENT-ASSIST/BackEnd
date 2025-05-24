@@ -9,3 +9,4 @@ public interface ISecurityDAO {
     User createUser(String username, String password);
     User addRole(UserDTO user, String newRole);
 }
+

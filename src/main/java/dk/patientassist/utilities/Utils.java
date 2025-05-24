@@ -20,13 +20,11 @@ import java.util.Properties;
 import dk.patientassist.control.ApiException;
 import io.javalin.http.Context;
 
-public class Utils
-{
+public class Utils {
     static ObjectMapper objectMapperDef = new ObjectMapper();
     static ObjectMapper objectMapper;
 
-    public static String getPropertyValue(String propName, String resourceName)
-    {
+    public static String getPropertyValue(String propName, String resourceName) {
         try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(resourceName)) {
             Properties prop = new Properties();
             prop.load(is);
@@ -43,8 +41,7 @@ public class Utils
         }
     }
 
-    public static ObjectMapper getObjectMapper()
-    {
+    public static ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
             objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // Ignore unknown properties in JSON
@@ -54,8 +51,7 @@ public class Utils
         return objectMapper;
     }
 
-    public static String convertToJsonMessage(Context ctx, String property, String message)
-    {
+    public static String convertToJsonMessage(Context ctx, String property, String message) {
         Map<String, String> msgMap = new HashMap<>();
         //msgMap.put(property, message);  // Put the message in the map
         msgMap.put(property, ctx.status().toString());
@@ -72,16 +68,14 @@ public class Utils
         }
     }
 
-    public static DateTimeFormatter dateTimeFormatter()
-    {
+    public static DateTimeFormatter dateTimeFormatter() {
         return new DateTimeFormatterBuilder()
                 .appendPattern("yyyy-MM-dd HH:mm:ss")
                 .appendFraction(ChronoField.MILLI_OF_SECOND, 2, 3, true)
                 .toFormatter();
     }
 
-    public static double roundFloat(double num, int places)
-    {
+    public static double roundFloat(double num, int places) {
         BigDecimal val = BigDecimal.valueOf(num);
         val = val.setScale(places, RoundingMode.HALF_UP);
         return val.doubleValue();

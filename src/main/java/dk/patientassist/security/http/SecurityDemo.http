@@ -1,0 +1,98 @@
+# In IntelliJ’s HTTP client toolbar, choose the “dev” environment
+@user = kikko
+@pw   = 1234
+
+### 1) Healthcheck (no authentication)
+GET {{host}}/auth/healthcheck
+Accept: application/json
+
+### 2) Open test endpoint (no authentication)
+GET {{host}}/auth/test
+Accept: application/json
+
+### 3) Register as ADMIN (capture token)
+POST {{host}}/auth/register?role=ADMIN
+Content-Type: application/json
+
+{
+  "username": "{{user}}",
+  "password": "{{pw}}"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+### 4) Login to refresh token
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{user}}",
+  "password": "{{pw}}"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+### 5) Access ADMIN-protected endpoint
+GET {{host}}/protected/admin_demo
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 6) Access USER-protected endpoint
+GET {{host}}/protected/user_demo
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 7) Add HOVEDKOK role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "HOVEDKOK"
+}
+
+### 8) Add KOK role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "KOK"
+}
+
+### 9) Add KØKKENPERSONALE role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "KØKKENPERSONALE"
+}
+
+### 10) Add LÆGE role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "LÆGE"
+}
+
+### 11) Add SYGEPLEJERSKE role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "SYGEPLEJERSKE"
+}
+
+### 12) Verify ADMIN endpoint still works
+GET {{host}}/protected/admin_demo
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 13) (Optional) Verify USER endpoint still works
+GET {{host}}/protected/user_demo
+Authorization: Bearer {{token}}
+Accept: application/json

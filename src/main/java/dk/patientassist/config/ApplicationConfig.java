@@ -1,11 +1,13 @@
 package dk.patientassist.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dk.patientassist.security.controllers.AccessController;
 import dk.patientassist.security.controllers.SecurityController;
-import dk.patientassist.security.enums.Role;
+import dk.patientassist.routes.DishRoutes;
+import dk.patientassist.routes.OrderRoutes;
 import dk.patientassist.security.exceptions.ApiException;
 import dk.patientassist.security.routes.SecurityRoutes;
+import dk.patientassist.security.enums.Role;
+import dk.patientassist.security.controllers.AccessController;
 import dk.patientassist.utilities.Utils;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
@@ -15,53 +17,72 @@ import org.slf4j.LoggerFactory;
 
 public class ApplicationConfig {
 
-    //private static Routes routes = new Routes();
+
+    private static final AccessController accessController = new AccessController();
+    private static final Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
     private static ObjectMapper jsonMapper = new Utils().getObjectMapper();
     private static SecurityController securityController = SecurityController.getInstance();
-    private static AccessController accessController = new AccessController();
-    private static Logger logger = LoggerFactory.getLogger(ApplicationConfig.class);
 
-    public static void configuration(JavalinConfig config) {
-        config.showJavalinBanner = false;
-        config.bundledPlugins.enableRouteOverview("/routes", Role.ANYONE);
-        config.router.contextPath = "/api"; // base path for all endpoints
-        config.router.apiBuilder(SecurityRoutes.getSecuredRoutes());
-        config.router.apiBuilder(SecurityRoutes.getSecurityRoutes());
+
+
+    public static void configuration(JavalinConfig cfg) {
+        cfg.showJavalinBanner = false;
+
+        cfg.bundledPlugins.enableRouteOverview("/routes", Role.ANYONE);
+        cfg.router.apiBuilder(SecurityRoutes.getSecurityRoutes());
+        cfg.router.apiBuilder(SecurityRoutes.getSecuredRoutes());
+        cfg.router.apiBuilder(DishRoutes.getDishRoutes());
+        cfg.router.apiBuilder(OrderRoutes.getOrderRoutes());
     }
-
-
 
     public static Javalin startServer(int port) {
         Javalin app = Javalin.create(ApplicationConfig::configuration);
 
         app.beforeMatched(accessController::accessHandler);
-        app.before(ApplicationConfig::corsHeaders);
-        app.options("/*", ApplicationConfig::corsHeadersOptions);
 
+        app.before(ApplicationConfig::cors);
+        app.options("/*", ApplicationConfig::corsOptions);
+      
         app.beforeMatched(ctx -> accessController.accessHandler(ctx));
 
-        app.exception(Exception.class, ApplicationConfig::generalExceptionHandler);
-        app.exception(ApiException.class, ApplicationConfig::apiExceptionHandler);
+        app.exception(ApiException.class, ApplicationConfig::handleApiException);
+        app.exception(Exception.class, ApplicationConfig::handleGeneralException);
+
+        app.get("/api/health", ctx -> ctx.result("OK"));
+
         app.start(port);
         return app;
     }
+
 
     public static void stopServer(Javalin app) {
         app.stop();
     }
 
-    private static void generalExceptionHandler(Exception e, Context ctx) {
-        logger.error("An unhandled exception occurred", e.getMessage());
-        ctx.json(Utils.convertToJsonMessage(ctx, "error", e.getMessage()));
+    private static void handleApiException(ApiException e, Context ctx) {
+        ctx.status(e.getCode())
+                .json(Utils.convertToJsonMessage(ctx, "warning", e.getMessage()));
     }
 
-    public static void apiExceptionHandler(ApiException e, Context ctx) {
-        ctx.status(e.getCode());
-        logger.warn("An API exception occurred: Code: {}, Message: {}", e.getCode(), e.getMessage());
-        ctx.json(Utils.convertToJsonMessage(ctx, "warning", e.getMessage()));
+    private static void handleGeneralException(Exception e, Context ctx) {
+        log.error("Unhandled exception", e);
+        ctx.status(500)
+                .json(Utils.convertToJsonMessage(ctx, "error", e.getMessage()));
     }
 
-    private static void corsHeaders(Context ctx) {
+    private static void cors(Context ctx) {
+        ctx.header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+                .header("Access-Control-Allow-Headers", "Content-Type,Authorization")
+                .header("Access-Control-Allow-Credentials", "true");
+    }
+
+    private static void corsOptions(Context ctx) {
+        cors(ctx);
+        ctx.status(204);
+    }
+  
+  private static void corsHeaders(Context ctx) {
         ctx.header("Access-Control-Allow-Origin", "*");
         ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -75,5 +96,4 @@ public class ApplicationConfig {
         ctx.header("Access-Control-Allow-Credentials", "true");
         ctx.status(204);
     }
-
 }

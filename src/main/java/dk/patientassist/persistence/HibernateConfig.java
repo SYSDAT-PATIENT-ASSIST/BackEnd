@@ -31,8 +31,16 @@ public class HibernateConfig
     }
 
     private static void getAnnotationConfiguration(Configuration configuration) {
+
+        // add our db entities here
+        configuration.addAnnotatedClass(Dish.class);
+        configuration.addAnnotatedClass(Order.class);
+        configuration.addAnnotatedClass(Recipe.class);
+        configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Ingredient.class);
         configuration.addAnnotatedClass(User.class);
         configuration.addAnnotatedClass(Role.class);
+        configuration.addAnnotatedClass(IngredientType.class);
     }
 
     public static void Init(Mode mode) {
@@ -41,28 +49,33 @@ public class HibernateConfig
             Properties props = new Properties();
             props = setBaseProperties(props);
 
-            if (System.getenv("DEPLOYED") != null)
-                props = setDeployedProperties(props);
-            else if (mode == Mode.DEV)
-                props = setDevProperties(props);
-            else if (mode == Mode.TEST)
+            // <-- check TEST first, regardless of DEPLOYED env var
+            if (mode == Mode.TEST) {
                 props = setTestProperties(props);
+
+                // then real‐deploy
+            } else if (System.getenv("DEPLOYED") != null) {
+                props = setDeployedProperties(props);
+
+                // then your local dev
+            } else if (mode == Mode.DEV) {
+                props = setDevProperties(props);
+            }
 
             configuration.setProperties(props);
             getAnnotationConfiguration(configuration);
 
-            logger.info("hibernate props: " + props);
-
-            ServiceRegistry serviceRegistry =
-                    new StandardServiceRegistryBuilder().
-                            applySettings(configuration.getProperties()).build();
+            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                    .applySettings(configuration.getProperties()).build();
             SessionFactory sf = configuration.buildSessionFactory(serviceRegistry);
             emf = sf.unwrap(EntityManagerFactory.class);
+
         } catch (Throwable ex) {
             System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
         }
     }
+
 
     private static Properties setBaseProperties(Properties props){
         //props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");

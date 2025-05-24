@@ -1,0 +1,16 @@
+﻿GET {{url}}/api/orders
+
+###
+GET {{url}}/api/orders/1
+
+###
+PUT {{url}}/api/orders/1
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+"status": "afsendt"
+}
+
+###
+GET {{url}}/api/orders/1
