@@ -38,6 +38,10 @@ public class SecurityRoutes {
                         securityController.register(),
                         Role.ANYONE
                 );
+                post("/user/addrole",
+                     securityController.addRole(), 
+                     Role.ANYONE);
+
             });
         };
     }

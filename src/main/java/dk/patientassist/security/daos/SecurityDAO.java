@@ -58,7 +58,7 @@ public class SecurityDAO implements ISecurityDAO {
             // 2) Begin transaction and assign ADMIN as the default role
             em.getTransaction().begin();
 
-            // Use the ADMIN enum value
+            // Use the ADMIN enum value (assuming dk.patientassist.security.enums.Role.ADMIN exists)
             String defaultRoleName = dk.patientassist.security.enums.Role.ADMIN.name();
             Role adminRole = em.find(Role.class, defaultRoleName);
             if (adminRole == null) {

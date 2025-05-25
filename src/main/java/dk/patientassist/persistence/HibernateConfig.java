@@ -31,6 +31,7 @@ public class HibernateConfig
     }
 
     private static void getAnnotationConfiguration(Configuration configuration) {
+
         // add our db entities here
         configuration.addAnnotatedClass(Dish.class);
         configuration.addAnnotatedClass(Order.class);
@@ -93,7 +94,7 @@ public class HibernateConfig
                 Utils.getPropertyValue("DB_NAME", "config.properties"),
                 Utils.getPropertyValue("DB_USER", "config.properties"),
                 Utils.getPropertyValue("DB_PW", "config.properties")
-                );
+        );
         props.put("hibernate.hikari_leakDetectionThreshold", "10000"); // leak detection
         props.setProperty("hibernate.connection.url",
                 Utils.getPropertyValue("DB_CONN_STR", "config.properties")
@@ -128,4 +129,3 @@ public class HibernateConfig
     }
 
 }
-

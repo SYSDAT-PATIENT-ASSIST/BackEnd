@@ -1,11 +1,13 @@
 package dk.patientassist.security.entities;
 
+import dk.patientassist.security.entities.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.Serial;
 import java.io.Serializable;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;

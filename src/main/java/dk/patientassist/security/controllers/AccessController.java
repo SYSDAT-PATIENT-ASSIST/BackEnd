@@ -9,11 +9,10 @@ import io.javalin.security.RouteRole;
 import java.util.Arrays;
 import java.util.Set;
 
-
 /**
  * Enforces authentication and authorization on all routes using beforeMatched().
  */
-public class AccessController {
+public class AccessController implements IAccessController {
 
     private final ISecurityController securityController;
 
@@ -21,7 +20,7 @@ public class AccessController {
      * Default constructor for production: uses the real SecurityController.
      */
     public AccessController() {
-        this(new SecurityController());
+        this(SecurityController.getInstance());
     }
 
     /**
@@ -34,6 +33,7 @@ public class AccessController {
     /**
      * This is called on every matched route to enforce access control.
      */
+    @Override
     public void accessHandler(Context ctx) {
         Set<RouteRole> roles = ctx.routeRoles();
 
@@ -46,19 +46,18 @@ public class AccessController {
         try {
             securityController.authenticate().handle(ctx);
         } catch (UnauthorizedResponse e) {
-            throw new UnauthorizedResponse(e.getMessage());
+            throw e;
         } catch (Exception e) {
-            throw new UnauthorizedResponse("Invalid or missing token");
+            throw new UnauthorizedResponse("You need to log in, dude! Or your token is invalid.");
         }
 
         // 3) Authorize user
         UserDTO user = ctx.attribute("user");
         boolean allowed = securityController.authorize(user, roles);
-
         if (!allowed) {
             throw new UnauthorizedResponse(
-                    "Unauthorized. You have roles: " + user.getRoles() +
-                            ". Required: " + roles
+                "Unauthorized with roles: " + user.getRoles()
+                + ". Needed roles are: " + roles
             );
         }
     }

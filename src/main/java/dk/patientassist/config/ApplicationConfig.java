@@ -1,5 +1,7 @@
 package dk.patientassist.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dk.patientassist.security.controllers.SecurityController;
 import dk.patientassist.routes.DishRoutes;
 import dk.patientassist.routes.OrderRoutes;
 import dk.patientassist.security.exceptions.ApiException;
@@ -15,8 +17,13 @@ import org.slf4j.LoggerFactory;
 
 public class ApplicationConfig {
 
+
     private static final AccessController accessController = new AccessController();
     private static final Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
+    private static ObjectMapper jsonMapper = new Utils().getObjectMapper();
+    private static SecurityController securityController = SecurityController.getInstance();
+
+
 
     public static void configuration(JavalinConfig cfg) {
         cfg.showJavalinBanner = false;
@@ -32,8 +39,11 @@ public class ApplicationConfig {
         Javalin app = Javalin.create(ApplicationConfig::configuration);
 
         app.beforeMatched(accessController::accessHandler);
+
         app.before(ApplicationConfig::cors);
         app.options("/*", ApplicationConfig::corsOptions);
+      
+        app.beforeMatched(ctx -> accessController.accessHandler(ctx));
 
         app.exception(ApiException.class, ApplicationConfig::handleApiException);
         app.exception(Exception.class, ApplicationConfig::handleGeneralException);
@@ -45,6 +55,9 @@ public class ApplicationConfig {
     }
 
 
+    public static void stopServer(Javalin app) {
+        app.stop();
+    }
 
     private static void handleApiException(ApiException e, Context ctx) {
         ctx.status(e.getCode())
@@ -66,6 +79,21 @@ public class ApplicationConfig {
 
     private static void corsOptions(Context ctx) {
         cors(ctx);
+        ctx.status(204);
+    }
+  
+  private static void corsHeaders(Context ctx) {
+        ctx.header("Access-Control-Allow-Origin", "*");
+        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        ctx.header("Access-Control-Allow-Credentials", "true");
+    }
+
+    private static void corsHeadersOptions(Context ctx) {
+        ctx.header("Access-Control-Allow-Origin", "*");
+        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        ctx.header("Access-Control-Allow-Credentials", "true");
         ctx.status(204);
     }
 }
