@@ -31,7 +31,6 @@ import java.text.ParseException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-package dk.patientassist.security.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -42,16 +41,16 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.UnauthorizedResponse;
 import jakarta.persistence.EntityNotFoundException;
-import javax.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SecurityController implements ISecurityController {
     private static final Logger logger = LoggerFactory.getLogger(SecurityController.class);
 
-    private final ISecurityDAO securityDAO;
+    private static ISecurityDAO securityDAO;
     private final ITokenSecurity tokenSecurity;
     private final ObjectMapper objectMapper;
+    private static SecurityController instance;
 
     public SecurityController() {
         this(
@@ -59,6 +58,15 @@ public class SecurityController implements ISecurityController {
             new TokenSecurity(),
             new Utils().getObjectMapper()
         );
+    }
+
+    public static SecurityController getInstance() { // Singleton because we don't want multiple instances of the same
+        // class
+        if (instance == null) {
+            instance = new SecurityController();
+        }
+        securityDAO = new SecurityDAO(HibernateConfig.getEntityManagerFactory());
+        return instance;
     }
 
     public SecurityController(ISecurityDAO securityDAO, ITokenSecurity tokenSecurity, ObjectMapper objectMapper) {
@@ -95,7 +103,6 @@ public class SecurityController implements ISecurityController {
             }
         };
     }
-}
 
 
 @Override
@@ -241,7 +248,7 @@ public UserDTO verifyToken(String token) {
     }
 }
 
-@Override
+
 public @NotNull Handler addRole() {
     return (ctx) -> {
         ObjectNode returnObject = objectMapper.createObjectNode();
@@ -266,4 +273,5 @@ public @NotNull Handler addRole() {
 
 public void healthCheck(@NotNull Context ctx) {
     ctx.status(200).json("{\"msg\": \"API is up and running\"}");
+}
 }
