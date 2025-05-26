@@ -1,6 +1,7 @@
 package dk.patientassist.test.Stepdefinitions;
 
-import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.config.Mode;
+import dk.patientassist.config.HibernateConfig;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 import io.restassured.RestAssured;
@@ -24,7 +25,7 @@ public class SecurityStepDefinitions {
         RestAssured.baseURI = baseUrl;
 
         // 2) initialize Hibernate in TEST mode (Testcontainers + create-drop)
-        HibernateConfig.Init(HibernateConfig.Mode.TEST);
+        HibernateConfig.init(Mode.TEST);
 
         // 3) truncate all rows from User and Role
         var emf = HibernateConfig.getEntityManagerFactory();

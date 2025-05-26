@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.nimbusds.jose.JOSEException;
 import dk.bugelhartmann.ITokenSecurity;
 import dk.bugelhartmann.UserDTO;
+import dk.patientassist.utilities.Utils;
+import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.security.daos.ISecurityDAO;
 import dk.patientassist.security.exceptions.ApiException;
 import dk.patientassist.security.exceptions.NotAuthorizedException;
@@ -24,7 +26,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Handles login, registration, token creation/verification, and role‐assignment.
+ * Handles login, registration, token creation/verification, and
+ * role‐assignment.
  * Now uses constructor injection for easier unit testing.
  */
 public class SecurityController implements ISecurityController {
@@ -35,28 +38,28 @@ public class SecurityController implements ISecurityController {
     private final ObjectMapper objectMapper;
 
     /**
-     * Production constructor: uses real DAO, real TokenSecurity, and the shared ObjectMapper.
+     * Production constructor: uses real DAO, real TokenSecurity, and the shared
+     * ObjectMapper.
      */
     public SecurityController() {
         this(
                 // real Hibernate‐backed DAO:
-                new dk.patientassist.security.daos.SecurityDAO(dk.patientassist.persistence.HibernateConfig.getEntityManagerFactory()),
+                new dk.patientassist.security.daos.SecurityDAO(
+                        dk.patientassist.config.HibernateConfig.getEntityManagerFactory()),
                 // real JWT/token implementation:
                 new dk.bugelhartmann.TokenSecurity(),
                 // ObjectMapper from your Utils class:
-                new Utils().getObjectMapper()
-        );
+                new Utils().getObjectMapperCompact());
     }
 
     /**
      * Injectable constructor for tests.
      */
     public SecurityController(ISecurityDAO securityDAO, ITokenSecurity tokenSecurity, ObjectMapper objectMapper) {
-        this.securityDAO   = securityDAO;
+        this.securityDAO = securityDAO;
         this.tokenSecurity = tokenSecurity;
-        this.objectMapper  = objectMapper;
+        this.objectMapper = objectMapper;
     }
-
 
     @Override
     public Handler login() {
@@ -83,7 +86,7 @@ public class SecurityController implements ISecurityController {
     public Handler register() {
         return ctx -> {
             ObjectNode returnObject = objectMapper.createObjectNode();
-            var em = dk.patientassist.persistence.HibernateConfig.getEntityManagerFactory().createEntityManager();
+            var em = dk.patientassist.config.HibernateConfig.getEntityManagerFactory().createEntityManager();
             try {
                 UserDTO input = ctx.bodyAsClass(UserDTO.class);
                 String roleParam = ctx.queryParam("role").toUpperCase();
@@ -109,8 +112,7 @@ public class SecurityController implements ISecurityController {
                 var newUser = new dk.patientassist.security.entities.User();
                 newUser.setUsername(input.getUsername());
                 newUser.setPassword(
-                        org.mindrot.jbcrypt.BCrypt.hashpw(input.getPassword(), org.mindrot.jbcrypt.BCrypt.gensalt())
-                );
+                        org.mindrot.jbcrypt.BCrypt.hashpw(input.getPassword(), org.mindrot.jbcrypt.BCrypt.gensalt()));
 
                 // load or create role entity
                 var roleEntity = em.find(dk.patientassist.security.entities.Role.class, validated.name());
@@ -128,7 +130,8 @@ public class SecurityController implements ISecurityController {
                 ctx.status(HttpStatus.CREATED)
                         .json(returnObject.put("token", token).put("username", newUser.getUsername()));
             } catch (Exception e) {
-                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                if (em.getTransaction().isActive())
+                    em.getTransaction().rollback();
                 ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .json(returnObject.put("msg", "Registration failed"));
             } finally {
@@ -145,9 +148,11 @@ public class SecurityController implements ISecurityController {
                 return;
             }
             String header = ctx.header("Authorization");
-            if (header == null) throw new UnauthorizedResponse("Authorization header missing");
+            if (header == null)
+                throw new UnauthorizedResponse("Authorization header missing");
             String[] parts = header.split(" ");
-            if (parts.length != 2) throw new UnauthorizedResponse("Authorization header malformed");
+            if (parts.length != 2)
+                throw new UnauthorizedResponse("Authorization header malformed");
             UserDTO user = verifyToken(parts[1]);
             ctx.attribute("user", user);
         };
@@ -155,7 +160,8 @@ public class SecurityController implements ISecurityController {
 
     @Override
     public boolean authorize(UserDTO user, Set<RouteRole> allowedRoles) {
-        if (user == null) throw new UnauthorizedResponse("You need to log in!");
+        if (user == null)
+            throw new UnauthorizedResponse("You need to log in!");
         Set<String> allowed = allowedRoles.stream()
                 .map(RouteRole::toString)
                 .collect(Collectors.toSet());
@@ -167,9 +173,9 @@ public class SecurityController implements ISecurityController {
     @Override
     public String createToken(UserDTO user) {
         try {
-            String issuer = Utils.getPropertyValue("ISSUER", "config.properties");
-            String expire = Utils.getPropertyValue("TOKEN_EXPIRE_TIME", "config.properties");
-            String secret = Utils.getPropertyValue("SECRET_KEY", "config.properties");
+            String issuer = Utils.getConfigProperty("ISSUER");
+            String expire = Utils.getConfigProperty("TOKEN_EXPIRE_TIME");
+            String secret = Utils.getConfigProperty("SECRET_KEY");
             return tokenSecurity.createToken(user, issuer, expire, secret);
         } catch (Exception e) {
             throw new ApiException(500, "Could not create token");
@@ -179,7 +185,7 @@ public class SecurityController implements ISecurityController {
     @Override
     public UserDTO verifyToken(String token) {
         try {
-            String secret = Utils.getPropertyValue("SECRET_KEY", "config.properties");
+            String secret = Utils.getConfigProperty("SECRET_KEY");
             if (!tokenSecurity.tokenIsValid(token, secret) || !tokenSecurity.tokenNotExpired(token)) {
                 throw new UnauthorizedResponse("Token is not valid or expired");
             }

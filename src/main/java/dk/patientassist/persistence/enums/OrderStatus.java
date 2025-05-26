@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum OrderStatus {
     VENTER, // PENDING
     AFSENDT,
-    BEKRÆFTET, //CONFIRMED
-    FÆRDIG,      // COMPLETED
-    ANNULLERET;  // CANCELLED
+    BEKRÆFTET, // CONFIRMED
+    FÆRDIG, // COMPLETED
+    ANNULLERET; // CANCELLED
 
     /**
      * JSON output as lowercase string (e.g., "færdig").
@@ -30,7 +30,8 @@ public enum OrderStatus {
      */
     @JsonCreator
     public static OrderStatus fromString(String key) {
-        if (key == null) return null;
+        if (key == null)
+            return null;
         try {
             return OrderStatus.valueOf(key.toUpperCase());
         } catch (IllegalArgumentException e) {

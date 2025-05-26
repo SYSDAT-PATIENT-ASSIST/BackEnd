@@ -1,10 +1,11 @@
 package dk.patientassist;
 
-import dk.patientassist.persistence.HibernateConfig;
 import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.dto.IngredientDTO;
 import dk.patientassist.persistence.dto.RecipeDTO;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
 import dk.patientassist.persistence.ent.*;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
@@ -22,12 +23,13 @@ import java.util.stream.Collectors;
 
 /**
  * Utility class used to populate the development database with test data.
- * This includes users, roles, ingredients, ingredient types, dishes, recipes, and orders.
+ * This includes users, roles, ingredients, ingredient types, dishes, recipes,
+ * and orders.
  */
 public class PopulateDatabase {
 
     static {
-        HibernateConfig.Init(HibernateConfig.Mode.DEV);
+        HibernateConfig.init(Mode.DEV);
     }
 
     private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
@@ -36,8 +38,7 @@ public class PopulateDatabase {
             "Gulerod", "Kartofler", "Tomat", "Smør", "Mælk", "Løg", "Hvidløg", "Persille",
             "Kylling", "Rejer", "Ris", "Æg", "Rugbrød", "Citron", "Dild", "Pasta",
             "Oksekød", "Karry", "Lasagneplader", "Squash", "Aubergine", "Bechamelsauce",
-            "Revet ost", "Spidskommen", "Bouillon"
-    );
+            "Revet ost", "Spidskommen", "Bouillon", "Fløde");
 
     public static void main(String[] args) {
         populateDatabase();
@@ -50,17 +51,17 @@ public class PopulateDatabase {
             em.getTransaction().begin();
 
             // --- Users with roles ---
-            createUser("læge", "1234", "DOCTOR", em);
-            createUser("sygeplejerske", "1234", "NURSE", em);
-            createUser("kok", "1234", "CHEF", em);
-            createUser("hovedkok", "1234", "HEAD_CHEF", em);
-            createUser("køkkenpersonale", "1234", "KITCHEN_STAFF", em);
+            createUser("læge", "1234", dk.patientassist.security.enums.Role.DOCTOR, em);
+            createUser("sygeplejerske", "1234", dk.patientassist.security.enums.Role.NURSE, em);
+            createUser("kok", "1234", dk.patientassist.security.enums.Role.CHEF, em);
+            createUser("hovedkok", "1234", dk.patientassist.security.enums.Role.HEAD_CHEF, em);
+            createUser("køkken", "1234", dk.patientassist.security.enums.Role.KITCHEN_STAFF, em);
 
             // --- Ingredient Types ---
             Map<String, IngredientType> ingredientTypeMap = new HashMap<>();
             for (String name : ingredientNames) {
                 IngredientType existing = em.createQuery(
-                                "SELECT i FROM IngredientType i WHERE i.name = :name", IngredientType.class)
+                        "SELECT i FROM IngredientType i WHERE i.name = :name", IngredientType.class)
                         .setParameter("name", name)
                         .getResultStream()
                         .findFirst()
@@ -99,10 +100,18 @@ public class PopulateDatabase {
 
             dishes.add(createDishWithRecipe(
                     em, "Rugbrød med æg og rejer", "Klassisk dansk smørrebrød",
-                    LocalDate.now(), 4, DishStatus.TILGÆNGELIG, Set.of(Allergens.GLUTEN, Allergens.SKALDYR, Allergens.ÆG),
+                    LocalDate.now(), 4, DishStatus.TILGÆNGELIG,
+                    Set.of(Allergens.GLUTEN, Allergens.SKALDYR, Allergens.ÆG),
                     "Smørrebrød",
                     "Kog æg, læg på rugbrød med rejer og pynt.",
                     List.of("Rugbrød", "Æg", "Rejer", "Citron", "Dild", "Smør")));
+
+            dishes.add(createDishWithRecipe(
+                    em, "Tomatsuppe", "Klassisk suppe med fløde",
+                    LocalDate.now(), 5, DishStatus.UDSOLGT, Set.of(Allergens.LAKTOSE),
+                    "Tomatsuppe",
+                    "Svits løg og hvidløg, tilsæt tomater og bouillon. Kog i 20 min, blend og rør fløde i. Pynt med frisk basilikum.",
+                    List.of("Tomat", "Løg", "Hvidløg", "Bouillon", "Fløde")));
 
             // --- Orders ---
             em.persist(new Order(1, LocalDateTime.now(), "Ingen hvidløg", dishes.get(0), OrderStatus.VENTER));
@@ -115,20 +124,22 @@ public class PopulateDatabase {
             em.getTransaction().commit();
             System.out.println("✅ Database populated successfully.");
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             e.printStackTrace();
         } finally {
             em.close();
         }
     }
 
-    private static void createUser(String username, String password, String roleName, EntityManager em) {
+    private static void createUser(String username, String password, dk.patientassist.security.enums.Role roleEnum,
+            EntityManager em) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-        Role role = em.find(Role.class, roleName);
+        Role role = em.find(Role.class, roleEnum.name());
         if (role == null) {
-            role = new Role(roleName);
+            role = new Role(roleEnum.name());
             em.persist(role);
         }
         user.addRole(role);
@@ -136,9 +147,9 @@ public class PopulateDatabase {
     }
 
     private static Dish createDishWithRecipe(EntityManager em, String name, String description,
-                                             LocalDate from, int daysAvailable, DishStatus status,
-                                             Set<Allergens> allergens, String recipeTitle, String instructions,
-                                             List<String> ingredientNames) {
+            LocalDate from, int daysAvailable, DishStatus status,
+            Set<Allergens> allergens, String recipeTitle, String instructions,
+            List<String> ingredientNames) {
         Dish dish = new Dish(name, description, from, from.plusDays(daysAvailable), status);
         dish.setKcal(400 + new Random().nextInt(200));
         dish.setProtein(20 + new Random().nextInt(10));

@@ -42,17 +42,13 @@ public class ApplicationConfig {
         return app;
     }
 
-
-
     private static void handleApiException(ApiException e, Context ctx) {
-        ctx.status(e.getCode())
-                .json(Utils.convertToJsonMessage(ctx, "warning", e.getMessage()));
+        ctx.status(e.getCode()).json(Utils.JSONStatusObject(ctx, e));
     }
 
     private static void handleGeneralException(Exception e, Context ctx) {
         log.error("Unhandled exception", e);
-        ctx.status(500)
-                .json(Utils.convertToJsonMessage(ctx, "error", e.getMessage()));
+        ctx.status(500).json(Utils.JSONStatusObject(ctx, e));
     }
 
     private static void cors(Context ctx) {
@@ -61,7 +57,6 @@ public class ApplicationConfig {
                 .header("Access-Control-Allow-Headers", "Content-Type,Authorization")
                 .header("Access-Control-Allow-Credentials", "true");
     }
-
 
     private static void corsOptions(Context ctx) {
         cors(ctx);

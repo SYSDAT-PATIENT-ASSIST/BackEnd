@@ -14,7 +14,8 @@ import java.util.Set;
 
 /**
  * JPA entity representing a dish in the system.
- * Stores nutritional values, availability, status, associated allergens, and recipe.
+ * Stores nutritional values, availability, status, associated allergens, and
+ * recipe.
  */
 @NoArgsConstructor
 @Getter
@@ -22,7 +23,6 @@ import java.util.Set;
 @Entity
 @Table(name = "dish")
 public class Dish {
-
     /**
      * Auto-generated ID of the dish.
      */
@@ -111,13 +111,14 @@ public class Dish {
     private List<Order> orders;
 
     /**
-     * Constructor used for quick dish instantiation (name, description, availability, and status).
+     * Constructor used for quick dish instantiation (name, description,
+     * availability, and status).
      *
-     * @param name          the name of the dish
-     * @param description   the description of the dish
-     * @param availableFrom the date the dish is available from
+     * @param name           the name of the dish
+     * @param description    the description of the dish
+     * @param availableFrom  the date the dish is available from
      * @param availableUntil the date the dish is available until
-     * @param status        the dish status
+     * @param status         the dish status
      */
     public Dish(String name, String description, LocalDate availableFrom, LocalDate availableUntil, DishStatus status) {
         this.name = name;
@@ -129,15 +130,19 @@ public class Dish {
 
     /**
      * Constructs a Dish entity from a {@link DishDTO}.
-     * Includes all nutritional and status fields. Recipe and orders must be set separately.
+     * Includes all nutritional and status fields. Recipe and orders must be set
+     * separately.
      *
      * @param dto the DTO containing dish data
      * @throws IllegalArgumentException if required fields are null or invalid
      */
     public Dish(DishDTO dto) {
-        if (dto == null) throw new IllegalArgumentException("DishDTO cannot be null");
-        if (dto.getName() == null || dto.getName().isBlank()) throw new IllegalArgumentException("Dish name cannot be null or blank");
-        if (dto.getDescription() == null) throw new IllegalArgumentException("Dish description cannot be null");
+        if (dto == null)
+            throw new IllegalArgumentException("DishDTO cannot be null");
+        if (dto.getName() == null || dto.getName().isBlank())
+            throw new IllegalArgumentException("Dish name cannot be null or blank");
+        if (dto.getDescription() == null)
+            throw new IllegalArgumentException("Dish description cannot be null");
         if (dto.getAvailableFrom() == null || dto.getAvailableUntil() == null)
             throw new IllegalArgumentException("Available from/until dates cannot be null");
         if (dto.getAvailableFrom().isAfter(dto.getAvailableUntil()))

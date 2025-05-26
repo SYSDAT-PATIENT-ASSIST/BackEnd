@@ -1,6 +1,8 @@
 package dk.patientassist;
 
-import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
+import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.ent.IngredientType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -8,19 +10,22 @@ import jakarta.persistence.EntityManagerFactory;
 import java.util.List;
 
 /**
- * Utility class to populate the database with predefined {@link IngredientType} entries.
- * This can be run independently to ensure a fixed set of reusable ingredients is loaded into the database.
+ * Utility class to populate the database with predefined {@link IngredientType}
+ * entries.
+ * This can be run independently to ensure a fixed set of reusable ingredients
+ * is loaded into the database.
  */
 public class PopulateIngredientType {
 
     static {
-        HibernateConfig.Init(HibernateConfig.Mode.DEV);
+        HibernateConfig.init(Mode.DEV);
     }
 
     private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
     /**
-     * A predefined list of unique ingredient names to populate {@link IngredientType} entries.
+     * A predefined list of unique ingredient names to populate
+     * {@link IngredientType} entries.
      */
     private static final List<String> INGREDIENT_NAMES = List.of(
             // Grøntsager
@@ -45,9 +50,7 @@ public class PopulateIngredientType {
 
             // Færdige produkter og andet
             "Tomatsauce", "Bouillon", "Grøntsagsbouillon", "Kokosmælk", "Pesto", "Mayonnaise", "Senep", "Ketchup",
-            "Brun sovs", "Ristede løg", "Ærter"
-    );
-
+            "Brun sovs", "Ristede løg", "Ærter");
 
     /**
      * Entry point to populate IngredientType table.
@@ -82,7 +85,8 @@ public class PopulateIngredientType {
             em.getTransaction().commit();
             System.out.println("✅ IngredientType table populated successfully.");
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             e.printStackTrace();
         } finally {
             em.close();

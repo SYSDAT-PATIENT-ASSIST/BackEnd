@@ -55,14 +55,11 @@ public class Order {
 
     /**
      * Dish associated with this order.
-     * Mapped using a join table `order_dish` to maintain flexibility for future many-to-many extensions.
+     * Mapped using a join table `order_dish` to maintain flexibility for future
+     * many-to-many extensions.
      */
     @ManyToOne(optional = false)
-    @JoinTable(
-            name = "order_dish",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "dish_id")
-    )
+    @JoinTable(name = "order_dish", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "dish_id"))
     private Dish dish;
 
     /**

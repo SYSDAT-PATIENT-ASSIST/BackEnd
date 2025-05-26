@@ -1,0 +1,92 @@
+###
+### -----------------------
+### Patient Assist.........
+### Systemudvikling........
+### Cph. Business School...
+### -----------------------
+###
+
+@url=http://localhost:9999/api
+
+###
+# @name REGISTER
+
+POST {{url}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin2@example.com",
+  "password": "admin",
+  "firstName": "John",
+  "middleName": "Doe",
+  "lastName": "Smith",
+  "roles": [
+    "admin", "doctor", "guest"
+  ],
+  "sections": [
+    1,
+    2,
+    5
+  ]
+}
+
+###
+# @name LOGIN FAIL PRIVILEGE
+
+POST {{url}}/auth/admin_only
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "fail"
+}
+
+###
+# @name LOGIN
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@test.dk",
+  "password": "admin"
+}
+
+###
+# @name LOGIN SUCCESS CREATED
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin2@example.com",
+  "password": "admin"
+}
+
+###
+# @name LOGIN SUCCESS PRIVILEGE
+
+GET {{url}}/auth/admin_only
+
+###
+# @name LOGIN FAIL PASSWORD
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "fail"
+}
+
+###
+# @name LOGIN FAIL EMAIL
+
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "fail@example.com",
+  "password": "admin"
+}
+

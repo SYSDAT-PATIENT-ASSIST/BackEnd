@@ -1,7 +1,7 @@
 package dk.patientassist.test.persistence;
 
-import dk.patientassist.persistence.HibernateConfig;
-import dk.patientassist.persistence.HibernateConfig.Mode;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class HibernateConfigTest {
      */
     @Test
     void initTestMode_providesEntityManagerFactory() {
-        HibernateConfig.Init(Mode.TEST);
+        HibernateConfig.init(Mode.TEST);
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
         assertNotNull(emf);
 

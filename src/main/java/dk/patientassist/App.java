@@ -1,23 +1,44 @@
 package dk.patientassist;
 
-import dk.patientassist.config.ApplicationConfig;
-import dk.patientassist.persistence.HibernateConfig;
-import io.javalin.Javalin;
+import static dk.patientassist.config.Mode.DEV;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class App {
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
+import dk.patientassist.control.MasterController;
+import dk.patientassist.utilities.EmployeePopulator;
+import dk.patientassist.utilities.EventPopulator;
+import dk.patientassist.utilities.ExamTreatPopulator;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+/**
+ * Patient Assist
+ */
+public class App {
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
-        // Init Hibernate
-        HibernateConfig.Init(HibernateConfig.Mode.DEV);
-        LOGGER.info("Hibernate initialized in DEV mode");
+        HibernateConfig.init(DEV);
 
-        // Start Javalin server with pre-configured routes
-        Javalin app = ApplicationConfig.startServer(7070);
+        try {
 
-        LOGGER.info("Server running at http://localhost:7070");
+            MasterController.start(Mode.DEV, 9999);
+
+            /* TEST DATA */
+
+            EventPopulator.populate(250);
+            ExamTreatPopulator.load("data/exams_and_treatments_data.json");
+            EmployeePopulator.populate();
+            EmployeePopulator.addAdmin();
+
+        } catch (Exception e) {
+
+            HibernateConfig.getEntityManagerFactory().close();
+            logger.error("Error initializing application: {}{}", e.getMessage(),
+                    System.lineSeparator());
+            e.printStackTrace();
+
+        }
     }
 }

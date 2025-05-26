@@ -10,7 +10,8 @@ import java.util.Set;
 
 /**
  * JPA entity representing a recipe.
- * A recipe belongs to one dish and contains a set of ingredients and cooking instructions.
+ * A recipe belongs to one dish and contains a set of ingredients and cooking
+ * instructions.
  */
 @NoArgsConstructor
 @Getter

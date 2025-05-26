@@ -16,11 +16,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * <<<<<<< HEAD
  * DAO for {@link Dish} entities, exposing CRUD operations,
  * various filters, and nested recipe/ingredient handling.
  * <p>
  * Uses JPA EntityManagerFactory for persistence,
  * and ensures thread-safe singleton access.
+ * =======
+ * Data Access Object (DAO) for handling persistence logic related to
+ * {@link Dish} entities.
+ * Provides operations such as create, read, update, delete (CRUD),
+ * as well as filtering, nested recipe handling and popularity ranking.
+ * >>>>>>> Dev
  */
 public class DishDAO implements IDAO<DishDTO, Integer> {
 
@@ -82,7 +89,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             LOGGER.error("Error fetching Dish id={}: {}", id, e.getMessage(), e);
             throw e;
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -111,7 +119,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             LOGGER.error("Error retrieving all Dishes: {}", e.getMessage(), e);
             throw e;
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -134,10 +143,12 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             return new DishDTO(dish);
         } catch (Exception e) {
             LOGGER.error("Error creating Dish '{}': {}", dto.getName(), e.getMessage(), e);
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -177,13 +188,14 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             return new DishDTO(dish);
         } catch (Exception e) {
             LOGGER.error("Error updating Dish id={}: {}", id, e.getMessage(), e);
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
-
 
     /**
      * Delete a dish by ID.
@@ -219,14 +231,14 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
 
         } catch (Exception e) {
             LOGGER.error("Error deleting Dish id={}: {}", id, e.getMessage(), e);
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
-
-
 
     /**
      * Find dishes matching a status.
@@ -247,7 +259,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             LOGGER.error("Error querying by status={}: {}", status, e.getMessage(), e);
             throw e;
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -270,7 +283,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             LOGGER.error("Error querying by allergen={}: {}", allergen, e.getMessage(), e);
             throw e;
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -296,7 +310,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             LOGGER.error("Error querying by status={} and allergen={}: {}", status, allergen, e.getMessage(), e);
             throw e;
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -321,16 +336,16 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             }
 
             switch (field) {
-                case "name"            -> dish.setName((String) value);
-                case "description"     -> dish.setDescription((String) value);
-                case "kcal"            -> dish.setKcal((Double) value);
-                case "protein"         -> dish.setProtein((Double) value);
-                case "carbohydrates"   -> dish.setCarbohydrates((Double) value);
-                case "fat"             -> dish.setFat((Double) value);
-                case "status"          -> dish.setStatus((DishStatus) value);
-                case "allergens"       -> dish.setAllergens((Set<Allergens>) value);
-                case "availableFrom"   -> dish.setAvailableFrom((LocalDate) value);
-                case "availableUntil"  -> dish.setAvailableUntil((LocalDate) value);
+                case "name" -> dish.setName((String) value);
+                case "description" -> dish.setDescription((String) value);
+                case "kcal" -> dish.setKcal((Double) value);
+                case "protein" -> dish.setProtein((Double) value);
+                case "carbohydrates" -> dish.setCarbohydrates((Double) value);
+                case "fat" -> dish.setFat((Double) value);
+                case "status" -> dish.setStatus((DishStatus) value);
+                case "allergens" -> dish.setAllergens((Set<Allergens>) value);
+                case "availableFrom" -> dish.setAvailableFrom((LocalDate) value);
+                case "availableUntil" -> dish.setAvailableUntil((LocalDate) value);
                 default -> throw new IllegalArgumentException("Cannot patch field: " + field);
             }
 
@@ -340,10 +355,12 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             return Optional.of(new DishDTO(dish));
         } catch (Exception e) {
             LOGGER.error("Error patching Dish id={} field='{}': {}", id, field, e.getMessage(), e);
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -374,10 +391,12 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             return new DishDTO(dish);
         } catch (Exception e) {
             LOGGER.error("Error updating availability for Dish id={}: {}", id, e.getMessage(), e);
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -406,7 +425,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             for (var ingrDTO : dto.getRecipe().getIngredients()) {
                 String name = ingrDTO.getName();
                 IngredientType type = em.createQuery(
-                                "SELECT t FROM IngredientType t WHERE t.name = :name", IngredientType.class)
+                        "SELECT t FROM IngredientType t WHERE t.name = :name", IngredientType.class)
                         .setParameter("name", name)
                         .getResultStream()
                         .findFirst()
@@ -423,10 +442,12 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             return new DishDTO(dish);
         } catch (Exception e) {
             LOGGER.error("Error creating nested Dish '{}': {}", dto.getName(), e.getMessage(), e);
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -473,7 +494,7 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
                 for (var ingrDTO : recipeDTO.getIngredients()) {
                     String name = ingrDTO.getName();
                     IngredientType type = em.createQuery(
-                                    "SELECT t FROM IngredientType t WHERE t.name = :name", IngredientType.class)
+                            "SELECT t FROM IngredientType t WHERE t.name = :name", IngredientType.class)
                             .setParameter("name", name)
                             .getResultStream()
                             .findFirst()
@@ -496,13 +517,14 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
 
         } catch (Exception e) {
             LOGGER.error("Error updating nested data for Dish id={}: {}", dishId, e.getMessage(), e);
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
-
 
     /**
      * Return the top-N most ordered dishes.
@@ -525,7 +547,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             LOGGER.error("Error fetching most ordered Dishes: {}", e.getMessage(), e);
             throw e;
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
@@ -551,10 +574,26 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             LOGGER.error("Error querying available Dishes: {}", e.getMessage(), e);
             throw e;
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
 
+    // Retrieves dishes that are currently available and sold out for patient menu
+    public List<DishDTO> getAllAvailable() {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<DishDTO> query = em.createQuery(
+                    "SELECT new dk.patientassist.persistence.dto.DishDTO(d) " +
+                            "FROM Dish d " +
+                            "WHERE (d.status = :status1 OR d.status = :status2) " +
+                            "AND :today BETWEEN d.availableFrom AND d.availableUntil",
+                    DishDTO.class);
+            query.setParameter("status1", DishStatus.TILGÆNGELIG);
+            query.setParameter("status2", DishStatus.UDSOLGT);
+            query.setParameter("today", LocalDate.now());
+            return query.getResultList();
+        }
+    }
 
     /**
      * Get currently available dishes filtered by allergen.
@@ -580,8 +619,8 @@ public class DishDAO implements IDAO<DishDTO, Integer> {
             LOGGER.error("Error querying available Dishes by allergen={}: {}", allergen, e.getMessage(), e);
             throw e;
         } finally {
-            if (shouldClose(em)) em.close();
+            if (shouldClose(em))
+                em.close();
         }
     }
-
 }

@@ -13,7 +13,7 @@ import static io.javalin.apibuilder.ApiBuilder.*;
  */
 public class SecurityRoutes {
 
-    private static final ObjectMapper jsonMapper = new Utils().getObjectMapper();
+    private static ObjectMapper jsonMapper = Utils.getObjectMapperCompact();
     private static final SecurityController securityController = new SecurityController();
 
     /**
@@ -24,20 +24,16 @@ public class SecurityRoutes {
             path("/auth", () -> {
                 get("/healthcheck",
                         securityController::healthCheck,
-                        Role.ANYONE
-                );
+                        Role.ANYONE);
                 get("/test",
-                        ctx -> ctx.json(jsonMapper.createObjectNode().put("msg","Hello from Open Deployment")),
-                        Role.ANYONE
-                );
+                        ctx -> ctx.json(jsonMapper.createObjectNode().put("msg", "Hello from Open Deployment")),
+                        Role.ANYONE);
                 post("/login",
                         securityController.login(),
-                        Role.ANYONE
-                );
+                        Role.ANYONE);
                 post("/register",
                         securityController.register(),
-                        Role.ANYONE
-                );
+                        Role.ANYONE);
             });
         };
     }
@@ -49,17 +45,14 @@ public class SecurityRoutes {
         return () -> {
             path("/protected", () -> {
                 get("/user_demo",
-                        ctx -> ctx.json(jsonMapper.createObjectNode().put("msg","Hello from USER Protected")),
-                        Role.ADMIN, Role.KITCHEN_STAFF, Role.HEAD_CHEF
-                );
+                        ctx -> ctx.json(jsonMapper.createObjectNode().put("msg", "Hello from USER Protected")),
+                        Role.ADMIN, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
                 get("/admin_demo",
-                        ctx -> ctx.json(jsonMapper.createObjectNode().put("msg","Hello from ADMIN Protected")),
-                        Role.ADMIN
-                );
+                        ctx -> ctx.json(jsonMapper.createObjectNode().put("msg", "Hello from ADMIN Protected")),
+                        Role.ADMIN);
                 post("/user/addrole",
                         securityController.addRole(),
-                        Role.ADMIN, Role.KITCHEN_STAFF, Role.HEAD_CHEF
-                );
+                        Role.ADMIN, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
             });
         };
     }

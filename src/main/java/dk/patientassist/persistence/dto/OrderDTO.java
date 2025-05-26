@@ -1,14 +1,17 @@
 package dk.patientassist.persistence.dto;
+
 import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.OrderStatus;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 @Getter
 @Setter
-public class OrderDTO{
+public class OrderDTO {
     private Integer id;
     private Integer bed_id;
     private LocalDateTime order_time;
@@ -16,7 +19,7 @@ public class OrderDTO{
     private DishDTO dish;
     private OrderStatus status;
 
-    public OrderDTO(Integer bed_id, LocalDateTime order_time, String note, DishDTO dish, OrderStatus status){
+    public OrderDTO(Integer bed_id, LocalDateTime order_time, String note, DishDTO dish, OrderStatus status) {
         this.bed_id = bed_id;
         this.order_time = order_time;
         this.note = note;
@@ -24,7 +27,7 @@ public class OrderDTO{
         this.status = status;
     }
 
-    public OrderDTO(Order order){
+    public OrderDTO(Order order) {
         this.id = order.getId();
         this.bed_id = order.getBed_id();
         this.order_time = order.getOrder_time();

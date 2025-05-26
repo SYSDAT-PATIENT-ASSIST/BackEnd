@@ -1,11 +1,12 @@
 package dk.patientassist.control;
 
-import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +21,9 @@ public class DishController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DishController.class);
     private final DishDAO dishDAO;
 
-
     private static final Set<String> PATCHABLE_FIELDS = Set.of(
             "name", "description", "kcal", "protein", "carbohydrates",
-            "fat", "status", "availableFrom", "availableUntil"
-    );
+            "fat", "status", "availableFrom", "availableUntil");
 
     public DishController(DishDAO dao) {
         this.dishDAO = dao;
@@ -38,7 +37,7 @@ public class DishController {
         try {
             List<DishDTO> dishes = dishDAO.getAll();
             dishes.forEach(d -> System.out.println("Dish: " + d.getName()));
-            ctx.result("Fetched " + dishes.size() + " dishes");
+            ctx.json(dishes);
 
         } catch (Exception e) {
             LOGGER.error("Error in getAllDishes: {}", e.getMessage(), e);
@@ -79,7 +78,6 @@ public class DishController {
         }
     }
 
-
     public void deleteExistingDish(Context ctx) {
         int id = Integer.parseInt(ctx.pathParam("id"));
         LOGGER.info("DELETE /dishes/{} - deleting dish", id);
@@ -109,8 +107,10 @@ public class DishController {
         Allergens allergen = null;
 
         try {
-            if (statusParam != null) status = DishStatus.fromString(statusParam);
-            if (allergenParam != null) allergen = Allergens.fromString(allergenParam);
+            if (statusParam != null)
+                status = DishStatus.fromString(statusParam);
+            if (allergenParam != null)
+                allergen = Allergens.fromString(allergenParam);
         } catch (IllegalArgumentException e) {
             LOGGER.warn("Invalid filter parameters: status='{}', allergen='{}'", statusParam, allergenParam);
             ctx.status(400).result("Invalid status or allergen");
@@ -119,10 +119,14 @@ public class DishController {
 
         try {
             List<DishDTO> results;
-            if (status != null && allergen != null) results = dishDAO.getDishesByStatusAndAllergen(status, allergen);
-            else if (status != null) results = dishDAO.getDishesByStatus(status);
-            else if (allergen != null) results = dishDAO.getDishesByAllergen(allergen);
-            else results = dishDAO.getAll();
+            if (status != null && allergen != null)
+                results = dishDAO.getDishesByStatusAndAllergen(status, allergen);
+            else if (status != null)
+                results = dishDAO.getDishesByStatus(status);
+            else if (allergen != null)
+                results = dishDAO.getDishesByAllergen(allergen);
+            else
+                results = dishDAO.getAll();
 
             LOGGER.debug("Filtered dishes count: {}", results.size());
             ctx.json(results);
@@ -170,15 +174,41 @@ public class DishController {
         };
     }
 
-    public void updateDishName(Context ctx) { handlePatch(ctx, "name"); }
-    public void updateDishDescription(Context ctx) { handlePatch(ctx, "description"); }
-    public void updateDishKcal(Context ctx) { handlePatch(ctx, "kcal"); }
-    public void updateDishProtein(Context ctx) { handlePatch(ctx, "protein"); }
-    public void updateDishCarbohydrates(Context ctx) { handlePatch(ctx, "carbohydrates"); }
-    public void updateDishFat(Context ctx) { handlePatch(ctx, "fat"); }
-    public void updateDishStatus(Context ctx) { handlePatch(ctx, "status"); }
-    public void updateDishAvailableFrom(Context ctx) { handlePatch(ctx, "availableFrom"); }
-    public void updateDishAvailableUntil(Context ctx) { handlePatch(ctx, "availableUntil"); }
+    public void updateDishName(Context ctx) {
+        handlePatch(ctx, "name");
+    }
+
+    public void updateDishDescription(Context ctx) {
+        handlePatch(ctx, "description");
+    }
+
+    public void updateDishKcal(Context ctx) {
+        handlePatch(ctx, "kcal");
+    }
+
+    public void updateDishProtein(Context ctx) {
+        handlePatch(ctx, "protein");
+    }
+
+    public void updateDishCarbohydrates(Context ctx) {
+        handlePatch(ctx, "carbohydrates");
+    }
+
+    public void updateDishFat(Context ctx) {
+        handlePatch(ctx, "fat");
+    }
+
+    public void updateDishStatus(Context ctx) {
+        handlePatch(ctx, "status");
+    }
+
+    public void updateDishAvailableFrom(Context ctx) {
+        handlePatch(ctx, "availableFrom");
+    }
+
+    public void updateDishAvailableUntil(Context ctx) {
+        handlePatch(ctx, "availableUntil");
+    }
 
     public void updateDishAllergens(Context ctx) {
         int id = Integer.parseInt(ctx.pathParam("id"));
@@ -234,7 +264,8 @@ public class DishController {
     public void createDishWithRecipeAndIngredients(Context ctx) {
         DishDTO dto = ctx.bodyAsClass(DishDTO.class);
         LOGGER.info("POST /dishes/full - creating dish with recipe '{}'", dto.getName());
-        if (!isDishValid(dto, ctx)) return;
+        if (!isDishValid(dto, ctx))
+            return;
         try {
             DishDTO created = dishDAO.createWithRecipeAndIngredients(dto);
             LOGGER.debug("Created full dish with id={}", created.getId());
@@ -251,7 +282,8 @@ public class DishController {
         int id = Integer.parseInt(ctx.pathParam("id"));
         LOGGER.info("PUT /dishes/{}/recipe - updating recipe & allergens", id);
         DishDTO dto = ctx.bodyAsClass(DishDTO.class);
-        if (!isDishValid(dto, ctx)) return;
+        if (!isDishValid(dto, ctx))
+            return;
         try {
             DishDTO updated = dishDAO.updateDishRecipeAndAllergens(id, dto.getAllergens(), dto.getRecipe());
             if (updated != null) {
@@ -269,6 +301,10 @@ public class DishController {
         }
     }
 
+    /**
+     * Validates a full dish structure with required fields, recipe, and
+     * ingredients.
+     */
     private boolean isDishValid(DishDTO dto, Context ctx) {
         LOGGER.debug("Validating DishDTO before full create/update");
         if (dto.getAllergens() == null || dto.getAllergens().isEmpty()) {
@@ -340,5 +376,4 @@ public class DishController {
             ctx.status(500).result("Failed to fetch available dishes");
         }
     }
-
 }

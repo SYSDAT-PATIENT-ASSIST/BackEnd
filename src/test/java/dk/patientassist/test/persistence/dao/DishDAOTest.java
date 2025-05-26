@@ -1,6 +1,7 @@
 package dk.patientassist.test.persistence.dao;
 
-import dk.patientassist.persistence.HibernateConfig;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
 import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dto.DishDTO;
 import dk.patientassist.persistence.dto.RecipeDTO;
@@ -31,14 +32,14 @@ class DishDAOTest {
     @BeforeAll
     void init() {
         // Initialize Hibernate in TEST mode (Testcontainers)
-        HibernateConfig.Init(HibernateConfig.Mode.TEST);
+        HibernateConfig.init(Mode.TEST);
         dao = DishDAO.getInstance(HibernateConfig.getEntityManagerFactory());
     }
 
     private void ensureIngredientTypeExists(EntityManager em, String name) {
         em.getTransaction().begin();
         boolean exists = em.createQuery(
-                        "SELECT COUNT(t) FROM IngredientType t WHERE t.name = :name", Long.class)
+                "SELECT COUNT(t) FROM IngredientType t WHERE t.name = :name", Long.class)
                 .setParameter("name", name)
                 .getSingleResult() > 0;
 
@@ -48,7 +49,6 @@ class DishDAOTest {
 
         em.getTransaction().commit();
     }
-
 
     @Test
     void testCreateAndGetById() {
@@ -127,14 +127,14 @@ class DishDAOTest {
     @Test
     void testCreateWithRecipeAndIngredients() {
         EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager();
-        ensureIngredientTypeExists(em, "Tomato");  // Ensure case-sensitive match
+        ensureIngredientTypeExists(em, "Tomato"); // Ensure case-sensitive match
 
         RecipeDTO recipe = new RecipeDTO();
         recipe.setTitle("R");
         recipe.setInstructions("I");
 
         IngredientDTO ing = new IngredientDTO();
-        ing.setName("Tomato");  // Must match DB exactly
+        ing.setName("Tomato"); // Must match DB exactly
 
         recipe.setIngredients(List.of(ing));
 
@@ -175,7 +175,6 @@ class DishDAOTest {
         assertEquals("R2", updated.getRecipe().getTitle());
         assertTrue(updated.getAllergens().contains(Allergens.GLUTEN));
     }
-
 
     @Test
     void testMiscQueries() {

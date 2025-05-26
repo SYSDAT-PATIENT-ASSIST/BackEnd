@@ -1,8 +1,8 @@
 package dk.patientassist.test.security.daos;
 
 import dk.bugelhartmann.UserDTO;
-import dk.patientassist.persistence.HibernateConfig;
-import dk.patientassist.persistence.HibernateConfig.Mode;
+import dk.patientassist.config.HibernateConfig;
+import dk.patientassist.config.Mode;
 import dk.patientassist.security.daos.SecurityDAO;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,7 +18,7 @@ class SecurityDAOIT {
     @BeforeAll
     void beforeAll() {
         // Start Testcontainers + Hibernate in TEST mode
-        HibernateConfig.Init(Mode.TEST);
+        HibernateConfig.init(Mode.TEST);
         dao = new SecurityDAO(HibernateConfig.getEntityManagerFactory());
     }
 
@@ -56,8 +56,8 @@ class SecurityDAOIT {
 
         // 3) Fetch again—should have both ADMIN and HOVEDKOK
         UserDTO after = dao.getVerifiedUser("it_charlie", "secret");
-        assertTrue(after.getRoles().contains("ADMIN"),   "Still has ADMIN");
-        assertTrue(after.getRoles().contains("HOVEDKOK"),"Now also has HOVEDKOK");
+        assertTrue(after.getRoles().contains("ADMIN"), "Still has ADMIN");
+        assertTrue(after.getRoles().contains("HOVEDKOK"), "Now also has HOVEDKOK");
     }
 
     @Test
