@@ -1,0 +1,102 @@
+# In IntelliJ’s HTTP client toolbar, choose the “dev” environment
+@user = lille
+@pw   = 1234
+
+### Healthcheck (no authentication)
+GET {{host}}/auth/healthcheck
+Accept: application/json
+
+### Open test endpoint (no authentication)
+GET {{host}}/auth/test
+Accept: application/json
+
+### Register as ADMIN (capture token)
+POST {{host}}/auth/register?role=ADMIN
+Content-Type: application/json
+
+{
+  "username": "{{user}}",
+  "password": "{{pw}}"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+### add HEAD_CHEF role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "HEAD_CHEF"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+
+### Login to refresh token
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{user}}",
+  "password": "{{pw}}"
+}
+
+> {% client.global.set("token", response.body.token) %}
+
+### Access ADMIN-protected endpoint
+GET {{host}}/protected/admin_demo
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Access USER-protected endpoint
+GET {{host}}/protected/user_demo
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Add HEAD_CHEF role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "HEAD_CHEF"
+}
+
+### Add KITCHEN_STAFF role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "KITCHEN_STAFF"
+}
+
+### Add DOCTOR role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "DOCTOR"
+}
+
+### 11) Add NURSE role
+POST {{host}}/protected/user/addrole
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "NURSE"
+}
+
+### 12) Verify ADMIN endpoint still works
+GET {{host}}/protected/admin_demo
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 13) Verify USER endpoint still works
+GET {{host}}/protected/user_demo
+Authorization: Bearer {{token}}
+Accept: application/json
+

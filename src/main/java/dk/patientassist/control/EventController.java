@@ -2,7 +2,7 @@ package dk.patientassist.control;
 
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.ent.Event;
-import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.security.enums.Role;
 import dk.patientassist.service.Mapper;
 import dk.patientassist.service.dto.EventDTO;
 import dk.patientassist.utilities.Utils;

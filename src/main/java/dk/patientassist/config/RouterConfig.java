@@ -11,6 +11,8 @@ import dk.patientassist.control.ExamTreatController;
 import dk.patientassist.routes.DishRoutes;
 import dk.patientassist.routes.OrderFoodRoutes;
 import dk.patientassist.routes.TestEndpoints;
+import dk.patientassist.security.controllers.SecurityController;
+import dk.patientassist.security.routes.SecurityRoutes;
 import dk.patientassist.utilities.Utils;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
@@ -81,14 +83,14 @@ public class RouterConfig {
 
     private static void corsHeaders(Context ctx) {
         ctx.header("Access-Control-Allow-Origin", "*");
-        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
         ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
         ctx.header("Access-Control-Allow-Credentials", "true");
     }
 
     private static void corsHeadersOptions(Context ctx) {
         ctx.header("Access-Control-Allow-Origin", "*");
-        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
         ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
         ctx.header("Access-Control-Allow-Credentials", "true");
         ctx.status(204);

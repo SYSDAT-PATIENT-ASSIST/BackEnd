@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.ent.Employee;
 import dk.patientassist.persistence.ent.Section;
-import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.security.enums.Role;
 import dk.patientassist.service.Mapper;
 import dk.patientassist.service.dto.EmployeeDTO;
 import dk.patientassist.utilities.Utils;
@@ -64,7 +64,6 @@ public class AuthController {
             Employee emp = Mapper.EmployeeDTOToEnt(empDetails);
             emp.password = empDetails.hashPw();
 
-            logger.info("register:::::::::::::::");
             logger.info(new String(ctx.bodyAsBytes()));
 
             em.getTransaction().begin();
@@ -124,7 +123,6 @@ public class AuthController {
         try (EntityManager em = HibernateConfig.getEntityManagerFactory().createEntityManager()) {
             EmployeeDTO empDetails = ctx.bodyAsClass(EmployeeDTO.class);
 
-            logger.info("login:::::::::::::::");
             logger.info(new String(ctx.bodyAsBytes()));
 
             em.getTransaction().begin();

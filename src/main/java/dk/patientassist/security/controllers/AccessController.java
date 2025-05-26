@@ -9,63 +9,90 @@ import io.javalin.security.RouteRole;
 import java.util.Arrays;
 import java.util.Set;
 
-public class AccessController implements IAccessController {
 
-    private final SecurityController securityController = SecurityController.getInstance();
+/**
+ * Enforces authentication and authorization on all routes using beforeMatched().
+ */
+public class AccessController {
+
+    private final ISecurityController securityController;
 
     /**
-     * Used by Javalin to check if the authenticated user has access to the route.
+     * Default constructor for production: uses the real SecurityController.
+     */
+    public AccessController() {
+        this(new SecurityController());
+    }
+
+    /**
+     * Constructor for tests: allows injection of a mock ISecurityController.
+     */
+    public AccessController(ISecurityController securityController) {
+        this.securityController = securityController;
+    }
+
+    /**
+     * This is called on every matched route to enforce access control.
      */
     public void accessHandler(Context ctx) {
-        // Public route
-        if (ctx.routeRoles().isEmpty() || ctx.routeRoles().contains(Role.ANYONE)) return;
+        Set<RouteRole> roles = ctx.routeRoles();
 
-        // Authenticate
+        System.out.println("=== AccessHandler Debug ===");
+        System.out.println("Method: " + ctx.method());
+        System.out.println("Authorization header: " + ctx.header("Authorization"));
+        System.out.println("Route Roles: " + roles);
+
+
+        // 1) Allow public routes (ANYONE or empty)
+        if (roles.isEmpty() || roles.contains(Role.ANYONE)) {
+            return;
+        }
+
+        // 2) Authenticate user
         try {
             securityController.authenticate().handle(ctx);
         } catch (UnauthorizedResponse e) {
-            throw new UnauthorizedResponse(e.getMessage());
+            System.out.println("Authentication failed: " + e.getMessage());
+            throw e;
         } catch (Exception e) {
             throw new UnauthorizedResponse("Invalid or missing token");
         }
 
-        // Authorize
+        // 3) Authorize user
         UserDTO user = ctx.attribute("user");
-        Set<RouteRole> allowedRoles = ctx.routeRoles();
-        if (!securityController.authorize(user, allowedRoles)) {
-            throw new UnauthorizedResponse("Unauthorized. You have roles: " + user.getRoles() +
-                    ". Required: " + allowedRoles);
+        boolean allowed = securityController.authorize(user, roles);
+
+        if (!allowed) {
+            throw new UnauthorizedResponse(
+                    "Unauthorized. You have roles: " + user.getRoles() +
+                            ". Required: " + roles
+            );
         }
     }
 
-    /**
-     * Returns true if the user has the specified role.
-     */
+    // --- Optional helpers ---
+
     public boolean hasRole(Context ctx, Role role) {
         UserDTO user = ctx.attribute("user");
         return user != null && user.getRoles().contains(role.toString());
     }
 
-    /**
-     * Throws if the user does not have the required role.
-     */
     public void requireRole(Context ctx, Role role) {
         if (!hasRole(ctx, role)) {
             throw new UnauthorizedResponse("Access denied. Required role: " + role);
         }
     }
 
-    /**
-     * Throws if the user does not have at least one of the required roles.
-     */
     public void requireOneOfRoles(Context ctx, Role... roles) {
         UserDTO user = ctx.attribute("user");
-        if (user == null) throw new UnauthorizedResponse("You must be logged in");
-
-        for (Role role : roles) {
-            if (user.getRoles().contains(role.toString())) return;
+        if (user == null) {
+            throw new UnauthorizedResponse("You must be logged in");
         }
-
+        for (Role role : roles) {
+            if (user.getRoles().contains(role.toString())) {
+                return;
+            }
+        }
         throw new UnauthorizedResponse("Access denied. Required one of: " + Arrays.toString(roles));
     }
 }

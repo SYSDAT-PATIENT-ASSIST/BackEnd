@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -35,9 +36,10 @@ public class Recipe {
 
     /**
      * Ingredients used in the recipe.
+     * Initialized to avoid NullPointerException.
      */
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Ingredient> ingredients;
+    private Set<Ingredient> ingredients = new HashSet<>();
 
     /**
      * Cooking or preparation instructions for the dish.
@@ -48,9 +50,9 @@ public class Recipe {
     /**
      * Dish associated with this recipe.
      */
-    @OneToOne
-    @JoinColumn(name = "dish_id") // FK managed on this side
+    @OneToOne(mappedBy = "recipe")
     private Dish dish;
+
 
     /**
      * Full constructor excluding dish reference (set separately if needed).
@@ -61,7 +63,7 @@ public class Recipe {
      */
     public Recipe(String title, Set<Ingredient> ingredients, String instructions) {
         this.title = title;
-        this.ingredients = ingredients;
+        this.ingredients = (ingredients != null) ? ingredients : new HashSet<>();
         this.instructions = instructions;
     }
 }

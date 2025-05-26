@@ -89,11 +89,12 @@ public class Dish {
     /**
      * Multiple allergens associated with this dish.
      */
-    @ElementCollection(targetClass = Allergens.class)
+    @ElementCollection(fetch = FetchType.EAGER, targetClass = Allergens.class)
     @CollectionTable(name = "dish_allergens", joinColumns = @JoinColumn(name = "dish_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "allergen")
     private Set<Allergens> allergens;
+
 
     /**
      * One recipe associated with this dish.
@@ -102,10 +103,11 @@ public class Dish {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
+
     /**
      * Orders that include this dish.
      */
-    @OneToMany(mappedBy = "dish")
+    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders;
 
     /**

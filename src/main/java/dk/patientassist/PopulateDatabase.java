@@ -1,5 +1,9 @@
 package dk.patientassist;
 
+import dk.patientassist.persistence.dao.DishDAO;
+import dk.patientassist.persistence.dto.DishDTO;
+import dk.patientassist.persistence.dto.IngredientDTO;
+import dk.patientassist.persistence.dto.RecipeDTO;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.persistence.ent.*;
@@ -38,6 +42,7 @@ public class PopulateDatabase {
 
     public static void main(String[] args) {
         populateDatabase();
+        System.out.println("Database populated with test data.");
     }
 
     public static void populateDatabase() {
@@ -108,7 +113,6 @@ public class PopulateDatabase {
                     "Svits løg og hvidløg, tilsæt tomater og bouillon. Kog i 20 min, blend og rør fløde i. Pynt med frisk basilikum.",
                     List.of("Tomat", "Løg", "Hvidløg", "Bouillon", "Fløde")));
 
-
             // --- Orders ---
             em.persist(new Order(1, LocalDateTime.now(), "Ingen hvidløg", dishes.get(0), OrderStatus.VENTER));
             em.persist(new Order(2, LocalDateTime.now(), "Ekstra ris", dishes.get(1), OrderStatus.BEKRÆFTET));
@@ -128,7 +132,8 @@ public class PopulateDatabase {
         }
     }
 
-    private static void createUser(String username, String password, dk.patientassist.security.enums.Role roleEnum, EntityManager em) {
+    private static void createUser(String username, String password, dk.patientassist.security.enums.Role roleEnum,
+            EntityManager em) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));

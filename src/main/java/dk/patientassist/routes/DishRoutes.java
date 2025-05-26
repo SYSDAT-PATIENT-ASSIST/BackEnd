@@ -3,43 +3,66 @@ package dk.patientassist.routes;
 import dk.patientassist.control.DishController;
 import dk.patientassist.security.enums.Role;
 import io.javalin.apibuilder.EndpointGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
+/**
+ * Defines all HTTP endpoints for Dish resources under /api/dishes.
+ * <p>
+ * Supports creation, retrieval, update (full & partial), deletion,
+ * and specialized queries (availability, popularity).
+ * Access is secured via role-based restrictions.
+ */
 public class DishRoutes {
 
-    private static final DishController controller = new DishController();
+    private static final Logger LOGGER = LoggerFactory.getLogger(DishRoutes.class);
+    private static final DishController CONTROLLER = new DishController();
 
+    /**
+     * Registers the Dish API routes.
+     *
+     * @return an EndpointGroup to plug into Javalin
+     */
     public static EndpointGroup getDishRoutes() {
         return () -> {
-            path("/api/dishes", () -> {
-                // --- GET ---
-                get("/all", controller::getAllDishes, Role.ANYONE);
-                get("/{id}", controller::getDishById, Role.ANYONE);
-                get("/filter", controller::getFilteredDishes, Role.ANYONE);
-                get("/available", controller::getAvailableDishes, Role.ANYONE);
-                get("/most-ordered", controller::getMostOrderedDishes, Role.ANYONE);
+            LOGGER.info("Registering Dish API routes");
 
-                // --- CREATE ---
-                post("/new", controller::createNewDish, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                post("/full", controller::createDishWithRecipeAndIngredients, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+            path("/dishes", () -> {
 
-                // --- DELETE ---
-                delete("/{id}", controller::deleteExistingDish, Role.HEAD_CHEF, Role.ADMIN);
+                // --- Retrieval & Filtering ---
+                get("/", CONTROLLER::getFilteredDishes, Role.ANYONE); // ?status=&allergen=
+                get("/{id}", CONTROLLER::getDishById, Role.ANYONE); // fetch by ID
+                get("/available", CONTROLLER::getAvailableDishes, Role.ANYONE); // current availability
+                get("/popular", CONTROLLER::getMostOrderedDishes, Role.ANYONE); // most ordered
 
-                // --- PATCH (field updates) ---
-                patch("/{id}/name", controller::updateDishName, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                patch("/{id}/description", controller::updateDishDescription, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                patch("/{id}/kcal", controller::updateDishKcal, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                patch("/{id}/protein", controller::updateDishProtein, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                patch("/{id}/carbohydrates", controller::updateDishCarbohydrates, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                patch("/{id}/fat", controller::updateDishFat, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                patch("/{id}/status", controller::updateDishStatus, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                patch("/{id}/allergens", controller::updateDishAllergens, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
-                patch("/{id}/available_from", controller::updateDishAvailableFrom, Role.HEAD_CHEF);
-                patch("/{id}/available_until", controller::updateDishAvailableUntil, Role.HEAD_CHEF);
-                patch("/{id}/recipe-and-allergens", controller::updateDishRecipeAndAllergens, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                // --- Creation ---
+                post("/", CONTROLLER::createNewDish, Role.KITCHEN_STAFF, Role.HEAD_CHEF); // simple creation
+                post("/full", CONTROLLER::createDishWithRecipeAndIngredients,
+                        Role.KITCHEN_STAFF, Role.HEAD_CHEF); // nested with recipe + ingredients
+
+                // --- Partial Updates (PATCH) ---
+                patch("/{id}/availableFrom", CONTROLLER::updateDishAvailableFrom, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/availableUntil", CONTROLLER::updateDishAvailableUntil, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/carbohydrates", CONTROLLER::updateDishCarbohydrates, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/description", CONTROLLER::updateDishDescription, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/fat", CONTROLLER::updateDishFat, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/kcal", CONTROLLER::updateDishKcal, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/name", CONTROLLER::updateDishName, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/protein", CONTROLLER::updateDishProtein, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                patch("/{id}/status", CONTROLLER::updateDishStatus, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+
+                // --- Full-field Updates (PUT) ---
+                put("/{id}/allergens", CONTROLLER::updateDishAllergens, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                put("/{id}/availability", CONTROLLER::updateDishAvailability, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+                put("/{id}/recipe", CONTROLLER::updateDishRecipeAndAllergens, Role.KITCHEN_STAFF, Role.HEAD_CHEF);
+
+                // --- Deletion ---
+                delete("/{id}", CONTROLLER::deleteExistingDish, Role.HEAD_CHEF, Role.ADMIN);
             });
+
+            LOGGER.info("Dish API routes registered successfully");
         };
     }
 }

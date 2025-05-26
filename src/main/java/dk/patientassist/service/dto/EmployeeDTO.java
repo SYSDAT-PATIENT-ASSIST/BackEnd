@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.security.enums.Role;
 import dk.patientassist.utilities.Utils;
 import jakarta.persistence.Column;
 import lombok.EqualsAndHashCode;

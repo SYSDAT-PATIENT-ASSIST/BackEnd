@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import dk.patientassist.config.HibernateConfig;
-import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.security.enums.Role;
 import dk.patientassist.utilities.Utils;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Array;

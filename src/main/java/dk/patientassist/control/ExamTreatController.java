@@ -15,7 +15,7 @@ import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.ent.ExamTreat;
 import dk.patientassist.persistence.ent.ExamTreatCategory;
 import dk.patientassist.persistence.ent.ExamTreatType;
-import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.security.enums.Role;
 import dk.patientassist.service.Mapper;
 import dk.patientassist.service.dto.ExamTreatCategoryDTO;
 import dk.patientassist.service.dto.ExamTreatTypeDTO;

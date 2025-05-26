@@ -7,8 +7,14 @@ import java.util.Collection;
 import java.util.List;
 
 public enum Role implements RouteRole {
-    ANYONE, GUEST, DOCTOR, NURSE, CHEF, KITCHEN_STAFF, HEAD_CHEF, ADMIN;
-
+    ANYONE,
+    GUEST,
+    CHEF,
+    HEAD_CHEF,
+    KITCHEN_STAFF,
+    DOCTOR,
+    NURSE,
+    ADMIN;
 
     public static String stringify(Role[] roles) {
         return String.join(",", Arrays.stream(roles).map(r -> r.name()).toList());

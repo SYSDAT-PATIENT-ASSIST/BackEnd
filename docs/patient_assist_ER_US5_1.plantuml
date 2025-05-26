@@ -1,0 +1,71 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype polyline
+
+class _order {
+   bed_id: integer
+   note: varchar(255)
+   order_time: timestamp(6)
+   status: varchar(255)
+   id: integer
+}
+class dish {
+   available_from: date
+   available_until: date
+   carbohydrates: double precision
+   description: varchar(255)
+   fat: double precision
+   kcal: double precision
+   name: varchar(255)
+   protein: double precision
+   status: varchar(255)
+   recipe_id: integer
+   id: integer
+}
+class dish_allergens {
+   dish_id: integer
+   allergen: varchar(255)
+}
+class ingredient {
+   recipe_id: integer
+   ingredient_type_id: integer
+   id: integer
+}
+class ingredient_type {
+   name: varchar(255)
+   id: integer
+}
+class order_dish {
+   dish_id: integer
+   order_id: integer
+}
+class recipe {
+   instructions: text
+   title: varchar(255)
+   dish_id: integer
+   id: integer
+}
+class roles {
+   name: varchar(20)
+}
+class user_roles {
+   user_name: varchar(25)
+   role_name: varchar(20)
+}
+class users {
+   password: varchar(255)
+   username: varchar(25)
+}
+
+dish             -[#595959,plain]-^  recipe          : "recipe_id:id"
+dish_allergens   -[#595959,plain]-^  dish            : "dish_id:id"
+ingredient       -[#595959,plain]-^  ingredient_type : "ingredient_type_id:id"
+ingredient       -[#595959,plain]-^  recipe          : "recipe_id:id"
+order_dish       -[#595959,plain]-^  _order          : "order_id:id"
+order_dish       -[#595959,plain]-^  dish            : "dish_id:id"
+recipe           -[#595959,plain]-^  dish            : "dish_id:id"
+user_roles       -[#595959,plain]-^  roles           : "role_name:name"
+user_roles       -[#595959,plain]-^  users           : "user_name:username"
+@enduml

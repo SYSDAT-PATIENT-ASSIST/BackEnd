@@ -1,6 +1,6 @@
 package dk.patientassist.api.resources;
 
-import dk.patientassist.persistence.enums.Role;
+import dk.patientassist.security.enums.Role;
 import dk.patientassist.service.dto.EmployeeDTO;
 
 /**
@@ -59,7 +59,7 @@ public class EmployeeData {
         headchef.firstName = "headchef";
         headchef.middleName = "headchef";
         headchef.lastName = "headchef";
-        headchef.roles = new Role[] { Role.HEADCHEF };
+        headchef.roles = new Role[] { Role.HEAD_CHEF };
         headchef.sections = new Long[0];
         headchef.setPassword("headchef");
 

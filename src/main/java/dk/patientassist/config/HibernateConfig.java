@@ -59,6 +59,15 @@ public class HibernateConfig {
             else if (mode == Mode.TEST)
                 setTestProperties(props);
 
+            // then real‐deploy
+            else if (System.getenv("DEPLOYED") != null) {
+                setDeployedProperties(props);
+
+                // then your local dev
+            } else if (mode == Mode.DEV) {
+                setDevProperties(props);
+            }
+
             configuration.setProperties(props);
             getAnnotationConfiguration(configuration);
 
@@ -66,6 +75,7 @@ public class HibernateConfig {
                     .applySettings(configuration.getProperties()).build();
             SessionFactory sf = configuration.buildSessionFactory(serviceRegistry);
             emf = sf.unwrap(EntityManagerFactory.class);
+
         } catch (Throwable ex) {
             System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
