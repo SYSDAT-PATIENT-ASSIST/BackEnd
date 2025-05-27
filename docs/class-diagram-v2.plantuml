@@ -1,0 +1,416 @@
+@startuml
+
+top to bottom direction
+skinparam linetype ortho
+
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+/' PACKAGE: control     '/
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+
+package "control" {
+    class MasterController {
+        + start() : Javalin <starts server>
+    }
+class OrderController {
+        + getOrder() : void
+        + createOrder() : void
+        ? other methods() : <see implementation>
+}
+    class AccessController {
+        + check() : void
+    }
+    class AuthController {
+        + getEndpoints() : endpointGroup
+        + register() : void
+        + login() : void
+    }
+    class DishController {
+        + getAllDishes() : void
+        + getDishById() : void
+        ? other methods() : <see implementation>
+    }
+    class EventController {
+        + getEndpoints() : endpointGroup
+        + readAll() : void
+        ? other methods() : <see implementation>
+    }
+    class ExamTreatController {
+        + getEndpoints() : endpointGroup
+        + readAllCategories() : void
+        + readSubCategories() : void
+        + readArticle() : void
+        ? other methods() : <see implementation>
+    }
+    class RecipeController {
+        + getAllRecipes() : void
+        + getRecipeById() : void
+        + createRecipe() : void
+        + updateRecipe() : void
+        ? other methods() : <see implementation>
+    }
+}
+
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+/' PACKAGE: config '/
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+
+package "config" {
+enum Mode << enumeration >> {
+  + DEPLOY: 
+  + DEV: 
+  + TEST: 
+}
+class RouterConfig {
+  
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+class HibernateConfig {
+  
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+}
+
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+/' PACKAGE: persistence '/
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+
+package persistence {
+    class Event {
+        + name : String
+        + description : String
+        + starttime : LocalDateTime
+        + duration : Duration
+    }
+    class ExamTreat {
+      + examTreatType: ExamTreatType
+      + article: byte[]
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+    }
+    class ExamTreatCategory {
+      + examTreatTypes: Set<ExamTreatType>
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+    }
+    class ExamTreatType {
+      + examTreat: ExamTreat
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+    }
+    interface IDAO<T, ID> << interface >> {
+        + getAll : List<T>
+        + create : T
+        + update : T
+        ? other methods() : <see implementation>
+    }
+    class Ingredient {
+        + type
+        + recipe
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+    }
+    class IngredientType {
+        - id : Integer 
+        - name : String 
+    }
+    class IngredientTypeDAO {
+        + findOrCreate() : IngredientType
+        ? other methods() : <see implementation>
+    }
+    class Order {
+        - id : Integer 
+        - bed_id : Integer 
+        - order_time : LocalDateTime 
+        - note : String 
+        - status : OrderStatus 
+        - dish : Dish 
+    }
+    class OrderDAO {
+        createOrder() : OrderDTO 
+        getOrder() : OrderDTO 
+        cancelOrder() : OrderDTO 
+        ? other methods() : <see implementation>
+    }
+    enum OrderStatus << enumeration >> {
+      + BEKRÆFTET: 
+      + ANNULLERET: 
+      + FÆRDIG: 
+      + VENTER: 
+      + AFSENDT: 
+    }
+    class Recipe {
+      + title : String
+      + instructions : String
+      + ingredients : Set<Ingredient>
+      + dish : Dish
+        ? other methods() : <see implementation>
+    }
+    class RecipeDAO {
+        + get() : Optional<RecipeDTO>
+        + getAll() : List<RecipeDTO>
+        ? other methods() : <see implementation>
+    }
+        enum AgeGroup << enumeration >> {
+          + [...]
+        }
+        enum Allergens << enumeration >> {
+        ? other fields : <see implementation>
+        }
+        enum DishStatus << enumeration >> {
+          + TILGÆNGELIG: 
+          + UDSOLGT: 
+          + UDGÅET: 
+        }
+    class Section {
+      + employees: Set<Employee>
+      + beds: Set<Bed>
+    }
+    class Bed {
+        - id : Integer
+        + section : Section
+    }
+    class Dish {
+    - id : Integer 
+    - name : String 
+    - description : String 
+    - availableFrom : LocalDate 
+    - availableUntil : LocalDate 
+    - status : DishStatus 
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+    }
+    
+    class DishDAO {
+     get(int id) : Optional<DishDTO>
+     getAll() : List<DishDTO>
+        ? other methods() : <see implementation>
+    }
+    
+        class Employee {
+            + name
+            + email
+            + password : String <encrypted>
+            + roles : Set<Role>
+            ? other fields : <see implementation>
+            ? other methods() : <see implementation>
+        }
+    
+}
+
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+/' PACKAGE: service '/
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+
+package "service" {
+class EventDTO {
+        + name : String
+        + description : String
+        + starttime : LocalDateTime
+        + duration : Duration
+}
+class ExamTreatCategoryDTO {
+        + examTreatTypes : ExamTreatTypeDTO[]
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+class ExamTreatDTO {
+        + name : String
+        + urlSafeName : String <use in URLs & frontend api calls>
+        + article : String
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+class ExamTreatTypeDTO {
+        + examTreats : ExamTreat[]
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+class IngredientDTO {
+  
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+class Mapper {
+    + <<NAME>>EntToDTO : <<NAME>>DTO
+    + <<NAME>>DTOToEnt : <<NAME>>
+}
+class OrderDTO {
+    - order_time : LocalDateTime 
+    - note : String
+    - dish : DishDTO
+    - status : OrderStatus
+    ? other fields : <see implementation>
+    ? other methods() : <see implementation>
+}
+class RecipeDTO {
+    - id : Integer 
+    - title : String 
+    - instructions : String 
+    - ingredients : List<IngredientDTO> 
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+class SectionDTO {
+    + id : Integer
+    + name : String
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+class EmployeeDTO {
+    + name
+    - password
+    + email
+    + roles : Role[]
+    + checkAgainstBCryptPw(String) : boolean
+    + hashPw() : String
+}
+    class BedDTO {
+      
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+    }
+class DishDTO {
+  
+    - id : Integer 
+    - name : String 
+    - description : String 
+    - availableFrom : LocalDate 
+    - availableUntil : LocalDate 
+    - status : DishStatus 
+    - kcal : double 
+    - protein : double 
+    - carbohydrates : double 
+    - fat : double 
+    - allergens : Set<Allergens> 
+    - recipe : RecipeDTO 
+    
+        ? other fields : <see implementation>
+        ? other methods() : <see implementation>
+}
+}
+
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+/' PACKAGE: routes      '/
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+
+package "routes" {
+    class DishRoutes {
+      getDishRoutes() : EndpointGroup 
+    }
+    class OrderFoodRoutes {
+      getOrderFoodRoutes() : EndpointGroup 
+    }
+    class OrderRoutes {
+    }
+    class RecipeRoutes {
+    }
+}
+
+
+frame "runners" {
+    class App
+    class PopulateDatabase
+    class PopulateIngredientType
+}
+
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+/' PACKAGE: security    '/
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+
+package "security" {
+    enum Role << enumeration >> {
+      + GUEST: 
+      + NURSE: 
+      + KITCHEN_STAFF: 
+      + ADMIN: 
+      + DOCTOR: 
+      + HEAD_CHEF: 
+      + ANYONE: 
+      + CHEF: 
+    }
+}
+
+
+
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+/' PACKAGE: utilities   '/
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+
+package "utilities" {
+    class EmployeePopulator {
+    populate() : void
+      
+    }
+    class EventPopulator {
+      
+    populate() : void
+    }
+    class ExamTreatPopulator {
+      
+    load(String filePath) : void
+    }
+        class WebScraper {
+       scrapeExamsAndTreatment(String) : void   
+        }
+    class Utils {
+      + getConfigProperty(String): String?
+      + dateTimeFormat(LocalDateTime): String
+      + getObjectMapperCompact(): ObjectMapper
+      + JSONStatusObject(Context, Exception): ObjectNode
+      + getObjectMapperPretty(): ObjectMapper
+    }
+}
+
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+/' RELATIONS            '/
+/''''''''''''''''''''''''/
+/''''''''''''''''''''''''/
+
+DishDAO                 --^  IDAO                   
+RecipeDAO               --^  IDAO                   
+OrderDAO               --^  IDAO                   
+IngredientTypeDAO               --^  IDAO                   
+
+Employee -- "has 0..*" Role
+Employee "has 0..*" -- "has 1..*" Section
+
+Section "has 1" -- "has 0..*" Bed
+
+ExamTreatCategory "has 1" -- "has 0..*" ExamTreatType
+ExamTreatType "has 1" -- "has 0..*" ExamTreat
+
+ExamTreatCategoryDTO "has 1" -- "has 0..*" ExamTreatTypeDTO
+ExamTreatTypeDTO "has 1" -- "has 0..*" ExamTreatDTO
+
+Recipe "has 1" -- "has 0..*" Ingredient
+IngredientType "has 1" -- "has 0..*" Ingredient
+
+DishDTO -- "has 0..*" Allergens
+DishDTO -- "has 1" RecipeDTO
+
+OrderDTO  -- "has 1" DishDTO
+OrderDTO  -- "has 1" OrderStatus
+
+RecipeDTO -- "has 0..*" IngredientDTO
+
+Order -- "has 1" OrderStatus
+Order -- "has 1" Dish
+
+@enduml
