@@ -19,3 +19,7 @@ dk/patientassist/App.main
 
 Main configuration file:  
 📄 `src/main/resources/config.properties`
+
+# Class Diagram
+
+[<img src="docs/class-diagram-v2.png">](https://github.com/SYSDAT-PATIENT-ASSIST/BackEnd/blob/main/docs/class-diagram-v2.png?raw=true)
