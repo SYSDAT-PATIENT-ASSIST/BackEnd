@@ -11,7 +11,7 @@
   3. open the project in Intellij and run the main methods in the following files (in order):
 ```
 dk/patientassist/PopulateIngredientType
-dk/patientassist/PopulateDatabase.main
+dk/patientassist/PopulateDatabase
 dk/patientassist/App.main
 ```
 
