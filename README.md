@@ -23,3 +23,7 @@ Main configuration file:
 # Class Diagram
 
 [<img src="docs/class-diagram-v2.png">](https://github.com/SYSDAT-PATIENT-ASSIST/BackEnd/blob/main/docs/class-diagram-v2.png?raw=true)
+
+# Database
+
+[<img src="docs/ERD.png">](https://github.com/SYSDAT-PATIENT-ASSIST/BackEnd/blob/main/docs/ERD.png?raw=true)
