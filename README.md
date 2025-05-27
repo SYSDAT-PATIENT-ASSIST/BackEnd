@@ -22,6 +22,8 @@ Main configuration file:
 
 # Class Diagram
 
+*Note that not all methods and fields are included, only the ones deemed noteworthy or integral to the classes.*
+
 [<img src="docs/class-diagram-v2.png">](https://github.com/SYSDAT-PATIENT-ASSIST/BackEnd/blob/main/docs/class-diagram-v2.png?raw=true)
 
 # Database
