@@ -59,21 +59,23 @@ class OrderController {
 /''''''''''''''''''''''''/
 
 package "config" {
-enum Mode << enumeration >> {
-  + DEPLOY: 
-  + DEV: 
-  + TEST: 
-}
-class RouterConfig {
-  
-        ? other fields : <see implementation>
-        ? other methods() : <see implementation>
-}
-class HibernateConfig {
-  
-        ? other fields : <see implementation>
-        ? other methods() : <see implementation>
-}
+    enum Mode << enumeration >> {
+      + DEPLOY: 
+      + DEV: 
+      + TEST: 
+    }
+    class RouterConfig {
+        + setup(Mode mode) : Javalin
+        - jsonErrorResponse() : void 
+        - debugLog() : void 
+        - corsHeaders() : void 
+        - corsHeadersOptions() : void 
+    }
+    
+    class HibernateConfig {
+          getEntityManagerFactory() : EntityManagerFactory 
+          init(Mode) : void
+    }
 }
 
 /''''''''''''''''''''''''/
@@ -275,9 +277,9 @@ class EmployeeDTO {
     + hashPw() : String
 }
     class BedDTO {
-      
-        ? other fields : <see implementation>
-        ? other methods() : <see implementation>
+        + id : Integer
+        + section_id : Integer
+        + occupied : boolean
     }
 class DishDTO {
   

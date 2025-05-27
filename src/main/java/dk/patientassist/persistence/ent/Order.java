@@ -1,6 +1,6 @@
 package dk.patientassist.persistence.ent;
 
-import dk.patientassist.persistence.dto.OrderDTO;
+import dk.patientassist.service.dto.OrderDTO;
 import dk.patientassist.persistence.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,5 @@
-package dk.patientassist.persistence.dto;
+package dk.patientassist.service.dto;
 
-import dk.patientassist.persistence.ent.Ingredient;
 import dk.patientassist.persistence.ent.Recipe;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

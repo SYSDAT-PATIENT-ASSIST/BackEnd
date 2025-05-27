@@ -1,8 +1,8 @@
 package dk.patientassist.test.utilities;
 
-import dk.patientassist.persistence.dto.DishDTO;
-import dk.patientassist.persistence.dto.IngredientDTO;
-import dk.patientassist.persistence.dto.RecipeDTO;
+import dk.patientassist.service.dto.DishDTO;
+import dk.patientassist.service.dto.IngredientDTO;
+import dk.patientassist.service.dto.RecipeDTO;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 

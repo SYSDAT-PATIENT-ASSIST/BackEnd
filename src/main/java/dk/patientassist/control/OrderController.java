@@ -1,7 +1,7 @@
 package dk.patientassist.control;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.dao.OrderDAO;
-import dk.patientassist.persistence.dto.OrderDTO;
+import dk.patientassist.service.dto.OrderDTO;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;

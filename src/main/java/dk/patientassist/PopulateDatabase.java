@@ -1,9 +1,5 @@
 package dk.patientassist;
 
-import dk.patientassist.persistence.dao.DishDAO;
-import dk.patientassist.persistence.dto.DishDTO;
-import dk.patientassist.persistence.dto.IngredientDTO;
-import dk.patientassist.persistence.dto.RecipeDTO;
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.persistence.ent.*;

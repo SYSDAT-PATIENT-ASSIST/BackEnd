@@ -2,7 +2,7 @@ package dk.patientassist.control;
 
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.dao.RecipeDAO;
-import dk.patientassist.persistence.dto.RecipeDTO;
+import dk.patientassist.service.dto.RecipeDTO;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 

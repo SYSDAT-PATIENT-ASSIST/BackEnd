@@ -1,5 +1,5 @@
 package dk.patientassist.persistence.dao;
-import dk.patientassist.persistence.dto.OrderDTO;
+import dk.patientassist.service.dto.OrderDTO;
 import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.OrderStatus;

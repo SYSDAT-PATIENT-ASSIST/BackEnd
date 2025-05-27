@@ -1,6 +1,6 @@
 package dk.patientassist.persistence.dao;
 
-import dk.patientassist.persistence.dto.RecipeDTO;
+import dk.patientassist.service.dto.RecipeDTO;
 import dk.patientassist.persistence.ent.Recipe;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;

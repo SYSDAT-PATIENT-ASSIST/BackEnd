@@ -2,7 +2,7 @@ package dk.patientassist.persistence.dao;
 
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
-import dk.patientassist.persistence.dto.DishDTO;
+import dk.patientassist.service.dto.DishDTO;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;

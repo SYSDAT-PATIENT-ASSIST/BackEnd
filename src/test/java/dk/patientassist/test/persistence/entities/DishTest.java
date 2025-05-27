@@ -1,6 +1,6 @@
 package dk.patientassist.test.persistence.entities;
 
-import dk.patientassist.persistence.dto.DishDTO;
+import dk.patientassist.service.dto.DishDTO;
 import dk.patientassist.persistence.ent.Dish;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;

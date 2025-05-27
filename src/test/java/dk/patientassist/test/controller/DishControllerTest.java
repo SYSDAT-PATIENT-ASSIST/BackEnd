@@ -2,9 +2,11 @@ package dk.patientassist.test.controller;
 
 import dk.patientassist.control.DishController;
 import dk.patientassist.persistence.dao.DishDAO;
-import dk.patientassist.persistence.dto.*;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
+import dk.patientassist.service.dto.DishDTO;
+import dk.patientassist.service.dto.IngredientDTO;
+import dk.patientassist.service.dto.RecipeDTO;
 import io.javalin.http.Context;
 import org.junit.jupiter.api.*;
 

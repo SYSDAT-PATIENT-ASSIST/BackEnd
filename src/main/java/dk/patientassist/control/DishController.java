@@ -2,11 +2,10 @@ package dk.patientassist.control;
 
 import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.persistence.dao.DishDAO;
-import dk.patientassist.persistence.dto.DishDTO;
+import dk.patientassist.service.dto.DishDTO;
 import dk.patientassist.persistence.enums.Allergens;
 import dk.patientassist.persistence.enums.DishStatus;
 import io.javalin.http.Context;
-import io.javalin.http.NotFoundResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

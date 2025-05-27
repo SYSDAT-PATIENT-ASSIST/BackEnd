@@ -6,10 +6,8 @@ import dk.patientassist.config.HibernateConfig;
 import dk.patientassist.config.Mode;
 import dk.patientassist.persistence.dao.DishDAO;
 import dk.patientassist.persistence.dao.OrderDAO;
-import dk.patientassist.persistence.dto.DishDTO;
-import dk.patientassist.persistence.dto.OrderDTO;
-import dk.patientassist.persistence.ent.Dish;
-import dk.patientassist.persistence.ent.Order;
+import dk.patientassist.service.dto.DishDTO;
+import dk.patientassist.service.dto.OrderDTO;
 import dk.patientassist.persistence.enums.DishStatus;
 import dk.patientassist.persistence.enums.OrderStatus;
 import io.cucumber.java.en.Given;
@@ -20,7 +18,6 @@ import org.junit.Assert;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class menuStepDefinitions {
     private DishController dishController;

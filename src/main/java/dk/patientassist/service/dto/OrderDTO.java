@@ -1,4 +1,4 @@
-package dk.patientassist.persistence.dto;
+package dk.patientassist.service.dto;
 
 import dk.patientassist.persistence.ent.Order;
 import dk.patientassist.persistence.enums.OrderStatus;
