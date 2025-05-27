@@ -15,7 +15,7 @@ dk/patientassist/PopulateDatabase.main
 dk/patientassist/App.main
 ```
 
-## Configuration
+# Configuration
 
 Main configuration file:  
 📄 `src/main/resources/config.properties`
